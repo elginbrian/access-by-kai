@@ -31,8 +31,29 @@ const TrainBookingResults = () => {
   const [isChatOpen, setIsChatOpen] = React.useState(false);
   const [isScheduleEditOpen, setIsScheduleEditOpen] = React.useState(false);
 
-  // Hook untuk mendeteksi arah scroll
-  const { scrollDirection, isAtTop } = useScrollDirection(10);
+  const rightColumnRef = React.useRef<HTMLDivElement>(null);
+
+  const { scrollDirection, isAtTop } = useScrollDirection({
+    threshold: 10,
+    element: rightColumnRef,
+  });
+
+  React.useEffect(() => {
+    const rightColumn = rightColumnRef.current;
+    if (!rightColumn || !isScheduleEditOpen) return;
+
+    const handleScroll = () => {
+      if (isScheduleEditOpen) {
+        setIsScheduleEditOpen(false);
+      }
+    };
+
+    rightColumn.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      rightColumn.removeEventListener("scroll", handleScroll);
+    };
+  }, [isScheduleEditOpen]);
 
   const searchCriteria = React.useMemo((): TrainScheduleSearchData | null => {
     const fromParam = searchParams.get("from") || searchParams.get("departure");
@@ -215,7 +236,7 @@ const TrainBookingResults = () => {
         </div>
 
         {isScheduleEditOpen && (
-          <div className="mt-8">
+          <div className={`transition-all duration-300 ease-in-out ${scrollDirection === "down" && !isAtTop ? "-mt-28" : "mt-8"}`}>
             <ScheduleEditCard
               isVisible={isScheduleEditOpen}
               onClose={handleScheduleEditClose}
@@ -238,7 +259,7 @@ const TrainBookingResults = () => {
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto px-6">
+        <div className={`max-w-7xl mx-auto px-6 transition-all duration-300 ease-in-out ${scrollDirection === "down" && !isAtTop ? "-mt-48" : "pt-6"}`}>
           <div className="flex flex-col lg:flex-row gap-6">
             <FilterSection
               priceValue={filters.priceValue}
@@ -256,12 +277,9 @@ const TrainBookingResults = () => {
             />
 
             {/* Scrollable Main Area */}
-            <div className="flex-1 mb-2 min-w-0 space-y-4 lg:max-h-screen lg:overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+            <div ref={rightColumnRef} className="flex-1 mb-2 min-w-0 space-y-4 lg:max-h-screen lg:overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
               {/* Promo Banner */}
               <PromoBanner title="Diskon Spesial Akhir Pekan!" description="Dapatkan diskon hingga 30% untuk tiket kelas Eksekutif" buttonText="Lihat Penawaran" onViewOffers={handleViewOffers} />
-
-              {/* Info Banner for browsing all trains */}
-              {!searchCriteria && !allTrainsLoading && <EmptyStateMessage type="browsing" onSearchSpecific={() => router.push("/")} />}
 
               {/* Active Filters Display */}
               <ActiveFiltersDisplay activeFilters={filters.activeFilters} onResetFilters={filters.resetAllFilters} />

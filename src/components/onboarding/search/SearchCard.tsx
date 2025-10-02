@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { TrainSearchSchema, type TrainSearchFormData } from "../../../lib/validators/train-search";
 import { useStationsForSearch } from "../../../lib/hooks/train-search";
 import { useRouter } from "next/navigation";
+import CustomSelect from "../../ui/form/CustomSelect";
 
 const SearchCard = () => {
   const router = useRouter();
@@ -21,8 +22,8 @@ const SearchCard = () => {
   } = useForm({
     resolver: zodResolver(TrainSearchSchema),
     defaultValues: {
-      departureStationId: 0,
-      arrivalStationId: 0,
+      departureStationId: "" as string | number,
+      arrivalStationId: "" as string | number,
       departureDate: "",
       returnDate: "",
       passengers: 1,
@@ -32,6 +33,57 @@ const SearchCard = () => {
   const watchedValues = watch();
 
   const { data: stations = [], isLoading: stationsLoading } = useStationsForSearch();
+
+  const stationOptions = React.useMemo(() => {
+    const individualStations = stations.map((station) => ({
+      value: station.value,
+      label: station.label,
+      code: station.code,
+      city: station.city,
+      province: station.province,
+      type: "station" as const,
+    }));
+
+    const cityGroups = stations.reduce((acc, station) => {
+      if (station.city) {
+        if (!acc[station.city]) {
+          acc[station.city] = [];
+        }
+        acc[station.city].push(station);
+      }
+      return acc;
+    }, {} as Record<string, typeof stations>);
+
+    const cityOptions = Object.entries(cityGroups)
+      .filter(([_, stationsInCity]) => stationsInCity.length > 1)
+      .map(([cityName, stationsInCity]) => ({
+        value: `city:${cityName}`,
+        label: `${cityName}`,
+        city: cityName,
+        province: stationsInCity[0]?.province,
+        code: `${stationsInCity.length} stasiun`,
+        type: "city" as const,
+        stationIds: stationsInCity.map((s) => s.value),
+      }));
+
+    const sortedCityOptions = cityOptions.sort((a, b) => a.city!.localeCompare(b.city!));
+
+    const sortedStations = individualStations.sort((a, b) => a.label.localeCompare(b.label));
+
+    if (sortedCityOptions.length > 0 && sortedStations.length > 0) {
+      return [
+        ...sortedCityOptions,
+        {
+          value: "separator",
+          label: "── Stasiun Individual ──",
+          type: "separator" as const,
+        },
+        ...sortedStations,
+      ];
+    }
+
+    return [...sortedCityOptions, ...sortedStations];
+  }, [stations]);
   const [isSearching, setIsSearching] = React.useState(false);
 
   const today = new Date().toISOString().split("T")[0];
@@ -40,9 +92,25 @@ const SearchCard = () => {
     setIsSearching(true);
     console.log("Search data:", data);
 
+    const getDepartureStations = () => {
+      if (typeof data.departureStationId === "string" && data.departureStationId.startsWith("city:")) {
+        const cityOption = stationOptions.find((opt) => opt.value === data.departureStationId && opt.type === "city");
+        return cityOption && "stationIds" in cityOption ? cityOption.stationIds : [data.departureStationId];
+      }
+      return [data.departureStationId];
+    };
+
+    const getArrivalStations = () => {
+      if (typeof data.arrivalStationId === "string" && data.arrivalStationId.startsWith("city:")) {
+        const cityOption = stationOptions.find((opt) => opt.value === data.arrivalStationId && opt.type === "city");
+        return cityOption && "stationIds" in cityOption ? cityOption.stationIds : [data.arrivalStationId];
+      }
+      return [data.arrivalStationId];
+    };
+
     const searchParams = new URLSearchParams({
-      departure: data.departureStationId.toString(),
-      arrival: data.arrivalStationId.toString(),
+      departure: getDepartureStations().join(","),
+      arrival: getArrivalStations().join(","),
       departureDate: data.departureDate,
       ...(data.returnDate && { returnDate: data.returnDate }),
     });
@@ -92,39 +160,16 @@ const SearchCard = () => {
                 <img src="/ic_train.svg" alt="Train Icon" style={{ color: colors.violet.normal }} />
                 <span className="ml-2">Dari (Departure)</span>
               </label>
-              <div className="relative">
-                <select
-                  {...register("departureStationId", { valueAsNumber: true })}
-                  className="w-full px-4 py-3 bg-white border-2 rounded-xl font-medium appearance-none cursor-pointer transition-colors focus:outline-none"
-                  style={{
-                    borderColor: colors.base.darkActive,
-                    color: colors.base.darker,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = colors.violet.light;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = colors.base.darkActive;
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = colors.violet.normal;
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = colors.base.darkActive;
-                  }}
-                  disabled={stationsLoading}
-                >
-                  <option value="">{stationsLoading ? "Memuat stasiun..." : "Pilih stasiun keberangkatan"}</option>
-                  {stations.map((station) => (
-                    <option key={station.value} value={station.value}>
-                      {station.label} ({station.code})
-                    </option>
-                  ))}
-                </select>
-                <svg className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.base.darkHover} strokeWidth="2">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </div>
+              <CustomSelect
+                options={stationOptions}
+                value={watchedValues.departureStationId || ""}
+                onChange={(value) => setValue("departureStationId", typeof value === "string" && value.startsWith("city:") ? value : Number(value))}
+                placeholder={stationsLoading ? "Memuat stasiun..." : "Pilih stasiun keberangkatan"}
+                disabled={stationsLoading}
+                loading={stationsLoading}
+                searchable={true}
+                error={!!errors.departureStationId}
+              />
             </div>
 
             {/* Swap Button */}
@@ -157,39 +202,16 @@ const SearchCard = () => {
                 <img src="/ic_train.svg" alt="Train Icon" style={{ color: colors.violet.normal }} />
                 <span className="ml-2">Ke (Arrival)</span>
               </label>
-              <div className="relative">
-                <select
-                  {...register("arrivalStationId", { valueAsNumber: true })}
-                  className="w-full px-4 py-3 bg-white border-2 rounded-xl font-medium appearance-none cursor-pointer transition-colors focus:outline-none"
-                  style={{
-                    borderColor: colors.base.darkActive,
-                    color: colors.base.darker,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = colors.violet.light;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = colors.base.darkActive;
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = colors.violet.normal;
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = colors.base.darkActive;
-                  }}
-                  disabled={stationsLoading}
-                >
-                  <option value="">{stationsLoading ? "Memuat stasiun..." : "Pilih stasiun tujuan"}</option>
-                  {stations.map((station) => (
-                    <option key={station.value} value={station.value}>
-                      {station.label} ({station.code})
-                    </option>
-                  ))}
-                </select>
-                <svg className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.base.darkHover} strokeWidth="2">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </div>
+              <CustomSelect
+                options={stationOptions}
+                value={watchedValues.arrivalStationId || ""}
+                onChange={(value) => setValue("arrivalStationId", typeof value === "string" && value.startsWith("city:") ? value : Number(value))}
+                placeholder={stationsLoading ? "Memuat stasiun..." : "Pilih stasiun tujuan"}
+                disabled={stationsLoading}
+                loading={stationsLoading}
+                searchable={true}
+                error={!!errors.arrivalStationId}
+              />
             </div>
 
             {/* Departure Date */}

@@ -1,17 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, RefObject } from "react";
 
-export const useScrollDirection = (threshold = 10) => {
+interface UseScrollDirectionOptions {
+  threshold?: number;
+  element?: RefObject<HTMLElement | null>;
+}
+
+export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
+  const { threshold = 10, element } = options;
   const [scrollDirection, setScrollDirection] = useState<"up" | "down" | null>(null);
   const [isAtTop, setIsAtTop] = useState(true);
 
   useEffect(() => {
-    let lastScrollY = window.pageYOffset;
+    let lastScrollY = 0;
     let ticking = false;
 
     const updateScrollDirection = () => {
-      const scrollY = window.pageYOffset;
+      const scrollY = element?.current ? element.current.scrollTop : window.pageYOffset;
 
       setIsAtTop(scrollY < 10);
 
@@ -32,10 +38,15 @@ export const useScrollDirection = (threshold = 10) => {
       }
     };
 
-    window.addEventListener("scroll", onScroll);
-
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [threshold]);
+    const scrollElement = element?.current;
+    if (scrollElement) {
+      scrollElement.addEventListener("scroll", onScroll);
+      return () => scrollElement.removeEventListener("scroll", onScroll);
+    } else {
+      window.addEventListener("scroll", onScroll);
+      return () => window.removeEventListener("scroll", onScroll);
+    }
+  }, [threshold, element]);
 
   return { scrollDirection, isAtTop };
 };

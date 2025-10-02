@@ -2,17 +2,13 @@ import { z } from "zod";
 
 export const TrainSearchSchema = z
   .object({
-    departureStationId: z
-      .number({
-        required_error: "Stasiun keberangkatan harus dipilih",
-      })
-      .min(1, "Stasiun keberangkatan harus dipilih"),
+    departureStationId: z.union([z.number().min(1, "Stasiun keberangkatan harus dipilih"), z.string().refine((val) => val.startsWith("city:"), "Invalid city selection")], {
+      required_error: "Stasiun keberangkatan harus dipilih",
+    }),
 
-    arrivalStationId: z
-      .number({
-        required_error: "Stasiun tujuan harus dipilih",
-      })
-      .min(1, "Stasiun tujuan harus dipilih"),
+    arrivalStationId: z.union([z.number().min(1, "Stasiun tujuan harus dipilih"), z.string().refine((val) => val.startsWith("city:"), "Invalid city selection")], {
+      required_error: "Stasiun tujuan harus dipilih",
+    }),
 
     departureDate: z
       .string({
