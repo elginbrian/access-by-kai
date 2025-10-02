@@ -10,8 +10,9 @@ const Stepper: React.FC<StepperProps> = ({ currentStep }) => {
     const steps = [
         { id: 1, name: 'Price Simulation' },
         { id: 2, name: 'Booking' },
-        { id: 3, name: 'Tracking' },
-        { id: 4, name: 'Selesai' },
+        { id: 3, name: 'Payment' },
+        { id: 4, name: 'Tracking' },
+        { id: 5, name: 'Selesai' },
     ];
 
     return (
