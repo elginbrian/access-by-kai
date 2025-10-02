@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useCentralBooking } from "./useCentralBooking";
-import PaymentService, { PaymentStatus, PaymentResponse } from "@/lib/services/PaymentService";
+import { useAuth } from "@/lib/auth/AuthContext";
+import PaymentService, { PaymentStatus } from "@/lib/services/PaymentService";
 
 export interface PaymentState {
   isLoading: boolean;
@@ -46,6 +47,7 @@ declare global {
 
 export function usePayment(): PaymentState & PaymentActions {
   const { bookingData } = useCentralBooking();
+  const { user } = useAuth();
   const [state, setState] = useState<PaymentState>({
     isLoading: false,
     isProcessing: false,
@@ -117,44 +119,42 @@ export function usePayment(): PaymentState & PaymentActions {
         return;
       }
 
-      setState((prev) => ({
-        ...prev,
-        isLoading: true,
-        error: null,
-      }));
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        const response = await PaymentService.createPayment({
-          bookingData,
-          paymentMethod: paymentMethods,
+        const numericUserId = user?.profile?.user_id;
+        if (!numericUserId) {
+          setState((prev) => ({ ...prev, isLoading: false, error: "Silakan login untuk melanjutkan pemesanan" }));
+          return;
+        }
+        const resp = await fetch("/api/bookings/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingData, enabledPayments: paymentMethods, userId: numericUserId }),
         });
 
-        if (response.success && response.snapToken) {
+        const data = await resp.json();
+
+        if (!resp.ok) {
+          setState((prev) => ({ ...prev, isLoading: false, error: data.error || "Gagal membuat pembayaran" }));
+          return;
+        }
+
+        // expected: { success: true, pemesananId, paymentId, orderId, snapToken, clientConfig }
+        if (data && data.snapToken) {
           setState((prev) => ({
             ...prev,
             isLoading: false,
-            snapToken: response.snapToken!,
-            orderId: response.orderId!,
-            paymentId: response.paymentId!,
-            status: {
-              orderId: response.orderId!,
-              status: "pending",
-              transactionStatus: "pending",
-            },
+            snapToken: data.snapToken,
+            orderId: data.orderId || null,
+            paymentId: data.paymentId || null,
+            status: data.orderId ? { orderId: data.orderId, status: "pending", transactionStatus: "pending" } : prev.status,
           }));
         } else {
-          setState((prev) => ({
-            ...prev,
-            isLoading: false,
-            error: response.error || "Gagal membuat pembayaran",
-          }));
+          setState((prev) => ({ ...prev, isLoading: false, error: "Gagal membuat pembayaran" }));
         }
       } catch (error) {
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error instanceof Error ? error.message : "Terjadi kesalahan tidak terduga",
-        }));
+        setState((prev) => ({ ...prev, isLoading: false, error: error instanceof Error ? error.message : "Terjadi kesalahan tidak terduga" }));
       }
     },
     [bookingData]
@@ -202,19 +202,13 @@ export function usePayment(): PaymentState & PaymentActions {
     setState((prev) => ({ ...prev, isProcessing: true }));
 
     try {
-      const success = await PaymentService.cancelPayment(orderId);
-      if (success) {
-        setState((prev) => ({
-          ...prev,
-          isProcessing: false,
-          status: prev.status ? { ...prev.status, status: "cancel" } : null,
-        }));
+      const resp = await fetch(`/api/payments/cancel/${encodeURIComponent(orderId)}`, { method: "POST" });
+      const data = await resp.json();
+
+      if (resp.ok && data.success) {
+        setState((prev) => ({ ...prev, isProcessing: false, status: prev.status ? { ...prev.status, status: "cancel" } : null }));
       } else {
-        setState((prev) => ({
-          ...prev,
-          isProcessing: false,
-          error: "Gagal membatalkan pembayaran",
-        }));
+        setState((prev) => ({ ...prev, isProcessing: false, error: data.error || "Gagal membatalkan pembayaran" }));
       }
     } catch (error) {
       setState((prev) => ({
