@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { signOut } from "@/lib/auth/authService";
 import toast from "react-hot-toast";
+import UserDropdown from "@/components/ui/UserDropdown";
 
 interface TrainNavigationProps {
   userName?: string;
@@ -63,10 +64,7 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
           </div>
           <div className="flex items-center space-x-4">
             {userIsLoggedIn ? (
-              <button onClick={handleAuthClick} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-                <img src={displayAvatar} alt="Profile" className="w-8 h-8 rounded-full" />
-                <span className="text-sm text-black">{displayName}</span>
-              </button>
+              <UserDropdown displayName={displayName} displayAvatar={displayAvatar} onLogout={handleAuthClick} onNavigate={(p) => router.push(p)} />
             ) : (
               <div className="flex items-center space-x-3">
                 <button onClick={() => handleNavClick("/auth/login")} className="text-purple-600 hover:text-purple-700 transition-colors font-medium text-sm px-4 py-2 rounded-full border border-purple-600 hover:bg-purple-50">
