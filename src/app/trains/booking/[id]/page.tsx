@@ -6,8 +6,10 @@ import { colors } from "@/app/design-system/colors";
 import { useTrainBookingDetails, useTrainRouteStations } from "@/lib/hooks/useTrainBookingDetails";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useBookingFormData } from "@/lib/hooks/useBookingFormData";
-import { useBookingSteps } from "@/lib/hooks/useBookingSteps";
+import { useBookingContext } from "@/lib/hooks/useBookingContext";
+import { useCentralBooking } from "@/lib/hooks/useCentralBooking";
 import { useSeatSelection } from "@/lib/hooks/useSeatSelection";
+import BookingLayout from "@/components/layout/BookingLayout";
 
 import BookingHeader from "@/components/trains/booking/BookingHeader";
 import TrainSummaryCard from "@/components/trains/booking/TrainSummaryCard";
@@ -21,12 +23,13 @@ import LoadingScreen from "@/components/trains/booking/LoadingScreen";
 import AuthRequiredScreen from "@/components/trains/booking/AuthRequiredScreen";
 import ErrorScreen from "@/components/trains/booking/ErrorScreen";
 
-export default function TrainBooking() {
+function TrainBookingContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
   const { user, loading, isAuthenticated } = useAuth();
-  const { currentStep, handleStepClick } = useBookingSteps();
+  const { currentStep, handleStepClick, nextStep } = useBookingContext();
+  const { setJourneyData, setBookerData, setPassengersData, setTrainTicketPrice } = useCentralBooking();
   const { showSeatSelection, selectedSeats, isRouteExpanded, handleSeatSelect, handleCloseSeatSelection, handleOpenSeatSelection, handleToggleRoute } = useSeatSelection();
   const { userData, updateBookerData, updatePassengerData, getBookerData, getPassengerData } = useBookingFormData();
 
@@ -44,6 +47,89 @@ export default function TrainBooking() {
       router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
     }
   }, [loading, isAuthenticated, router, params?.id, searchParams]);
+
+  React.useEffect(() => {
+    if (trainDetails && jadwalId) {
+      setJourneyData({
+        jadwalId: jadwalId,
+        trainName: trainDetails.nama_kereta || "Unknown Train",
+        trainCode: trainDetails.nomor_ka || "N/A",
+        departureTime: trainDetails.waktu_berangkat || "",
+        departureStation: trainDetails.stasiun_asal?.nama || "",
+        departureDate: trainDetails.tanggal_keberangkatan || "",
+        arrivalTime: trainDetails.waktu_tiba || "",
+        arrivalStation: trainDetails.stasiun_tujuan?.nama || "",
+        arrivalDate: trainDetails.tanggal_keberangkatan || "",
+      });
+
+      setTrainTicketPrice(trainDetails.harga_base || 600000);
+    }
+  }, [
+    trainDetails?.nama_kereta,
+    trainDetails?.nomor_ka,
+    trainDetails?.waktu_berangkat,
+    trainDetails?.waktu_tiba,
+    trainDetails?.stasiun_asal?.nama,
+    trainDetails?.stasiun_tujuan?.nama,
+    trainDetails?.tanggal_keberangkatan,
+    trainDetails?.harga_base,
+    jadwalId,
+    setJourneyData,
+    setTrainTicketPrice,
+  ]);
+
+  const bookerInfo = getBookerData();
+  const passengerInfo = getPassengerData();
+
+  const currentBookerData = React.useMemo(
+    () => ({
+      fullName: bookerInfo.fullName,
+      email: bookerInfo.email,
+      phoneNumber: bookerInfo.phoneNumber,
+    }),
+    [bookerInfo.fullName, bookerInfo.email, bookerInfo.phoneNumber]
+  );
+
+  const currentPassengerData = React.useMemo(
+    () => ({
+      passengerName: passengerInfo.passengerName,
+      idNumber: passengerInfo.idNumber,
+    }),
+    [passengerInfo.passengerName, passengerInfo.idNumber]
+  );
+
+  React.useEffect(() => {
+    if (currentBookerData.fullName) {
+      setBookerData({
+        fullName: currentBookerData.fullName,
+        email: currentBookerData.email,
+        phone: currentBookerData.phoneNumber,
+      });
+    }
+  }, [currentBookerData.fullName, currentBookerData.email, currentBookerData.phoneNumber, setBookerData]);
+
+  React.useEffect(() => {
+    if (currentPassengerData.passengerName) {
+      setPassengersData([
+        {
+          name: currentPassengerData.passengerName,
+          idNumber: currentPassengerData.idNumber,
+          seat: selectedSeats[0] || "Belum dipilih",
+          seatType: "Window",
+        },
+      ]);
+    }
+  }, [currentPassengerData.passengerName, currentPassengerData.idNumber, selectedSeats, setPassengersData]);
+
+  React.useEffect(() => {
+    if (userData.fullName || userData.email || userData.phoneNumber) {
+      setBookerData({
+        fullName: userData.fullName,
+        email: userData.email,
+        phone: userData.phoneNumber,
+      });
+    }
+  }, [userData.fullName, userData.email, userData.phoneNumber, setBookerData]);
 
   if (loading || trainLoading || isRedirecting) {
     const loadingMessage = isRedirecting ? "Mengarahkan ke halaman login..." : loading ? "Memeriksa autentikasi..." : "Memuat detail kereta...";
@@ -114,7 +200,7 @@ export default function TrainBooking() {
                 onSeatSelect={handleSeatSelect}
               />
 
-              <PaymentButton />
+              <PaymentButton onClick={nextStep} />
             </div>
           </div>
         </div>
@@ -132,5 +218,13 @@ export default function TrainBooking() {
 
       <FloatingChatButton />
     </div>
+  );
+}
+
+export default function TrainBooking() {
+  return (
+    <BookingLayout>
+      <TrainBookingContent />
+    </BookingLayout>
   );
 }

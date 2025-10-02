@@ -1,155 +1,169 @@
-'use client';
+"use client";
 
-import React from 'react';
-import TrainNavigation from '@/components/trains/navbar/TrainNavigation';
-import BookingProgress from '@/components/trains/booking/BookingProgress';
-import JourneyDetails from '@/components/trains/review/JourneyDetails';
-import PassengerList from '@/components/trains/review/PassengerList';
-import MealOrderList from '@/components/trains/review/MealOrderList';
-import BookingSummary from '@/components/trains/review/BookingSummary';
+import React from "react";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
+import BookingProgress from "@/components/trains/booking/BookingProgress";
+import JourneyDetails from "@/components/trains/review/JourneyDetails";
+import PassengerList from "@/components/trains/review/PassengerList";
+import MealOrderList from "@/components/trains/review/MealOrderList";
+import BookingSummary from "@/components/trains/review/BookingSummary";
+import BookingLayout from "@/components/layout/BookingLayout";
+import { useBookingContext } from "@/lib/hooks/useBookingContext";
+import { useCentralBooking } from "@/lib/hooks/useCentralBooking";
 
 interface Passenger {
-    id: string;
-    name: string;
-    idNumber: string;
-    seat: string;
-    seatType: string;
+  id: string;
+  name: string;
+  idNumber: string;
+  seat: string;
+  seatType: string;
 }
 
 interface MealOrder {
-    id: string;
-    name: string;
-    forPassenger: string;
-    price: number;
-    image: string;
+  id: string;
+  name: string;
+  forPassenger: string;
+  price: number;
+  image: string;
 }
+
+const TrainReviewContent = () => {
+  const { currentStep, handleStepClick, prevStep, nextStep } = useBookingContext();
+  const { bookingData } = useCentralBooking();
+
+  const { journey, booker, passengers: passengerData, foodOrders, pricing } = bookingData;
+
+  const passengers: Passenger[] = passengerData.map((passenger, index) => ({
+    id: (index + 1).toString(),
+    name: passenger.name,
+    idNumber: passenger.idNumber,
+    seat: passenger.seat || "Belum dipilih",
+    seatType: passenger.seatType || "Unknown",
+  }));
+
+  const mealOrders: MealOrder[] = foodOrders.map((order) => ({
+    id: order.id,
+    name: order.name,
+    forPassenger: order.forPassenger || "Main Passenger",
+    price: order.price,
+    image: order.image || "/dummy_images.png",
+  }));
+
+  const formatPrice = (price: number) => {
+    return `Rp ${price.toLocaleString("id-ID")}`;
+  };
+
+  const formatTime = (timeString: string) => {
+    if (!timeString) return "N/A";
+    try {
+      const date = new Date(timeString);
+      return date.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    } catch (e) {
+      return timeString;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+    } catch (e) {
+      return dateString;
+    }
+  };
+
+  const mealsTotal = pricing.foodTotal;
+  const serviceFee = pricing.serviceFee;
+  const total = pricing.total;
+
+  if (!journey.jadwalId || !booker.fullName) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Memuat data pemesanan...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const bookingSteps = [
+    {
+      id: "pemesanan",
+      title: "Pemesanan",
+    },
+    {
+      id: "makanan",
+      title: "Pemesanan Makanan",
+    },
+    {
+      id: "review",
+      title: "Review",
+    },
+    {
+      id: "bayar",
+      title: "Bayar",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="sticky top-0 z-30 bg-gray-50">
+        <TrainNavigation />
+
+        <BookingProgress steps={bookingSteps} currentStep={currentStep} onStepClick={handleStepClick} />
+      </div>
+      <div className="max-w-[100rem] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 px-6 py-8">
+        <div className="lg:col-span-8 space-y-6">
+          <JourneyDetails
+            trainName={journey.trainName}
+            trainCode={journey.trainCode}
+            departureTime={formatTime(journey.departureTime)}
+            departureStation={journey.departureStation}
+            departureDate={formatDate(journey.departureDate)}
+            arrivalTime={formatTime(journey.arrivalTime)}
+            arrivalStation={journey.arrivalStation}
+            arrivalDate={formatDate(journey.arrivalDate)}
+          />
+
+          <PassengerList passengers={passengers} />
+          <MealOrderList mealOrders={mealOrders} formatPrice={formatPrice} />
+        </div>
+
+        <div className="lg:col-span-4">
+          <BookingSummary
+            trainTickets={pricing.trainTickets}
+            meals={mealsTotal}
+            serviceFee={serviceFee}
+            total={total}
+            passengerCount={passengers.length}
+            mealCount={foodOrders.length}
+            formatPrice={formatPrice}
+            onEditSeat={() => handleStepClick(1)}
+            onEditFood={() => handleStepClick(2)}
+            onProceedToPayment={nextStep}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const TrainReviewPage = () => {
-    const passengers: Passenger[] = [
-        {
-            id: '1',
-            name: 'John Anderson',
-            idNumber: '1234567890123456',
-            seat: '12A',
-            seatType: 'Window'
-        },
-        {
-            id: '2',
-            name: 'Sarah Anderson',
-            idNumber: '1234567890123457',
-            seat: '12B',
-            seatType: 'Aisle'
-        }
-    ];
-
-    const mealOrders: MealOrder[] = [
-        {
-            id: '1',
-            name: 'Nasi Gudeg',
-            forPassenger: 'John Anderson',
-            price: 45000,
-            image: 'https://images.unsplash.com/photo-1596040033229-a0b4e4c82a4c?w=150&h=150&fit=crop'
-        },
-        {
-            id: '2',
-            name: 'Nasi Ayam',
-            forPassenger: 'Sarah Anderson',
-            price: 42000,
-            image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=150&h=150&fit=crop'
-        }
-    ];
-
-    const formatPrice = (price: number) => {
-        return `Rp ${price.toLocaleString('id-ID')}`;
-    };
-
-    const trainTickets = 1200000;
-    const meals = 87000;
-    const serviceFee = 15000;
-    const total = trainTickets + meals + serviceFee;
-
-    const [currentStep, setCurrentStep] = React.useState(1);
-
-    const bookingSteps = [
-        {
-            id: 'pemesanan',
-            title: 'Pemesanan'
-        },
-        {
-            id: 'makanan',
-            title: 'Pemesanan Makanan'
-        },
-        {
-            id: 'review',
-            title: 'Review'
-        },
-        {
-            id: 'bayar',
-            title: 'Bayar'
-        },
-    ];
-
-    const handleStepClick = (step: number) => {
-        // Only allow going back to previous steps
-        if (step <= currentStep) {
-            setCurrentStep(step);
-        }
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="sticky top-0 z-30 bg-gray-50">
-                {/* Header */}
-                <TrainNavigation />
-
-                {/* Progress Steps */}
-                <BookingProgress
-                    steps={bookingSteps}
-                    currentStep={currentStep}
-                    onStepClick={handleStepClick}
-                />
-            </div>
-            <div className="max-w-[100rem] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 px-6 py-8">
-                {/* Left Section - Journey Details */}
-                <div className="lg:col-span-8 space-y-6">
-                    {/* Journey Details */}
-                    <JourneyDetails
-                        trainName="Argo Parahyangan"
-                        trainCode="KA 21"
-                        departureTime="07:30"
-                        departureStation="Jakarta Gambir"
-                        departureDate="Dec 25, 2024"
-                        arrivalTime="11:15"
-                        arrivalStation="Surabaya Gubeng"
-                        arrivalDate="Dec 25, 2024"
-                    />
-
-                    {/* Passengers & Seats */}
-                    <PassengerList passengers={passengers} />
-
-                    {/* Meal Orders */}
-                    <MealOrderList 
-                        mealOrders={mealOrders} 
-                        formatPrice={formatPrice} 
-                    />
-                </div>
-
-                {/* Right Section - Booking Summary */}
-                <div className="lg:col-span-4">
-                    <BookingSummary
-                        trainTickets={trainTickets}
-                        meals={meals}
-                        serviceFee={serviceFee}
-                        total={total}
-                        formatPrice={formatPrice}
-                        onEditSeat={() => console.log('Edit seat clicked')}
-                        onEditFood={() => console.log('Edit food clicked')}
-                        onProceedToPayment={() => console.log('Proceed to payment clicked')}
-                    />
-                </div>
-            </div>
-        </div>
-    );
-}
+  return (
+    <BookingLayout>
+      <TrainReviewContent />
+    </BookingLayout>
+  );
+};
 
 export default TrainReviewPage;

@@ -55,34 +55,18 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({ onClose, onSeatSelect, se
       const convertedPassengers: Passenger[] = passengersProp.map((passenger, index) => ({
         id: passenger.id,
         name: passenger.name,
-        seat: passenger.seat || "",
+        seat: selectedSeats[index] || passenger.seat || "",
         isAdult: passenger.isAdult,
         type: passenger.type,
       }));
 
-      const passengersWithSeats = convertedPassengers.map((passenger, index) => ({
-        ...passenger,
-        seat: selectedSeats[index] || passenger.seat || "",
-      }));
-
-      setPassengers(passengersWithSeats);
-    }
-  }, [passengersProp, selectedSeats]);
-
-  useEffect(() => {
-    if (passengers.length > 0 && selectedSeats.length > 0) {
-      const updatedPassengers = passengers.map((passenger, index) => ({
-        ...passenger,
-        seat: selectedSeats[index] || "",
-      }));
-
-      const hasChanged = updatedPassengers.some((passenger, index) => passenger.seat !== passengers[index].seat);
+      const hasChanged = convertedPassengers.some((passenger, index) => !passengers[index] || passengers[index].id !== passenger.id || passengers[index].name !== passenger.name || passengers[index].seat !== passenger.seat);
 
       if (hasChanged) {
-        setPassengers(updatedPassengers);
+        setPassengers(convertedPassengers);
       }
     }
-  }, [selectedSeats]);
+  }, [passengersProp, selectedSeats, passengers]);
 
   const generateSeats = useCallback((): Seat[] => {
     if (!kursiList || kursiLoading) {

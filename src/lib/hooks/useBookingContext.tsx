@@ -1,7 +1,21 @@
-import { useState } from "react";
+"use client";
+
+import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-export function useBookingSteps() {
+interface BookingContextType {
+  currentStep: number;
+  maxCompletedStep: number;
+  handleStepClick: (step: number) => void;
+  nextStep: () => void;
+  prevStep: () => void;
+  navigateToStep: (step: number) => void;
+  markStepCompleted: (step: number) => void;
+}
+
+const BookingContext = createContext<BookingContextType | null>(null);
+
+export function BookingProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const params = useParams();
   const trainId = params?.id as string;
@@ -18,9 +32,15 @@ export function useBookingSteps() {
   };
 
   const [currentStep, setCurrentStep] = useState(getCurrentStepFromPath());
+  const [maxCompletedStep, setMaxCompletedStep] = useState(1);
+
+  useEffect(() => {
+    const step = getCurrentStepFromPath();
+    setCurrentStep(step);
+  }, [params]);
 
   const handleStepClick = (step: number) => {
-    if (step <= currentStep) {
+    if (step <= maxCompletedStep || step === maxCompletedStep + 1) {
       navigateToStep(step);
     }
   };
@@ -48,6 +68,7 @@ export function useBookingSteps() {
 
   const nextStep = () => {
     const newStep = Math.min(currentStep + 1, 4);
+    markStepCompleted(currentStep);
     navigateToStep(newStep);
   };
 
@@ -56,12 +77,31 @@ export function useBookingSteps() {
     navigateToStep(newStep);
   };
 
-  return {
-    currentStep,
-    setCurrentStep,
-    handleStepClick,
-    nextStep,
-    prevStep,
-    navigateToStep,
+  const markStepCompleted = (step: number) => {
+    setMaxCompletedStep((prev) => Math.max(prev, step));
   };
+
+  return (
+    <BookingContext.Provider
+      value={{
+        currentStep,
+        maxCompletedStep,
+        handleStepClick,
+        nextStep,
+        prevStep,
+        navigateToStep,
+        markStepCompleted,
+      }}
+    >
+      {children}
+    </BookingContext.Provider>
+  );
+}
+
+export function useBookingContext() {
+  const context = useContext(BookingContext);
+  if (!context) {
+    throw new Error("useBookingContext must be used within BookingProvider");
+  }
+  return context;
 }
