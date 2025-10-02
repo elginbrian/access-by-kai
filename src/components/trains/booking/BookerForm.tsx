@@ -3,6 +3,7 @@
 import React from "react";
 import InputField from "@/components/input/InputField";
 import { colors } from "@/app/design-system/colors";
+import { RequiredFieldIndicator } from "./RequiredFieldIndicator";
 
 export interface BookerData {
   fullName: string;
@@ -29,7 +30,9 @@ const BookerForm: React.FC<BookerFormProps> = ({ data, onChange }) => {
 
       <div className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Nama Lengkap <span className="text-red-500">*</span>
+          </label>
           <InputField
             label="Nama Lengkap"
             type="text"
@@ -43,11 +46,13 @@ const BookerForm: React.FC<BookerFormProps> = ({ data, onChange }) => {
               } as React.CSSProperties
             }
           />
-          <p className="text-xs text-gray-400 mt-1.5">Tidak boleh menggunakan karakter khusus</p>
+          <RequiredFieldIndicator hasValue={!!data.fullName.trim()} fieldName="Nama lengkap" />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Nomor Telepon</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Nomor Telepon <span className="text-red-500">*</span>
+          </label>
           <div className="flex gap-2">
             <div className="relative">
               <select className="appearance-none text-black h-full pl-3 pr-8 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white">
@@ -71,11 +76,13 @@ const BookerForm: React.FC<BookerFormProps> = ({ data, onChange }) => {
               }
             />
           </div>
-          <p className="text-xs text-gray-400 mt-1.5">Sertakan kode negara</p>
+          <RequiredFieldIndicator hasValue={!!data.phoneNumber.trim()} fieldName="Nomor telepon" />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Alamat Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Alamat Email <span className="text-red-500">*</span>
+          </label>
           <InputField
             label="Alamat Email"
             type="email"
@@ -89,7 +96,7 @@ const BookerForm: React.FC<BookerFormProps> = ({ data, onChange }) => {
               } as React.CSSProperties
             }
           />
-          <p className="text-xs text-gray-400 mt-1.5">Kami akan mengirim konfirmasi ke email ini</p>
+          <RequiredFieldIndicator hasValue={!!data.email.trim()} fieldName="Alamat email" />
         </div>
       </div>
     </div>

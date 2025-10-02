@@ -3,6 +3,7 @@
 import React from "react";
 import InputField from "@/components/input/InputField";
 import { colors } from "@/app/design-system/colors";
+import { RequiredFieldIndicator } from "./RequiredFieldIndicator";
 
 export interface PassengerData {
   title: string;
@@ -48,7 +49,9 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ data, onChange }) => {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Nama Lengkap <span className="text-red-500">*</span>
+          </label>
           <InputField
             label="Nama Lengkap"
             type="text"
@@ -62,6 +65,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ data, onChange }) => {
               } as React.CSSProperties
             }
           />
+          <RequiredFieldIndicator hasValue={!!data.passengerName.trim()} fieldName="Nama penumpang" />
         </div>
       </div>
 
@@ -84,11 +88,13 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ data, onChange }) => {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Nomor Identitas</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Nomor Identitas <span className="text-red-500">*</span>
+          </label>
           <InputField
             label="Nomor Identitas"
             type="text"
-            placeholder="Masukkan nomor identitas"
+            placeholder="Nomor Induk Kependudukan atau Nomor Paspor"
             value={data.idNumber}
             onChange={handleInputChange("idNumber")}
             className="w-full px-1 py-1 border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent"
@@ -98,6 +104,7 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ data, onChange }) => {
               } as React.CSSProperties
             }
           />
+          <RequiredFieldIndicator hasValue={!!data.idNumber.trim()} fieldName="Nomor identitas" />
         </div>
       </div>
 

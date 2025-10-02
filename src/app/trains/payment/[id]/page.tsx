@@ -6,20 +6,17 @@ import BookingProgress from "@/components/trains/booking/BookingProgress";
 import JourneyDetailsCard from "@/components/trains/payment/JourneyDetailsCard";
 import PaymentMethodSelector from "@/components/trains/payment/PaymentMethodSelector";
 import PaymentSummary from "@/components/trains/payment/PaymentSummary";
+import PaymentGateway from "@/components/trains/payment/PaymentGateway";
 import BookingLayout from "@/components/layout/BookingLayout";
 import { useBookingContext } from "@/lib/hooks/useBookingContext";
 import { useCentralBooking } from "@/lib/hooks/useCentralBooking";
+import { PaymentErrorBoundary } from "@/components/ErrorBoundary";
 
 const TrainPaymentContent = () => {
   const { currentStep, handleStepClick, prevStep } = useBookingContext();
   const { bookingData } = useCentralBooking();
-
-  const [activePaymentMethod, setActivePaymentMethod] = useState("credit");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [promoCode, setPromoCode] = useState("");
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentOrderId, setPaymentOrderId] = useState<string | null>(null);
 
   const formatPrice = (price: number) => {
     return `Rp ${price.toLocaleString("id-ID")}`;
@@ -86,40 +83,26 @@ const TrainPaymentContent = () => {
     );
   }
 
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCardNumber(e.target.value.replace(/\D/g, ""));
+  const handlePaymentSuccess = (orderId: string) => {
+    setPaymentSuccess(true);
+    setPaymentOrderId(orderId);
+
+    setTimeout(() => {
+      window.location.href = `/trains/payment/success?order_id=${orderId}`;
+    }, 2000);
   };
 
-  const handleCardNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCardName(e.target.value);
-  };
-
-  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/[^0-9]/g, "");
-    if (val.length === 0) {
-      setExpiryDate("");
-    } else if (val.length <= 2) {
-      setExpiryDate(val + "/");
-    } else {
-      setExpiryDate(val.slice(0, 2) + "/" + val.slice(2, 4));
-    }
-  };
-
-  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCvv(e.target.value);
-  };
-
-  const handlePromoCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPromoCode(e.target.value);
+  const handlePaymentError = (error: string) => {
+    console.error("Payment error:", error);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="sticky top-0 z-30 bg-gray-50">
         <TrainNavigation />
-
         <BookingProgress steps={bookingSteps} currentStep={currentStep} onStepClick={handleStepClick} />
       </div>
+
       <div className="max-w-[100rem] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 px-6 py-8">
         <div className="lg:col-span-8 space-y-6">
           <JourneyDetailsCard
@@ -136,20 +119,7 @@ const TrainPaymentContent = () => {
             timeRange={`${formatTime(journey.departureTime)} - ${formatTime(journey.arrivalTime)}`}
           />
 
-          <PaymentMethodSelector
-            activePaymentMethod={activePaymentMethod}
-            onPaymentMethodChange={setActivePaymentMethod}
-            cardNumber={cardNumber}
-            cardName={cardName}
-            expiryDate={expiryDate}
-            cvv={cvv}
-            promoCode={promoCode}
-            onCardNumberChange={handleCardNumberChange}
-            onCardNameChange={handleCardNameChange}
-            onExpiryDateChange={handleExpiryDateChange}
-            onCvvChange={handleCvvChange}
-            onPromoCodeChange={handlePromoCodeChange}
-          />
+          <PaymentGateway onPaymentSuccess={handlePaymentSuccess} onPaymentError={handlePaymentError} />
         </div>
 
         <div className="lg:col-span-4">
@@ -161,7 +131,6 @@ const TrainPaymentContent = () => {
             formatPrice={formatPrice}
             foodOrders={foodOrders}
             passengerCount={passengers.length}
-            onProceedToPayment={() => {}}
             onBackToReview={prevStep}
           />
         </div>
@@ -172,9 +141,11 @@ const TrainPaymentContent = () => {
 
 const TrainPaymentPage = () => {
   return (
-    <BookingLayout>
-      <TrainPaymentContent />
-    </BookingLayout>
+    <PaymentErrorBoundary>
+      <BookingLayout>
+        <TrainPaymentContent />
+      </BookingLayout>
+    </PaymentErrorBoundary>
   );
 };
 

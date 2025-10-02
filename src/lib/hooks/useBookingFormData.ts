@@ -24,7 +24,6 @@ export function useBookingFormData() {
     idNumber: "",
   });
 
-  // Auto-populate from user profile
   useEffect(() => {
     if (user?.profile) {
       setUserData((prev) => ({
@@ -34,7 +33,7 @@ export function useBookingFormData() {
         email: user.email || "",
         passengerName: user.profile?.nama_lengkap || "",
         idType: user.profile?.tipe_identitas || "KTP",
-        idNumber: user.profile?.nomor_identitas || "",
+        idNumber: "",
       }));
     }
   }, [user]);

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
+import { BookingSecureStorage } from "@/lib/storage/SecureStorage";
 
 export interface BookingData {
   journey: {
@@ -106,13 +107,14 @@ const CentralBookingContext = createContext<CentralBookingContextType | null>(nu
 export function CentralBookingProvider({ children }: { children: ReactNode }) {
   const [bookingData, setBookingData] = useState<BookingData>(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("central-booking-data");
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          console.error("Error parsing saved booking data:", e);
+      try {
+        const saved = BookingSecureStorage.getBookingData();
+        if (saved) {
+          return saved;
         }
+      } catch (e) {
+        console.error("Error loading saved booking data:", e);
+        BookingSecureStorage.clearBookingData();
       }
     }
     return initialBookingData;
@@ -120,8 +122,12 @@ export function CentralBookingProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("central-booking-data", JSON.stringify(bookingData));
-      console.log("Central Booking - Data saved to localStorage:", bookingData);
+      try {
+        BookingSecureStorage.setBookingData(bookingData);
+        console.log("Central Booking - Data saved securely:", bookingData);
+      } catch (error) {
+        console.error("Error saving booking data:", error);
+      }
     }
   }, [bookingData]);
 
@@ -253,7 +259,7 @@ export function CentralBookingProvider({ children }: { children: ReactNode }) {
   const clearAllData = useCallback(() => {
     setBookingData(initialBookingData);
     if (typeof window !== "undefined") {
-      localStorage.removeItem("central-booking-data");
+      BookingSecureStorage.clearBookingData();
     }
   }, []);
 

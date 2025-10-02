@@ -79,39 +79,11 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({ ticketPrice, foodTotal 
 
       {/* Action Buttons */}
       <div className="space-y-3 mb-4">
-        <button onClick={onProceedToPayment} className="w-full py-4 px-6 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all hover:shadow-lg flex items-center justify-center gap-2">
-          <img src="/ic_lock.svg" alt="" />
-          <span>Bayar Sekarang</span>
-        </button>
-
         {onBackToReview && (
           <button onClick={onBackToReview} className="w-full py-3 px-6 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all">
             Kembali ke Review
           </button>
         )}
-      </div>
-
-      {/* Security Badge */}
-      <div className="bg-green-50 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <img src="/ic_shield.svg" alt="Keamanan" />
-          <div>
-            <div className="font-semibold text-green-800 text-sm mb-1">Pembayaran Anda terenkripsi dan aman</div>
-            <div className="text-xs text-green-700">Dilindungi dengan teknologi SSL 256-bit</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Accepted Payment Methods */}
-      <div className="mt-6">
-        <div className="text-xs text-gray-500 text-center mb-3 border-t border-gray-200 pt-3">Metode pembayaran yang diterima</div>
-        <div className="flex justify-center items-center gap-2 flex-wrap">
-          <img src="/ic_visa_blue.svg" alt="Visa" />
-          <img src="/ic_mastercard_red.svg" alt="MasterCard" />
-          <img src="/ic_legal_dark.svg" alt="Bank" />
-          <img src="/ic_ewallet_purple.svg" alt="E-Wallet" />
-          <img src="/ic_qris_green.svg" alt="QRIS" />
-        </div>
       </div>
     </div>
   );

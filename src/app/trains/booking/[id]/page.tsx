@@ -9,6 +9,8 @@ import { useBookingFormData } from "@/lib/hooks/useBookingFormData";
 import { useBookingContext } from "@/lib/hooks/useBookingContext";
 import { useCentralBooking } from "@/lib/hooks/useCentralBooking";
 import { useSeatSelection } from "@/lib/hooks/useSeatSelection";
+import { validateBookingCompletion } from "@/lib/validation/bookingValidation";
+import { MissingDataAlert } from "@/components/trains/booking/RequiredFieldIndicator";
 import BookingLayout from "@/components/layout/BookingLayout";
 
 import BookingHeader from "@/components/trains/booking/BookingHeader";
@@ -29,7 +31,7 @@ function TrainBookingContent() {
   const searchParams = useSearchParams();
   const { user, loading, isAuthenticated } = useAuth();
   const { currentStep, handleStepClick, nextStep } = useBookingContext();
-  const { setJourneyData, setBookerData, setPassengersData, setTrainTicketPrice } = useCentralBooking();
+  const { bookingData, setJourneyData, setBookerData, setPassengersData, setTrainTicketPrice } = useCentralBooking();
   const { showSeatSelection, selectedSeats, isRouteExpanded, handleSeatSelect, handleCloseSeatSelection, handleOpenSeatSelection, handleToggleRoute } = useSeatSelection();
   const { userData, updateBookerData, updatePassengerData, getBookerData, getPassengerData } = useBookingFormData();
 
@@ -199,6 +201,11 @@ function TrainBookingContent() {
                 onCloseSeatSelection={handleCloseSeatSelection}
                 onSeatSelect={handleSeatSelect}
               />
+
+              {(() => {
+                const validation = validateBookingCompletion(bookingData);
+                return !validation.isValid ? <MissingDataAlert missingFields={validation.missingFields} /> : null;
+              })()}
 
               <PaymentButton onClick={nextStep} />
             </div>

@@ -5,29 +5,43 @@ import React from "react";
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  errorInfo: React.ErrorInfo | null;
 }
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
   fallback?: React.ComponentType<{ error: Error; retry: () => void }>;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorInfo: null };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+    return { hasError: true, error, errorInfo: null };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
+
+    this.setState({ errorInfo });
+
+    // Call onError callback if provided
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
+
+    // In production, log to error reporting service
+    if (process.env.NODE_ENV === "production") {
+      // Example: Sentry.captureException(error, { contexts: { react: { componentStack: errorInfo.componentStack } } })
+    }
   }
 
   retry = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, errorInfo: null });
   };
 
   render() {
@@ -88,6 +102,72 @@ export const TrainErrorFallback: React.FC<{ error: Error; retry: () => void }> =
         </div>
       </div>
     </div>
+  );
+};
+
+export const BookingErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <ErrorBoundary
+      fallback={({ error, retry }) => (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border p-8 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Kesalahan Pemesanan</h2>
+            <p className="text-gray-600 mb-6">Terjadi kesalahan saat memproses pemesanan Anda. Silakan coba lagi atau hubungi customer service.</p>
+            <div className="space-y-3">
+              <button onClick={retry} className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors">
+                Coba Lagi
+              </button>
+              <button onClick={() => (window.location.href = "/trains")} className="w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
+                Cari Kereta Lain
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      onError={(error, errorInfo) => {
+        console.error("Booking Error:", error, errorInfo);
+      }}
+    >
+      {children}
+    </ErrorBoundary>
+  );
+};
+
+export const PaymentErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <ErrorBoundary
+      fallback={({ error, retry }) => (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border p-8 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Kesalahan Pembayaran</h2>
+            <p className="text-gray-600 mb-6">Terjadi kesalahan pada sistem pembayaran. Data pemesanan Anda aman. Silakan coba lagi.</p>
+            <div className="space-y-3">
+              <button onClick={retry} className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors">
+                Coba Lagi
+              </button>
+              <button onClick={() => window.history.back()} className="w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
+                Kembali ke Review
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      onError={(error, errorInfo) => {
+        console.error("Payment Error:", error, errorInfo);
+      }}
+    >
+      {children}
+    </ErrorBoundary>
   );
 };
 
