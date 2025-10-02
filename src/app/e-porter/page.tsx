@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import HeroSection from '@/components/eporter/HeroSection';
 import ActiveTicketsList from '@/components/eporter/ActiveTicketsList';
 import NavBarEPorter from '@/components/eporter/NavBar';
+import PorterBookingForm from '@/components/eporter/PorterBookingForm';
 
 // Sample ticket data - in a real app this would come from an API
 const sampleTickets = [
@@ -38,10 +39,22 @@ const sampleTickets = [
 ];
 
 const KAIEPorterPage = () => {
+    const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
     const handleTicketSelect = (ticketId: string) => {
         console.log('Selected ticket:', ticketId);
-        // Handle ticket selection logic here
+        setSelectedTicketId(ticketId);
+    };
+
+    const handleBackToTickets = () => {
+        setSelectedTicketId(null);
+    };
+
+    const handlePorterBookingSubmit = (formData: any) => {
+        console.log('Porter booking submitted:', formData);
+        // Handle the booking submission here
+        alert('Porter booking submitted successfully!');
+        setSelectedTicketId(null); // Go back to tickets list
     };
 
     return (
@@ -60,13 +73,23 @@ const KAIEPorterPage = () => {
 
                 {/* Active Tickets Section */}
                 <div className="mt-16">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Tiket Aktif Anda</h2>
+                    {selectedTicketId ? (
+                        <PorterBookingForm
+                            ticketId={selectedTicketId}
+                            onBack={handleBackToTickets}
+                            onSubmit={handlePorterBookingSubmit}
+                        />
+                    ) : (
+                        <>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">Tiket Aktif Anda</h2>
 
-                    <ActiveTicketsList
-                        tickets={sampleTickets}
-                        onTicketSelect={handleTicketSelect}
-                        buttonText="Pilih tiket ini"
-                    />
+                            <ActiveTicketsList
+                                tickets={sampleTickets}
+                                onTicketSelect={handleTicketSelect}
+                                buttonText="Pilih tiket ini"
+                            />
+                        </>
+                    )}
                 </div>
             </div>
         </div>
