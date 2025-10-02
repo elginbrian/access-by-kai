@@ -4,6 +4,7 @@ import React from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 import SearchSummary from "@/components/trains/trainSummary/SearchSummary";
+import ScheduleEditCard from "@/components/trains/schedule/ScheduleEditCard";
 import PromoBanner from "@/components/trains/promotions/PromoBanner";
 import FloatingChat from "@/components/trains/floatButton/FloatingChat";
 import ChatSidebar from "@/components/trains/chat/ChatSidebar";
@@ -27,6 +28,7 @@ const TrainBookingResults = () => {
   const searchParams = useSearchParams();
 
   const [isChatOpen, setIsChatOpen] = React.useState(false);
+  const [isScheduleEditOpen, setIsScheduleEditOpen] = React.useState(false);
 
   const searchCriteria = React.useMemo((): TrainScheduleSearchData | null => {
     const fromParam = searchParams.get("from") || searchParams.get("departure");
@@ -117,7 +119,7 @@ const TrainBookingResults = () => {
   };
 
   const handleEditSchedule = () => {
-    router.push(`/?${searchParams.toString()}`);
+    setIsScheduleEditOpen(true);
   };
 
   const handleSwitchStations = () => {
@@ -157,6 +159,10 @@ const TrainBookingResults = () => {
     console.log("Nav clicked:", section);
   };
 
+  const handleScheduleEditClose = () => {
+    setIsScheduleEditOpen(false);
+  };
+
   return (
     <ErrorBoundary fallback={TrainErrorFallback}>
       <div className="min-h-screen relative" style={{ backgroundColor: colors.violet.light }}>
@@ -182,10 +188,27 @@ const TrainBookingResults = () => {
           )}
         </div>
 
-        {/* Main Content */}
+        {isScheduleEditOpen && (
+          <div className="mt-8">
+            <ScheduleEditCard
+              isVisible={isScheduleEditOpen}
+              onClose={handleScheduleEditClose}
+              initialData={
+                searchCriteria
+                  ? {
+                      departureStationId: searchCriteria.departureStationId,
+                      arrivalStationId: searchCriteria.arrivalStationId,
+                      departureDate: searchCriteria.departureDate,
+                      passengers: parseInt(passengersCount),
+                    }
+                  : undefined
+              }
+            />
+          </div>
+        )}
+
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Sticky Sidebar */}
             <FilterSection
               priceValue={filters.priceValue}
               setPriceValue={filters.setPriceValue}
