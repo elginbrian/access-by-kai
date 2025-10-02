@@ -1,13 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import NavBarEPorter from '@/components/eporter/NavBarEPorter';
+import NavBarServices from '@/components/navbar/NavBarServices';
 import TicketInfoCard from '@/components/eporter/booking/TicketInfoCard';
 import PassengerListCard from '@/components/eporter/booking/PassengerListCard';
 import PortersList from '@/components/eporter/booking/PortersList';
 import HelpSupportCard from '@/components/eporter/booking/HelpSupportCard';
+import LoadingPorters from '@/components/eporter/booking/LoadingPorters';
 
 const KAIEPorterBookingPage = () => {
+    // Loading state for porter search
+    const [isLoading, setIsLoading] = useState(false);
+    
     // Passengers state for selection UI
     const [passengers] = useState([
         { id: '1', name: 'Jane Doe', type: 'Adult' as 'Adult', isSelected: true },
@@ -65,10 +69,25 @@ const KAIEPorterBookingPage = () => {
         // Handle contact support action
     };
 
+    const handleSearchPorters = () => {
+        console.log('Starting porter search...');
+        setIsLoading(true);
+        
+        // Simulate API call - remove this and replace with actual API call
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 3000);
+    };
+
+    const handleCancelSearch = () => {
+        console.log('Porter search cancelled');
+        setIsLoading(false);
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
             {/* Navigation */}
-            <NavBarEPorter />
+            <NavBarServices service="E-Porter" />
 
             {/* Main Content */}
             <div className="container mx-auto px-8 py-8">
@@ -102,14 +121,28 @@ const KAIEPorterBookingPage = () => {
                         />
                     </div>
 
-                    {/* Right Column - Porter Cards */}
+                    {/* Right Column - Porter Cards or Loading */}
                     <div className="space-y-6">
-                        <PortersList
-                            porters={porters}
-                            onWhatsAppClick={handleWhatsAppClick}
-                            onRequestAnotherClick={handleRequestAnotherClick}
-                            onCancelClick={handleCancelClick}
-                        />
+                        {isLoading ? (
+                            <LoadingPorters onCancel={handleCancelSearch} />
+                        ) : (
+                            <>
+                                <PortersList
+                                    porters={porters}
+                                    onWhatsAppClick={handleWhatsAppClick}
+                                    onRequestAnotherClick={handleRequestAnotherClick}
+                                    onCancelClick={handleCancelClick}
+                                />
+                                
+                                {/* Add Search Button for Testing */}
+                                <button
+                                    onClick={handleSearchPorters}
+                                    className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                                >
+                                    Search for Porter (Demo)
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

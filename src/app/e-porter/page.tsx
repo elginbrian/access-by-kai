@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import HeroSection from '@/components/eporter/HeroSection';
 import ActiveTicketsList from '@/components/eporter/ActiveTicketsList';
-import NavBarEPorter from '@/components/eporter/NavBarEPorter';
+import NavBarServices from '@/components/navbar/NavBarServices';
 import PorterBookingForm from '@/components/eporter/PorterBookingForm';
 
 // Sample ticket data - in a real app this would come from an API
@@ -60,7 +60,7 @@ const KAIEPorterPage = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
             {/* Navigation */}
-            <NavBarEPorter/>
+            <NavBarServices service="E-Porter" />
             
             {/* Hero Section */}
             <div className="container mx-auto px-8 py-16">

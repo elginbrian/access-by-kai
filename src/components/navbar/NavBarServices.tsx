@@ -2,14 +2,18 @@
 
 import React from 'react';
 
-const NavBarEPorter: React.FC = () => {
+interface NavBarServicesProps {
+    service?: string;
+}
+
+const NavBarServices: React.FC<NavBarServicesProps> = ({ service }) => {
     return (
         <nav className="sticky top-0 w-full z-30 flex items-center justify-between px-8 py-4 bg-white">
             <div className="flex items-center gap-2">
                 <div className="bg-blue-600 p-2 rounded-lg">
                     <img src="/ic_train.svg" alt="Train" />
                 </div>
-                <span className="text-xl font-semibold text-gray-800">KAI e-Porter</span>
+                <span className="text-xl font-semibold text-gray-800">KAI {service}</span>
             </div>
 
             <div className="flex gap-8">
@@ -29,4 +33,4 @@ const NavBarEPorter: React.FC = () => {
     );
 };
 
-export default NavBarEPorter;
+export default NavBarServices;
