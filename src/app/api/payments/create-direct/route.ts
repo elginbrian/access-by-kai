@@ -125,6 +125,10 @@ export async function POST(request: NextRequest) {
       custom_field1: `train-${bookingData.journey.jadwalId}`,
       custom_field2: `passengers-${bookingData.passengers.length}`,
       custom_field3: `route-${bookingData.journey.departureStation}-${bookingData.journey.arrivalStation}`,
+      credit_card: {
+        secure: true,
+        save_card: true,
+      },
     };
 
     const midtransUrl = process.env.MIDTRANS_ENVIRONMENT === "production" ? "https://app.midtrans.com/snap/v1/transactions" : "https://app.sandbox.midtrans.com/snap/v1/transactions";

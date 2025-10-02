@@ -19,7 +19,7 @@ export interface PaymentActions {
   createPayment: (paymentMethods?: string[]) => Promise<void>;
   checkStatus: (orderId: string) => Promise<void>;
   cancelPayment: (orderId: string) => Promise<void>;
-  openSnapPayment: () => void;
+  openSnapPayment: (onClose?: () => void) => void;
   resetPayment: () => void;
   retryPayment: () => Promise<void>;
 }
@@ -225,72 +225,76 @@ export function usePayment(): PaymentState & PaymentActions {
     }
   }, []);
 
-  const openSnapPayment = useCallback(() => {
-    if (!state.snapToken || !state.isSnapReady) {
-      setState((prev) => ({
-        ...prev,
-        error: "Payment gateway belum siap",
-      }));
-      return;
-    }
-
-    setState((prev) => ({ ...prev, isProcessing: true, error: null }));
-
-    window.snap.pay(state.snapToken, {
-      enabledPayments: ["credit_card", "bca_va", "bni_va", "bri_va", "mandiri_va", "gopay", "shopeepay", "qris"],
-      skipOrderSummary: false,
-      onSuccess: (result) => {
-        console.log("Payment success:", result);
+  const openSnapPayment = useCallback(
+    (onClose?: () => void) => {
+      if (!state.snapToken || !state.isSnapReady) {
         setState((prev) => ({
           ...prev,
-          isProcessing: false,
-          status: {
-            orderId: result.order_id,
-            status: "settlement",
-            transactionStatus: result.transaction_status,
-            paymentType: result.payment_type,
-            grossAmount: parseFloat(result.gross_amount),
-            transactionTime: result.transaction_time,
-          },
+          error: "Payment gateway belum siap",
         }));
+        return;
+      }
 
-        // Redirect to success page
-        window.location.href = `/trains/payment/success?order_id=${result.order_id}`;
-      },
-      onPending: (result) => {
-        console.log("Payment pending:", result);
-        setState((prev) => ({
-          ...prev,
-          isProcessing: false,
-          status: {
-            orderId: result.order_id,
-            status: "pending",
-            transactionStatus: result.transaction_status,
-            paymentType: result.payment_type,
-            grossAmount: parseFloat(result.gross_amount),
-            transactionTime: result.transaction_time,
-          },
-        }));
+      setState((prev) => ({ ...prev, isProcessing: true, error: null }));
 
-        // Start status polling for pending payments
-        if (result.order_id) {
-          startStatusPolling(result.order_id);
-        }
-      },
-      onError: (result) => {
-        console.error("Payment error:", result);
-        setState((prev) => ({
-          ...prev,
-          isProcessing: false,
-          error: result?.status_message || "Pembayaran gagal diproses",
-        }));
-      },
-      onClose: () => {
-        console.log("Payment popup closed");
-        setState((prev) => ({ ...prev, isProcessing: false }));
-      },
-    });
-  }, [state.snapToken, state.isSnapReady, startStatusPolling]);
+      window.snap.pay(state.snapToken, {
+        enabledPayments: ["credit_card", "bca_va", "bni_va", "bri_va", "mandiri_va", "gopay", "shopeepay", "qris"],
+        skipOrderSummary: false,
+        onSuccess: (result) => {
+          console.log("Payment success:", result);
+          setState((prev) => ({
+            ...prev,
+            isProcessing: false,
+            status: {
+              orderId: result.order_id,
+              status: "settlement",
+              transactionStatus: result.transaction_status,
+              paymentType: result.payment_type,
+              grossAmount: parseFloat(result.gross_amount),
+              transactionTime: result.transaction_time,
+            },
+          }));
+
+          // Redirect to success page
+          window.location.href = `/trains/payment/success?order_id=${result.order_id}`;
+        },
+        onPending: (result) => {
+          console.log("Payment pending:", result);
+          setState((prev) => ({
+            ...prev,
+            isProcessing: false,
+            status: {
+              orderId: result.order_id,
+              status: "pending",
+              transactionStatus: result.transaction_status,
+              paymentType: result.payment_type,
+              grossAmount: parseFloat(result.gross_amount),
+              transactionTime: result.transaction_time,
+            },
+          }));
+
+          // Start status polling for pending payments
+          if (result.order_id) {
+            startStatusPolling(result.order_id);
+          }
+        },
+        onError: (result) => {
+          console.error("Payment error:", result);
+          setState((prev) => ({
+            ...prev,
+            isProcessing: false,
+            error: result?.status_message || "Pembayaran gagal diproses",
+          }));
+        },
+        onClose: () => {
+          console.log("Payment popup closed");
+          setState((prev) => ({ ...prev, isProcessing: false }));
+          onClose?.(); // Call the external onClose callback
+        },
+      });
+    },
+    [state.snapToken, state.isSnapReady, startStatusPolling]
+  );
 
   const resetPayment = useCallback(() => {
     if (statusCheckIntervalRef.current) {
