@@ -21,12 +21,30 @@ export function useJadwalGerbong() {
 
 export function useJadwalGerbongByJadwal(jadwalId: number) {
   return useQuery({
-    queryKey: ["jadwal_gerbong", "jadwal", jadwalId],
+    queryKey: ["master_gerbong", "jadwal", jadwalId],
     queryFn: async (): Promise<JadwalGerbongUI[]> => {
-      const { data, error } = await supabase.from("jadwal_gerbong").select("*").eq("jadwal_id", jadwalId).order("nomor_gerbong_aktual", { ascending: true });
+      const { data: jadwalData, error: jadwalError } = await supabase.from("jadwal").select("master_kereta_id").eq("jadwal_id", jadwalId).single();
+
+      if (jadwalError) throw jadwalError;
+
+      const { data, error } = await supabase.from("master_gerbong").select("*").eq("master_kereta_id", jadwalData.master_kereta_id).order("nomor_gerbong", { ascending: true });
 
       if (error) throw error;
-      return data.map(mapJadwalGerbong);
+
+      return data.map(
+        (gerbong: any): JadwalGerbongUI => ({
+          jadwalGerbongId: gerbong.master_gerbong_id,
+          jadwalId: jadwalId,
+          masterGerbongId: gerbong.master_gerbong_id,
+          nomorGerbongAktual: gerbong.nomor_gerbong,
+          statusOperasional: true,
+          statusLabel: "Beroperasi",
+          tipeGerbong: gerbong.tipe_gerbong,
+          layoutKursi: gerbong.layout_kursi,
+          kapasitasKursi: gerbong.kapasitas_kursi,
+          keterangan: null,
+        })
+      );
     },
     enabled: !!jadwalId,
   });
@@ -39,7 +57,7 @@ export function useJadwalGerbongById(jadwalGerbongId: number) {
       const { data, error } = await supabase.from("jadwal_gerbong").select("*").eq("jadwal_gerbong_id", jadwalGerbongId).single();
 
       if (error) {
-        if (error.code === "PGRST116") return null; // No rows found
+        if (error.code === "PGRST116") return null;
         throw error;
       }
       return mapJadwalGerbong(data);
@@ -48,14 +66,12 @@ export function useJadwalGerbongById(jadwalGerbongId: number) {
   });
 }
 
-// Create jadwal gerbong
 export function useCreateJadwalGerbong(currentUserId?: number) {
   const queryClient = useQueryClient();
   const role = useUserRole(currentUserId);
 
   return useMutation({
     mutationFn: async (jadwalGerbong: JadwalGerbongParsed): Promise<JadwalGerbongUI> => {
-      // Check admin role
       if (role.data !== "admin") {
         throw new Error("forbidden: admin role required");
       }

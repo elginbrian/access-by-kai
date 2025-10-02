@@ -1,57 +1,56 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
 interface SeatSelectionBottomBarProps {
-    selectedSeatsCount: number;
-    totalPrice: string;
-    onUseAISuggestion?: () => void;
-    onContinueBooking: () => void;
+  selectedSeatsCount: number;
+  maxSelectableSeats: number;
+  totalPrice: string;
+  onContinueBooking: () => void;
+  onBack?: () => void;
 }
-
-const SeatSelectionBottomBar: React.FC<SeatSelectionBottomBarProps> = ({
-    selectedSeatsCount,
-    totalPrice,
-    onUseAISuggestion,
-    onContinueBooking
-}) => {
-    return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
-            <div className="max-w-[1400px] mx-auto flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-600">
-                        {selectedSeatsCount} seat{selectedSeatsCount !== 1 ? 's' : ''} selected
-                    </span>
-                    <div className="text-lg font-bold text-gray-900">
-                        Total: {totalPrice}
-                    </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                    {onUseAISuggestion && (
-                        <button 
-                            onClick={onUseAISuggestion}
-                            className="flex items-center gap-2 px-4 py-2 text-purple-600 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors bg-purple-50"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                            Use AI Suggestion
-                        </button>
-                    )}
-                    <button 
-                        onClick={onContinueBooking}
-                        className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        Continue Booking
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
+const SeatSelectionBottomBar: React.FC<SeatSelectionBottomBarProps> = ({ selectedSeatsCount, maxSelectableSeats, totalPrice, onContinueBooking, onBack }) => {
+  const canContinue = selectedSeatsCount === maxSelectableSeats;
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-600">
+              {selectedSeatsCount} of {maxSelectableSeats} seats selected
+            </span>
+            {!canContinue && (
+              <span className="text-xs text-orange-600">
+                Select {maxSelectableSeats - selectedSeatsCount} more seat{maxSelectableSeats - selectedSeatsCount !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+          <div className="text-lg font-bold text-gray-900">Total: {totalPrice}</div>
         </div>
-    );
+
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button onClick={onBack} className="flex items-center gap-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Kembali
+            </button>
+          )}
+          <button
+            onClick={onContinueBooking}
+            disabled={!canContinue}
+            className={`flex items-center gap-2 px-6 py-2 rounded-lg transition-colors ${canContinue ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
+          >
+            Continue Booking
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default SeatSelectionBottomBar;

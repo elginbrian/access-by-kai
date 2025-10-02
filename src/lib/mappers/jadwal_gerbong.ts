@@ -8,9 +8,12 @@ export interface JadwalGerbongUI {
   statusOperasional: boolean;
   statusLabel: string;
   keterangan: string | null;
+  tipeGerbong?: string;
+  layoutKursi?: string;
+  kapasitasKursi?: number;
 }
 
-export function mapJadwalGerbong(row: JadwalGerbong): JadwalGerbongUI {
+export function mapJadwalGerbong(row: any): JadwalGerbongUI {
   return {
     jadwalGerbongId: Number(row.jadwal_gerbong_id),
     jadwalId: Number(row.jadwal_id),
@@ -18,6 +21,9 @@ export function mapJadwalGerbong(row: JadwalGerbong): JadwalGerbongUI {
     nomorGerbongAktual: Number(row.nomor_gerbong_aktual),
     statusOperasional: row.status_operasional ?? true,
     statusLabel: row.status_operasional ?? true ? "Beroperasi" : "Tidak Beroperasi",
+    tipeGerbong: row.master_gerbong?.tipe_gerbong,
+    layoutKursi: row.master_gerbong?.layout_kursi,
+    kapasitasKursi: row.master_gerbong?.kapasitas_kursi,
     keterangan: row.keterangan || null,
   };
 }

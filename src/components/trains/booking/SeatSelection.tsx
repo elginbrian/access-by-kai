@@ -1,173 +1,272 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback } from 'react';
-import TrainInfoHeader from '@/components/trains/seat-selection/TrainInfoHeader';
-import SeatStatusLegend from '@/components/trains/seat-selection/SeatStatusLegend';
-import CarSelector from '@/components/trains/seat-selection/CarSelector';
-import SeatMap, { Seat, SeatStatus } from '@/components/trains/seat-selection/SeatMap';
-import PassengerList, { Passenger } from '@/components/trains/seat-selection/PassengerList';
-import AISeatAssistant from '@/components/trains/seat-selection/AISeatAssistant';
-import SeatSelectionBottomBar from '@/components/trains/seat-selection/SeatSelectionBottomBar';
+import React, { useState, useCallback, useMemo, useEffect } from "react";
+import toast from "react-hot-toast";
+import TrainInfoHeader from "@/components/trains/seat-selection/TrainInfoHeader";
+import SeatStatusLegend from "@/components/trains/seat-selection/SeatStatusLegend";
+import CarSelector from "@/components/trains/seat-selection/CarSelector";
+import SeatMap, { Seat, SeatStatus } from "@/components/trains/seat-selection/SeatMap";
+import PassengerList, { Passenger } from "@/components/trains/seat-selection/PassengerList";
+import AISeatAssistant from "@/components/trains/seat-selection/AISeatAssistant";
+import SeatSelectionBottomBar from "@/components/trains/seat-selection/SeatSelectionBottomBar";
+import { useJadwalGerbongByJadwal } from "@/lib/hooks/jadwal_gerbong";
+import { useJadwalKursiByGerbong } from "@/lib/hooks/jadwal_kursi";
+import { PassengerInfo } from "./SeatSelector";
 
 interface SeatSelectionProps {
-    onClose: () => void;
-    onSeatSelect: (seats: string[]) => void;
-    selectedSeats: string[];
+  onClose: () => void;
+  onSeatSelect: (seats: string[]) => void;
+  selectedSeats: string[];
+  passengers?: PassengerInfo[];
+  jadwalId?: number;
 }
 
-const SeatSelection: React.FC<SeatSelectionProps> = ({
-    onClose,
-    onSeatSelect,
-    selectedSeats
-}) => {
-    const [currentCar, setCurrentCar] = useState(1);
-    const [passengers, setPassengers] = useState<Passenger[]>([
-        {
-            id: '1',
-            name: 'John Doe',
-            seat: '2B',
-            isAdult: true,
-            type: 'adult'
-        },
-        {
-            id: '2',
-            name: 'Jane Doe',
-            seat: '2C',
-            isAdult: true,
-            type: 'adult'
-        }
-    ]);
+const SeatSelection: React.FC<SeatSelectionProps> = ({ onClose, onSeatSelect, selectedSeats, passengers: passengersProp, jadwalId }) => {
+  const [currentCar, setCurrentCar] = useState(1);
+  const [passengers, setPassengers] = useState<Passenger[]>([]);
 
-    // Generate seat layout for the current car
-    const generateSeats = useCallback((): Seat[] => {
-        const seats: Seat[] = [];
-        const occupiedSeats = [
-            '1A', '1B', '1C', '2A', '3A', '3B', '3C', '4A', '4B', '4C',
-            '5A', '5B', '5C', '6A', '6B', '6C', '7A', '7B', '7C', '8A',
-            '8B', '8C', '10A', '10B', '10C', '11A', '11B', '11C', '12A',
-            '12B', '12C', '13A', '13B', '13C', '14A', '14B', '14C',
-            '15A', '15B', '15C', '16A', '16B', '16C'
-        ];
+  const { data: gerbongList, isLoading: gerbongLoading, error: gerbongError } = useJadwalGerbongByJadwal(jadwalId || 0);
+  const { data: kursiList, isLoading: kursiLoading, error: kursiError } = useJadwalKursiByGerbong(jadwalId || 0, currentCar);
 
-        // Add some occupied-lp (priority) seats for demo
-        const occupiedLpSeats = ['2D', '5D', '8D', '11D', '14D'];
+  useEffect(() => {
+    console.log("Current car changed to:", currentCar);
+    console.log("Kursi list loading:", kursiLoading);
+    console.log("Kursi list data:", kursiList);
+    console.log("Kursi list error:", kursiError);
+  }, [currentCar, kursiList, kursiLoading, kursiError]);
 
-        for (let row = 1; row <= 16; row++) {
-            ['A', 'B', 'C', 'D'].forEach(letter => {
-                const seatId = `${row}${letter}`;
-                let status: SeatStatus = 'available';
+  useEffect(() => {
+    if (gerbongList && gerbongList.length > 0 && currentCar === 0) {
+      console.log("GerbongList:", gerbongList);
+      const firstSelectableGerbong = gerbongList.find((gerbong) => {
+        return (gerbong.kapasitasKursi || 0) > 0 && !(gerbong.tipeGerbong || "").includes("KERETA_MAKAN") && !(gerbong.tipeGerbong || "").includes("KERETA_PEMBANGKIT") && !(gerbong.tipeGerbong || "").includes("KERETA_BAGASI");
+      });
 
-                if (selectedSeats.includes(seatId)) {
-                    status = 'selected';
-                } else if (occupiedLpSeats.includes(seatId)) {
-                    status = 'occupied-lp';
-                } else if (occupiedSeats.includes(seatId)) {
-                    status = 'occupied';
-                } else if (seatId === '9D') {
-                    status = 'child';
-                }
+      console.log("First selectable gerbong:", firstSelectableGerbong);
+      if (firstSelectableGerbong) {
+        console.log("Setting currentCar to:", firstSelectableGerbong.nomorGerbongAktual);
+        setCurrentCar(firstSelectableGerbong.nomorGerbongAktual);
+      }
+    }
+  }, [gerbongList]);
 
-                seats.push({
-                    id: seatId,
-                    row,
-                    letter,
-                    status
-                });
-            });
-        }
+  useEffect(() => {
+    if (passengersProp && passengersProp.length > 0) {
+      const convertedPassengers: Passenger[] = passengersProp.map((passenger, index) => ({
+        id: passenger.id,
+        name: passenger.name,
+        seat: passenger.seat || "",
+        isAdult: passenger.isAdult,
+        type: passenger.type,
+      }));
 
-        return seats;
-    }, [selectedSeats]);
+      const passengersWithSeats = convertedPassengers.map((passenger, index) => ({
+        ...passenger,
+        seat: selectedSeats[index] || passenger.seat || "",
+      }));
 
-    const seats = generateSeats();
+      setPassengers(passengersWithSeats);
+    }
+  }, [passengersProp, selectedSeats]);
 
-    const handleSeatClick = useCallback((seatId: string, status: SeatStatus) => {
-        if (status === 'occupied' || status === 'occupied-lp') return;
+  useEffect(() => {
+    if (passengers.length > 0 && selectedSeats.length > 0) {
+      const updatedPassengers = passengers.map((passenger, index) => ({
+        ...passenger,
+        seat: selectedSeats[index] || "",
+      }));
 
-        let newSelectedSeats = [...selectedSeats];
-        if (newSelectedSeats.includes(seatId)) {
-            newSelectedSeats = newSelectedSeats.filter(id => id !== seatId);
+      const hasChanged = updatedPassengers.some((passenger, index) => passenger.seat !== passengers[index].seat);
+
+      if (hasChanged) {
+        setPassengers(updatedPassengers);
+      }
+    }
+  }, [selectedSeats]);
+
+  const generateSeats = useCallback((): Seat[] => {
+    if (!kursiList || kursiLoading) {
+      return [];
+    }
+
+    const seats: Seat[] = kursiList.map((kursi) => {
+      const seatId = kursi.kodeKursi;
+      let status: SeatStatus = "available";
+
+      if (selectedSeats.includes(seatId)) {
+        status = "selected";
+      } else if (kursi.statusInventaris === "TERISI" || kursi.statusInventaris === "TERJUAL") {
+        status = "occupied";
+      } else if (kursi.isBlocked) {
+        status = "occupied-lp";
+      } else if (kursi.statusInventaris === "DIPESAN") {
+        status = "occupied";
+      } else if (kursi.statusInventaris === "DIKUNCI") {
+        status = "occupied-lp";
+      } else if (kursi.statusInventaris === "TERSEDIA") {
+        status = "available";
+      }
+
+      const matches = seatId.match(/^(\d+)([A-Z])$/);
+      const row = matches ? parseInt(matches[1]) : 1;
+      const letter = matches ? matches[2] : "A";
+
+      return {
+        id: seatId,
+        row,
+        letter,
+        status,
+      };
+    });
+
+    return seats.sort((a, b) => {
+      if (a.row !== b.row) return a.row - b.row;
+      return a.letter.localeCompare(b.letter);
+    });
+  }, [kursiList, kursiLoading, selectedSeats]);
+
+  const handleSeatClick = useCallback(
+    (seatId: string, status: SeatStatus) => {
+      if (status === "occupied" || status === "occupied-lp") {
+        toast.error("Kursi sudah terisi, silakan pilih kursi lain.");
+        return;
+      }
+
+      let newSelectedSeats = [...selectedSeats];
+      if (newSelectedSeats.includes(seatId)) {
+        newSelectedSeats = newSelectedSeats.filter((id) => id !== seatId);
+      } else {
+        if (newSelectedSeats.length >= passengers.length) {
+          const removedSeat = newSelectedSeats.shift();
+          newSelectedSeats.push(seatId);
+          toast(`Kursi ${removedSeat} diganti dengan kursi ${seatId}`, {
+            icon: "🔄",
+          });
         } else {
-            newSelectedSeats.push(seatId);
+          newSelectedSeats.push(seatId);
+          const remaining = passengers.length - newSelectedSeats.length;
+          if (remaining > 0) {
+            toast.success(`Kursi ${seatId} dipilih. Pilih ${remaining} kursi lagi.`);
+          } else {
+            toast.success(`Semua kursi telah dipilih!`);
+          }
         }
-        onSeatSelect(newSelectedSeats);
-    }, [selectedSeats, onSeatSelect]);
+      }
+      onSeatSelect(newSelectedSeats);
+    },
+    [selectedSeats, passengers.length, onSeatSelect]
+  );
 
-    const handleCarChange = useCallback((carNumber: number) => {
-        setCurrentCar(carNumber);
-    }, []);
+  const handleCarChange = useCallback(
+    (carNumber: number) => {
+      console.log("handleCarChange called:", carNumber, "current:", currentCar);
+      setCurrentCar(carNumber);
+    },
+    [currentCar]
+  );
 
-    const handlePassengerChange = useCallback((passengerId: string) => {
-        // Handle passenger change logic here
-        console.log('Change passenger:', passengerId);
-    }, []);
+  const handlePassengerChange = useCallback((passengerId: string) => {
+    console.log("Change passenger:", passengerId);
+  }, []);
 
-    const handleUseAISuggestion = useCallback(() => {
-        // Apply AI suggestion logic here
-        const suggestedSeats = ['3A', '3C'];
-        onSeatSelect(suggestedSeats);
-    }, [onSeatSelect]);
+  const handleUseAISuggestion = useCallback(() => {
+    console.log("Auto assign clicked! KursiList:", kursiList, "Passengers:", passengers);
 
-    const handleContinueBooking = useCallback(() => {
-        // Handle continue booking logic here
-        onClose();
-    }, [onClose]);
+    if (kursiList && kursiList.length > 0 && passengers.length > 0) {
+      const availableSeats = kursiList.filter((kursi) => kursi.statusInventaris === "TERSEDIA" && !kursi.isBlocked).map((kursi) => kursi.kodeKursi);
 
+      console.log("Available seats:", availableSeats);
+
+      if (availableSeats.length >= passengers.length) {
+        const shuffled = [...availableSeats].sort(() => 0.5 - Math.random());
+        const assignedSeats = shuffled.slice(0, passengers.length);
+
+        console.log("Assigned seats:", assignedSeats);
+
+        const passengersWithSeats = passengers.map((passenger, index) => ({
+          ...passenger,
+          seat: assignedSeats[index] || "",
+        }));
+
+        setPassengers(passengersWithSeats);
+        onSeatSelect(assignedSeats);
+        toast.success(`${assignedSeats.length} kursi berhasil dipilih secara otomatis!`);
+      } else {
+        toast.error(`Tidak cukup kursi tersedia. Butuh ${passengers.length} kursi, tersedia ${availableSeats.length} kursi.`);
+      }
+    } else {
+      console.log("Kondisi tidak terpenuhi - kursiList:", !!kursiList, "length:", kursiList?.length, "passengers:", passengers.length);
+      toast.error("Data kursi atau penumpang tidak tersedia.");
+    }
+  }, [kursiList, passengers, onSeatSelect]);
+
+  const handleContinueBooking = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const seats = generateSeats();
+
+  if (gerbongLoading || kursiLoading) {
     return (
-        <div className="max-w-[1400px] mx-auto px-6 py-8 pb-24">
-            {/* Train Header */}
-            <TrainInfoHeader
-                trainNumber="67"
-                trainName="Argo Parahyangan"
-                trainCode="KA 21"
-                departureTime="13:45"
-                departureStation="Bekasi (BKS)"
-                arrivalTime="17:00"
-                arrivalStation="Bandung (BD)"
-                duration="3h 15m"
-                totalPrice="Rp. 170.000"
-                onClose={onClose}
-            />
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left Side - Seat Selection */}
-                <div className="lg:col-span-8">
-                    <SeatStatusLegend />
-                    <CarSelector
-                        currentCar={currentCar}
-                        onCarChange={handleCarChange}
-                        totalCars={8}
-                    />
-                    <div className="flex flex-row">
-                        <SeatMap
-                            seats={seats}
-                            currentCar={currentCar}
-                            onSeatClick={handleSeatClick}
-                        />
-                        <PassengerList
-                            passengers={passengers}
-                            onPassengerChange={handlePassengerChange}
-                        />
-                    </div>
-                </div>
-
-                {/* Right Side - Passenger Info & AI Assistant */}
-                <div className="lg:col-span-4 space-y-6">
-                    <AISeatAssistant
-                        onSuggestionApply={handleUseAISuggestion}
-                    />
-                </div>
-            </div>
-
-            {/* Bottom Action Bar */}
-            <SeatSelectionBottomBar
-                selectedSeatsCount={selectedSeats.length}
-                totalPrice="Rp 170,000"
-                onUseAISuggestion={handleUseAISuggestion}
-                onContinueBooking={handleContinueBooking}
-            />
+      <div className="max-w-[1400px] mx-auto px-6 py-8 pb-24">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Memuat data kursi...</p>
+          </div>
         </div>
+      </div>
     );
+  }
+
+  if (gerbongError || kursiError) {
+    return (
+      <div className="max-w-[1400px] mx-auto px-6 py-8 pb-24">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">Gagal memuat data kursi</p>
+            <button onClick={() => window.location.reload()} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              Coba Lagi
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-[1400px] mx-auto px-6 py-8 pb-24">
+      <TrainInfoHeader
+        trainNumber="67"
+        trainName="Argo Parahyangan"
+        trainCode="KA 21"
+        departureTime="13:45"
+        departureStation="Bekasi (BKS)"
+        arrivalTime="17:00"
+        arrivalStation="Bandung (BD)"
+        duration="3h 15m"
+        totalPrice="Rp. 170.000"
+        onClose={onClose}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8">
+          <SeatStatusLegend />
+          <CarSelector currentCar={currentCar} onCarChange={handleCarChange} totalCars={gerbongList?.length || 8} gerbongList={gerbongList} />
+          <div className="flex flex-row">
+            <SeatMap seats={seats} currentCar={currentCar} onSeatClick={handleSeatClick} />
+            <PassengerList passengers={passengers} onPassengerChange={handlePassengerChange} onAutoAssign={handleUseAISuggestion} />
+          </div>
+        </div>
+
+        <div className="lg:col-span-4 space-y-6">
+          <AISeatAssistant onSuggestionApply={handleUseAISuggestion} />
+        </div>
+      </div>
+
+      <SeatSelectionBottomBar selectedSeatsCount={selectedSeats.length} maxSelectableSeats={passengers.length} totalPrice="Rp 170,000" onContinueBooking={handleContinueBooking} onBack={onClose} />
+    </div>
+  );
 };
 
 export default SeatSelection;

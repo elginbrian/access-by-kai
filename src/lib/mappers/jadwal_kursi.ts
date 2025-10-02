@@ -13,10 +13,15 @@ export interface JadwalKursiUI {
   statusBlocked: string;
   keterangan: string | null;
   hargaFinal: number;
+  posisi?: string;
+  isPremium?: boolean;
+  isDifabel?: boolean;
+  koordinatX?: number;
+  koordinatY?: number;
+  fasilitasKursi?: any;
 }
 
 export function mapJadwalKursi(row: JadwalKursi): JadwalKursiUI {
-  // Map status inventaris to readable label
   const statusLabels: Record<string, string> = {
     TERSEDIA: "Tersedia",
     DIKUNCI: "Dikunci",

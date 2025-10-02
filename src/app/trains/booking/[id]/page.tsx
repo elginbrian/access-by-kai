@@ -9,7 +9,6 @@ import { useBookingFormData } from "@/lib/hooks/useBookingFormData";
 import { useBookingSteps } from "@/lib/hooks/useBookingSteps";
 import { useSeatSelection } from "@/lib/hooks/useSeatSelection";
 
-// Import modular components
 import BookingHeader from "@/components/trains/booking/BookingHeader";
 import TrainSummaryCard from "@/components/trains/booking/TrainSummaryCard";
 import TrainInfoCard from "@/components/trains/booking/TrainInfoCard";
@@ -27,8 +26,6 @@ export default function TrainBooking() {
   const params = useParams();
   const searchParams = useSearchParams();
   const { user, loading, isAuthenticated } = useAuth();
-
-  // Custom hooks for modular state management
   const { currentStep, handleStepClick } = useBookingSteps();
   const { showSeatSelection, selectedSeats, isRouteExpanded, handleSeatSelect, handleCloseSeatSelection, handleOpenSeatSelection, handleToggleRoute } = useSeatSelection();
   const { userData, updateBookerData, updatePassengerData, getBookerData, getPassengerData } = useBookingFormData();
@@ -48,9 +45,6 @@ export default function TrainBooking() {
     }
   }, [loading, isAuthenticated, router, params?.id, searchParams]);
 
-  // User data is now handled by useBookingFormData hook
-
-  // Show loading while checking auth, redirecting, or loading train data
   if (loading || trainLoading || isRedirecting) {
     const loadingMessage = isRedirecting ? "Mengarahkan ke halaman login..." : loading ? "Memeriksa autentikasi..." : "Memuat detail kereta...";
 
@@ -59,7 +53,6 @@ export default function TrainBooking() {
     return <LoadingScreen message={loadingMessage} submessage={submessage} />;
   }
 
-  // Show authentication required screen if not authenticated and not redirecting yet
   if (!isAuthenticated && !isRedirecting) {
     return (
       <AuthRequiredScreen
@@ -75,6 +68,21 @@ export default function TrainBooking() {
   if (trainError) {
     return <ErrorScreen title="Kereta tidak ditemukan" message="Jadwal kereta yang Anda cari tidak tersedia." actionLabel="Kembali ke Pencarian" onAction={() => router.push("/trains")} />;
   }
+
+  const passengerData = getPassengerData();
+  const bookerData = getBookerData();
+
+  const passengers = passengerData.passengerName
+    ? [
+        {
+          id: "1",
+          name: passengerData.passengerName,
+          seat: selectedSeats[0] || undefined,
+          isAdult: true,
+          type: "adult" as const,
+        },
+      ]
+    : [];
 
   const allStations = routeStations || [];
   return (
@@ -100,6 +108,7 @@ export default function TrainBooking() {
                 trainDetails={trainDetails}
                 selectedSeats={selectedSeats}
                 showSeatSelection={showSeatSelection}
+                passengers={passengers}
                 onOpenSeatSelection={handleOpenSeatSelection}
                 onCloseSeatSelection={handleCloseSeatSelection}
                 onSeatSelect={handleSeatSelect}
@@ -114,6 +123,7 @@ export default function TrainBooking() {
           trainDetails={trainDetails}
           selectedSeats={selectedSeats}
           showSeatSelection={showSeatSelection}
+          passengers={passengers}
           onOpenSeatSelection={handleOpenSeatSelection}
           onCloseSeatSelection={handleCloseSeatSelection}
           onSeatSelect={handleSeatSelect}

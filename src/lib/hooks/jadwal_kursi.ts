@@ -19,33 +19,92 @@ export function useJadwalKursi() {
   });
 }
 
-export function useJadwalKursiByGerbong(jadwalGerbongId: number) {
+export function useJadwalKursiByGerbong(jadwalId: number, nomorGerbong: number) {
   return useQuery({
-    queryKey: ["jadwal_kursi", "gerbong", jadwalGerbongId],
+    queryKey: ["template_kursi", "jadwal", jadwalId, "gerbong", nomorGerbong],
     queryFn: async (): Promise<JadwalKursiUI[]> => {
-      const { data, error } = await supabase.from("jadwal_kursi").select("*").eq("jadwal_gerbong_id", jadwalGerbongId).order("kode_kursi", { ascending: true });
+      const { data: jadwalData, error: jadwalError } = await supabase.from("jadwal").select("master_kereta_id").eq("jadwal_id", jadwalId).single();
+
+      if (jadwalError) throw jadwalError;
+
+      const { data: gerbongData, error: gerbongError } = await supabase.from("master_gerbong").select("master_gerbong_id").eq("master_kereta_id", jadwalData.master_kereta_id).eq("nomor_gerbong", nomorGerbong).single();
+
+      if (gerbongError) throw gerbongError;
+
+      const { data, error } = await supabase.from("template_kursi").select("*").eq("master_gerbong_id", gerbongData.master_gerbong_id).order("kode_kursi", { ascending: true });
 
       if (error) throw error;
-      return data.map(mapJadwalKursi);
+
+      return data.map(
+        (kursi: any): JadwalKursiUI => ({
+          jadwalKursiId: kursi.template_kursi_id,
+          jadwalGerbongId: 0,
+          templateKursiId: kursi.template_kursi_id,
+          kodeKursi: kursi.kode_kursi,
+          statusInventaris: "TERSEDIA",
+          statusLabel: "Tersedia",
+          hargaKursi: 0,
+          multiplierKursi: kursi.is_premium ? 1.5 : 1.0,
+          isBlocked: false,
+          statusBlocked: "Aktif",
+          keterangan: null,
+          hargaFinal: 0,
+          posisi: kursi.posisi,
+          isPremium: kursi.is_premium || false,
+          isDifabel: kursi.is_difabel || false,
+          koordinatX: kursi.koordinat_x,
+          koordinatY: kursi.koordinat_y,
+          fasilitasKursi: kursi.fasilitas_kursi,
+        })
+      );
     },
-    enabled: !!jadwalGerbongId,
+    enabled: !!jadwalId && !!nomorGerbong,
   });
 }
 
-export function useAvailableJadwalKursiByGerbong(jadwalGerbongId: number) {
+export function useAvailableJadwalKursiByGerbong(jadwalId: number, nomorGerbong: number) {
   return useQuery({
-    queryKey: ["jadwal_kursi", "available", "gerbong", jadwalGerbongId],
+    queryKey: ["template_kursi", "available", "jadwal", jadwalId, "gerbong", nomorGerbong],
     queryFn: async (): Promise<JadwalKursiUI[]> => {
-      const { data, error } = await supabase.from("jadwal_kursi").select("*").eq("jadwal_gerbong_id", jadwalGerbongId).eq("status_inventaris", "TERSEDIA").eq("is_blocked", false).order("kode_kursi", { ascending: true });
+      const { data: jadwalData, error: jadwalError } = await supabase.from("jadwal").select("master_kereta_id").eq("jadwal_id", jadwalId).single();
+
+      if (jadwalError) throw jadwalError;
+
+      const { data: gerbongData, error: gerbongError } = await supabase.from("master_gerbong").select("master_gerbong_id").eq("master_kereta_id", jadwalData.master_kereta_id).eq("nomor_gerbong", nomorGerbong).single();
+
+      if (gerbongError) throw gerbongError;
+
+      const { data, error } = await supabase.from("template_kursi").select("*").eq("master_gerbong_id", gerbongData.master_gerbong_id).order("kode_kursi", { ascending: true });
 
       if (error) throw error;
-      return data.map(mapJadwalKursi);
+
+      return data.map(
+        (kursi: any): JadwalKursiUI => ({
+          jadwalKursiId: kursi.template_kursi_id,
+          jadwalGerbongId: 0,
+          templateKursiId: kursi.template_kursi_id,
+          kodeKursi: kursi.kode_kursi,
+          statusInventaris: "TERSEDIA",
+          statusLabel: "Tersedia",
+          hargaKursi: 0,
+          multiplierKursi: kursi.is_premium ? 1.5 : 1.0,
+          isBlocked: false,
+          statusBlocked: "Aktif",
+          keterangan: null,
+          hargaFinal: 0,
+          posisi: kursi.posisi,
+          isPremium: kursi.is_premium || false,
+          isDifabel: kursi.is_difabel || false,
+          koordinatX: kursi.koordinat_x,
+          koordinatY: kursi.koordinat_y,
+          fasilitasKursi: kursi.fasilitas_kursi,
+        })
+      );
     },
-    enabled: !!jadwalGerbongId,
+    enabled: !!jadwalId && !!nomorGerbong,
   });
 }
 
-// Get jadwal kursi by ID
 export function useJadwalKursiById(jadwalKursiId: number) {
   return useQuery({
     queryKey: ["jadwal_kursi", jadwalKursiId],
@@ -53,7 +112,7 @@ export function useJadwalKursiById(jadwalKursiId: number) {
       const { data, error } = await supabase.from("jadwal_kursi").select("*").eq("jadwal_kursi_id", jadwalKursiId).single();
 
       if (error) {
-        if (error.code === "PGRST116") return null; // No rows found
+        if (error.code === "PGRST116") return null;
         throw error;
       }
       return mapJadwalKursi(data);
@@ -62,14 +121,12 @@ export function useJadwalKursiById(jadwalKursiId: number) {
   });
 }
 
-// Create jadwal kursi
 export function useCreateJadwalKursi(currentUserId?: number) {
   const queryClient = useQueryClient();
   const role = useUserRole(currentUserId);
 
   return useMutation({
     mutationFn: async (jadwalKursi: JadwalKursiParsed): Promise<JadwalKursiUI> => {
-      // Check admin role
       if (role.data !== "admin") {
         throw new Error("forbidden: admin role required");
       }
@@ -112,7 +169,6 @@ export function useUpdateJadwalKursi(currentUserId?: number) {
   });
 }
 
-// Update jadwal kursi status (for booking operations)
 export function useUpdateJadwalKursiStatus() {
   const queryClient = useQueryClient();
 
@@ -130,14 +186,12 @@ export function useUpdateJadwalKursiStatus() {
   });
 }
 
-// Delete jadwal kursi
 export function useDeleteJadwalKursi(currentUserId?: number) {
   const queryClient = useQueryClient();
   const role = useUserRole(currentUserId);
 
   return useMutation({
     mutationFn: async (jadwalKursiId: number): Promise<void> => {
-      // Check admin role
       if (role.data !== "admin") {
         throw new Error("forbidden: admin role required");
       }
@@ -153,24 +207,20 @@ export function useDeleteJadwalKursi(currentUserId?: number) {
   });
 }
 
-// Toggle jadwal kursi blocked status
 export function useToggleJadwalKursiBlocked(currentUserId?: number) {
   const queryClient = useQueryClient();
   const role = useUserRole(currentUserId);
 
   return useMutation({
     mutationFn: async (jadwalKursiId: number): Promise<JadwalKursiUI> => {
-      // Check admin role
       if (role.data !== "admin") {
         throw new Error("forbidden: admin role required");
       }
 
-      // First get current blocked status
       const { data: currentData, error: fetchError } = await supabase.from("jadwal_kursi").select("is_blocked").eq("jadwal_kursi_id", jadwalKursiId).single();
 
       if (fetchError) throw fetchError;
 
-      // Toggle blocked status
       const newBlockedStatus = !currentData.is_blocked;
 
       const { data, error } = await supabase.from("jadwal_kursi").update({ is_blocked: newBlockedStatus }).eq("jadwal_kursi_id", jadwalKursiId).select().single();
