@@ -39,6 +39,7 @@ export interface BookingData {
   }>;
 
   pricing: {
+    baseTicketPrice: number;
     trainTickets: number;
     foodTotal: number;
     serviceFee: number;
@@ -66,6 +67,7 @@ const initialBookingData: BookingData = {
   passengers: [],
   foodOrders: [],
   pricing: {
+    baseTicketPrice: 0,
     trainTickets: 0,
     foodTotal: 0,
     serviceFee: 15000,
@@ -146,24 +148,56 @@ export function CentralBookingProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setPassengersData = useCallback((passengers: BookingData["passengers"]) => {
-    setBookingData((prev) => ({
-      ...prev,
-      passengers,
-    }));
+    setBookingData((prev) => {
+      const passengerCount = passengers.length;
+      const totalTicketPrice = prev.pricing.baseTicketPrice * Math.max(1, passengerCount);
+
+      return {
+        ...prev,
+        passengers,
+        pricing: {
+          ...prev.pricing,
+          trainTickets: totalTicketPrice,
+          total: totalTicketPrice + prev.pricing.foodTotal + prev.pricing.serviceFee,
+        },
+      };
+    });
   }, []);
 
   const addPassenger = useCallback((passenger: BookingData["passengers"][0]) => {
-    setBookingData((prev) => ({
-      ...prev,
-      passengers: [...prev.passengers, passenger],
-    }));
+    setBookingData((prev) => {
+      const newPassengers = [...prev.passengers, passenger];
+      const passengerCount = newPassengers.length;
+      const totalTicketPrice = prev.pricing.baseTicketPrice * Math.max(1, passengerCount);
+
+      return {
+        ...prev,
+        passengers: newPassengers,
+        pricing: {
+          ...prev.pricing,
+          trainTickets: totalTicketPrice,
+          total: totalTicketPrice + prev.pricing.foodTotal + prev.pricing.serviceFee,
+        },
+      };
+    });
   }, []);
 
   const updatePassenger = useCallback((index: number, passenger: Partial<BookingData["passengers"][0]>) => {
-    setBookingData((prev) => ({
-      ...prev,
-      passengers: prev.passengers.map((p, i) => (i === index ? { ...p, ...passenger } : p)),
-    }));
+    setBookingData((prev) => {
+      const updatedPassengers = prev.passengers.map((p, i) => (i === index ? { ...p, ...passenger } : p));
+      const passengerCount = updatedPassengers.length;
+      const totalTicketPrice = prev.pricing.baseTicketPrice * Math.max(1, passengerCount);
+
+      return {
+        ...prev,
+        passengers: updatedPassengers,
+        pricing: {
+          ...prev.pricing,
+          trainTickets: totalTicketPrice,
+          total: totalTicketPrice + prev.pricing.foodTotal + prev.pricing.serviceFee,
+        },
+      };
+    });
   }, []);
 
   const setFoodOrders = useCallback((orders: BookingData["foodOrders"]) => {
@@ -234,26 +268,35 @@ export function CentralBookingProvider({ children }: { children: ReactNode }) {
   const updatePricing = useCallback(() => {
     setBookingData((prev) => {
       const foodTotal = prev.foodOrders.reduce((sum, order) => sum + order.price * order.quantity, 0);
+      const passengerCount = prev.passengers.length;
+      const totalTicketPrice = prev.pricing.baseTicketPrice * Math.max(1, passengerCount);
+
       return {
         ...prev,
         pricing: {
           ...prev.pricing,
+          trainTickets: totalTicketPrice,
           foodTotal,
-          total: prev.pricing.trainTickets + foodTotal + prev.pricing.serviceFee,
+          total: totalTicketPrice + foodTotal + prev.pricing.serviceFee,
         },
       };
     });
   }, []);
 
   const setTrainTicketPrice = useCallback((price: number) => {
-    setBookingData((prev) => ({
-      ...prev,
-      pricing: {
-        ...prev.pricing,
-        trainTickets: price,
-        total: price + prev.pricing.foodTotal + prev.pricing.serviceFee,
-      },
-    }));
+    setBookingData((prev) => {
+      const passengerCount = prev.passengers.length;
+      const totalTicketPrice = price * Math.max(1, passengerCount);
+      return {
+        ...prev,
+        pricing: {
+          ...prev.pricing,
+          baseTicketPrice: price,
+          trainTickets: totalTicketPrice,
+          total: totalTicketPrice + prev.pricing.foodTotal + prev.pricing.serviceFee,
+        },
+      };
+    });
   }, []);
 
   const clearAllData = useCallback(() => {

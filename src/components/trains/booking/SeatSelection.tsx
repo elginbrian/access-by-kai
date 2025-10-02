@@ -11,6 +11,7 @@ import AISeatAssistant from "@/components/trains/seat-selection/AISeatAssistant"
 import SeatSelectionBottomBar from "@/components/trains/seat-selection/SeatSelectionBottomBar";
 import { useJadwalGerbongByJadwal } from "@/lib/hooks/jadwal_gerbong";
 import { useJadwalKursiByGerbong } from "@/lib/hooks/jadwal_kursi";
+import { useCentralBooking } from "@/lib/hooks/useCentralBooking";
 import { PassengerInfo } from "./SeatSelector";
 
 interface SeatSelectionProps {
@@ -25,8 +26,13 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({ onClose, onSeatSelect, se
   const [currentCar, setCurrentCar] = useState(1);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
 
+  const { bookingData } = useCentralBooking();
   const { data: gerbongList, isLoading: gerbongLoading, error: gerbongError } = useJadwalGerbongByJadwal(jadwalId || 0);
   const { data: kursiList, isLoading: kursiLoading, error: kursiError } = useJadwalKursiByGerbong(jadwalId || 0, currentCar);
+
+  const formatPrice = (price: number) => {
+    return `Rp ${price.toLocaleString("id-ID")}`;
+  };
 
   useEffect(() => {
     console.log("Current car changed to:", currentCar);
@@ -248,7 +254,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({ onClose, onSeatSelect, se
         </div>
       </div>
 
-      <SeatSelectionBottomBar selectedSeatsCount={selectedSeats.length} maxSelectableSeats={passengers.length} totalPrice="Rp 170,000" onContinueBooking={handleContinueBooking} onBack={onClose} />
+      <SeatSelectionBottomBar selectedSeatsCount={selectedSeats.length} maxSelectableSeats={passengers.length} totalPrice={formatPrice(bookingData.pricing.total)} onContinueBooking={handleContinueBooking} onBack={onClose} />
     </div>
   );
 };

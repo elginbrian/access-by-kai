@@ -5,7 +5,7 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { colors } from "@/app/design-system/colors";
 import { useTrainBookingDetails, useTrainRouteStations } from "@/lib/hooks/useTrainBookingDetails";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { useBookingFormData } from "@/lib/hooks/useBookingFormData";
+import { useMultiPassengerBookingData } from "@/lib/hooks/useMultiPassengerBookingData";
 import { useBookingContext } from "@/lib/hooks/useBookingContext";
 import { useCentralBooking } from "@/lib/hooks/useCentralBooking";
 import { useSeatSelection } from "@/lib/hooks/useSeatSelection";
@@ -17,8 +17,9 @@ import BookingHeader from "@/components/trains/booking/BookingHeader";
 import TrainSummaryCard from "@/components/trains/booking/TrainSummaryCard";
 import TrainInfoCard from "@/components/trains/booking/TrainInfoCard";
 import BookerForm from "@/components/trains/booking/BookerForm";
-import PassengerForm from "@/components/trains/booking/PassengerForm";
+import PassengerManager from "@/components/trains/booking/PassengerManager";
 import SeatSelector from "@/components/trains/booking/SeatSelector";
+import SeatCounter from "@/components/trains/booking/SeatCounter";
 import PaymentButton from "@/components/trains/booking/PaymentButton";
 import FloatingChatButton from "@/components/trains/booking/FloatingChatButton";
 import LoadingScreen from "@/components/trains/booking/LoadingScreen";
@@ -31,9 +32,9 @@ function TrainBookingContent() {
   const searchParams = useSearchParams();
   const { user, loading, isAuthenticated } = useAuth();
   const { currentStep, handleStepClick, nextStep } = useBookingContext();
-  const { bookingData, setJourneyData, setBookerData, setPassengersData, setTrainTicketPrice } = useCentralBooking();
-  const { showSeatSelection, selectedSeats, isRouteExpanded, handleSeatSelect, handleCloseSeatSelection, handleOpenSeatSelection, handleToggleRoute } = useSeatSelection();
-  const { userData, updateBookerData, updatePassengerData, getBookerData, getPassengerData } = useBookingFormData();
+  const { bookingData, setJourneyData, setBookerData, setPassengersData, setTrainTicketPrice, updatePricing } = useCentralBooking();
+  const { showSeatSelection, selectedSeats, isRouteExpanded, handleSeatSelect, handleCloseSeatSelection, handleOpenSeatSelection, handleToggleRoute, areAllSeatsSelected } = useSeatSelection();
+  const { bookingData: multiPassengerData, updateBookerData, updatePassengersData, getBookerData, getAllPassengersData } = useMultiPassengerBookingData();
 
   const [isRedirecting, setIsRedirecting] = React.useState(false);
 
@@ -81,7 +82,7 @@ function TrainBookingContent() {
   ]);
 
   const bookerInfo = getBookerData();
-  const passengerInfo = getPassengerData();
+  const allPassengersInfo = getAllPassengersData();
 
   const currentBookerData = React.useMemo(
     () => ({
@@ -90,14 +91,6 @@ function TrainBookingContent() {
       phoneNumber: bookerInfo.phoneNumber,
     }),
     [bookerInfo.fullName, bookerInfo.email, bookerInfo.phoneNumber]
-  );
-
-  const currentPassengerData = React.useMemo(
-    () => ({
-      passengerName: passengerInfo.passengerName,
-      idNumber: passengerInfo.idNumber,
-    }),
-    [passengerInfo.passengerName, passengerInfo.idNumber]
   );
 
   React.useEffect(() => {
@@ -111,27 +104,26 @@ function TrainBookingContent() {
   }, [currentBookerData.fullName, currentBookerData.email, currentBookerData.phoneNumber, setBookerData]);
 
   React.useEffect(() => {
-    if (currentPassengerData.passengerName) {
-      setPassengersData([
-        {
-          name: currentPassengerData.passengerName,
-          idNumber: currentPassengerData.idNumber,
-          seat: selectedSeats[0] || "Belum dipilih",
-          seatType: "Window",
-        },
-      ]);
+    if (allPassengersInfo.length > 0) {
+      const passengersForCentral = allPassengersInfo.map((passenger, index) => ({
+        name: passenger.passengerName,
+        idNumber: passenger.idNumber,
+        seat: selectedSeats[index] || "Belum dipilih",
+        seatType: "Window",
+      }));
+      setPassengersData(passengersForCentral);
     }
-  }, [currentPassengerData.passengerName, currentPassengerData.idNumber, selectedSeats, setPassengersData]);
+  }, [allPassengersInfo, selectedSeats, setPassengersData]);
 
   React.useEffect(() => {
-    if (userData.fullName || userData.email || userData.phoneNumber) {
+    if (multiPassengerData.fullName || multiPassengerData.email || multiPassengerData.phoneNumber) {
       setBookerData({
-        fullName: userData.fullName,
-        email: userData.email,
-        phone: userData.phoneNumber,
+        fullName: multiPassengerData.fullName,
+        email: multiPassengerData.email,
+        phone: multiPassengerData.phoneNumber,
       });
     }
-  }, [userData.fullName, userData.email, userData.phoneNumber, setBookerData]);
+  }, [multiPassengerData.fullName, multiPassengerData.email, multiPassengerData.phoneNumber, setBookerData]);
 
   if (loading || trainLoading || isRedirecting) {
     const loadingMessage = isRedirecting ? "Mengarahkan ke halaman login..." : loading ? "Memeriksa autentikasi..." : "Memuat detail kereta...";
@@ -157,20 +149,16 @@ function TrainBookingContent() {
     return <ErrorScreen title="Kereta tidak ditemukan" message="Jadwal kereta yang Anda cari tidak tersedia." actionLabel="Kembali ke Pencarian" onAction={() => router.push("/trains")} />;
   }
 
-  const passengerData = getPassengerData();
   const bookerData = getBookerData();
+  const passengersData = getAllPassengersData();
 
-  const passengers = passengerData.passengerName
-    ? [
-        {
-          id: "1",
-          name: passengerData.passengerName,
-          seat: selectedSeats[0] || undefined,
-          isAdult: true,
-          type: "adult" as const,
-        },
-      ]
-    : [];
+  const passengers = passengersData.map((passenger, index) => ({
+    id: (index + 1).toString(),
+    name: passenger.passengerName,
+    seat: selectedSeats[index] || undefined,
+    isAdult: true,
+    type: "adult" as const,
+  }));
 
   const allStations = routeStations || [];
   return (
@@ -190,16 +178,14 @@ function TrainBookingContent() {
             <div className="lg:col-span-8 space-y-6">
               <BookerForm data={getBookerData()} onChange={updateBookerData} />
 
-              <PassengerForm data={getPassengerData()} onChange={updatePassengerData} />
+              <PassengerManager passengers={getAllPassengersData()} onChange={updatePassengersData} maxPassengers={8} />
 
-              <SeatSelector
-                trainDetails={trainDetails}
+              <SeatCounter
                 selectedSeats={selectedSeats}
-                showSeatSelection={showSeatSelection}
-                passengers={passengers}
+                passengers={getAllPassengersData()}
+                baseTicketPrice={bookingData.pricing.baseTicketPrice}
+                totalTicketPrice={bookingData.pricing.trainTickets}
                 onOpenSeatSelection={handleOpenSeatSelection}
-                onCloseSeatSelection={handleCloseSeatSelection}
-                onSeatSelect={handleSeatSelect}
               />
 
               {(() => {

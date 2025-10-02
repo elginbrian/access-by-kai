@@ -15,9 +15,10 @@ export interface PassengerData {
 interface PassengerFormProps {
   data: PassengerData;
   onChange: (data: PassengerData) => void;
+  hideHeader?: boolean;
 }
 
-const PassengerForm: React.FC<PassengerFormProps> = ({ data, onChange }) => {
+const PassengerForm: React.FC<PassengerFormProps> = ({ data, onChange, hideHeader = false }) => {
   const handleInputChange = (field: keyof PassengerData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     onChange({
       ...data,
@@ -26,8 +27,8 @@ const PassengerForm: React.FC<PassengerFormProps> = ({ data, onChange }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-lg">
-      <h2 className="text-xl font-bold text-gray-900 mb-6">Data Penumpang</h2>
+    <div className={hideHeader ? "" : "bg-white rounded-2xl p-8 shadow-lg"}>
+      {!hideHeader && <h2 className="text-xl font-bold text-gray-900 mb-6">Data Penumpang</h2>}
 
       <div className="grid grid-cols-2 gap-5 mb-5">
         <div>
