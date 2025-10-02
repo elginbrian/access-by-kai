@@ -93,6 +93,23 @@ const TrainBookingResults = () => {
 
   const handleBookNow = (train: any) => {
     console.log("Booking train:", train);
+
+    const bookingParams = new URLSearchParams();
+
+    if (searchCriteria) {
+      bookingParams.set("from", searchCriteria.departureStationId.toString());
+      bookingParams.set("to", searchCriteria.arrivalStationId.toString());
+      bookingParams.set("date", searchCriteria.departureDate);
+      if (searchCriteria.trainClass) {
+        bookingParams.set("class", searchCriteria.trainClass);
+      }
+    }
+
+    if (passengersCount) {
+      bookingParams.set("passengers", passengersCount);
+    }
+
+    router.push(`/trains/booking/${train.jadwalId}?${bookingParams.toString()}`);
   };
 
   const handleEditSchedule = () => {
