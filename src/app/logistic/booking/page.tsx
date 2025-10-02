@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import Stepper from '@/components/logistics/Stepper';
 import NavBarServices from '@/components/navbar/NavBarServices';
 import Button from '@/components/button/Button';
@@ -8,6 +9,12 @@ import InputField from '@/components/input/InputField';
 import TextAreaField from '@/components/input/TextAreaField';
 
 const BookingDetailsPage: React.FC = () => {
+    const router = useRouter();
+
+    function goToPayment() {
+        router.push('/logistic/payment');
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 font-sans">
             <NavBarServices service="Logistics" />
@@ -50,7 +57,7 @@ const BookingDetailsPage: React.FC = () => {
                     </section>
 
                     <div className="mt-6">
-                        <Button variant="active" className="w-full py-3 rounded-full text-white font-semibold bg-gradient-to-r from-[#8b5cf6] to-[#3b82f6]">
+                        <Button onClick={goToPayment} variant="active" className="w-full py-3 rounded-full text-white font-semibold bg-gradient-to-r from-[#8b5cf6] to-[#3b82f6]">
                             Selanjutnya →
                         </Button>
                     </div>
