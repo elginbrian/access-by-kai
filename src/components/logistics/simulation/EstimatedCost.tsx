@@ -4,7 +4,7 @@ import React from 'react';
 
 const EstimatedCost: React.FC = () => {
     return (
-        <div className="mt-8 bg-white p-6 rounded-lg shadow-lg">
+        <div>
             <div className="flex items-center mb-4">
                 <img src="/ic_invoice_white.svg" alt="Image" className="bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] h-10 w-10 p-2 rounded-lg mr-3" />
                 <span className="text-lg font-semibold text-black">Estimated Cost</span>
@@ -33,15 +33,6 @@ const EstimatedCost: React.FC = () => {
                 <img src="/ic_clock_gray.svg" alt="" className="h-4 w-4 mr-2" />
                 <p className="text-sm text-gray-500 text-center">Estimated delivery: 2-3 business days</p>
             </div>
-            <button
-                type="button"
-                className="w-full py-3 rounded-lg text-white font-semibold bg-gradient-to-b from-[#6b46c1] to-[#3b82f6] hover:opacity-95 mt-6 flex items-center justify-center gap-2"
-            >
-                <span className="flex items-center justify-center gap-2">
-                    Selanjutnya
-                    <img src="/ic_arrow_right.svg" alt="" className="h-4 w-4" />
-                </span>
-            </button>
         </div>
     );
 };
