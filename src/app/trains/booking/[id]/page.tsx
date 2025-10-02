@@ -222,8 +222,6 @@ function TrainBookingContent() {
           onSeatSelect={handleSeatSelect}
         />
       )}
-
-      <FloatingChatButton />
     </div>
   );
 }

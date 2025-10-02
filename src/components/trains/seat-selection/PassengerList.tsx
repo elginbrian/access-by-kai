@@ -28,11 +28,6 @@ const PassengerList: React.FC<PassengerListProps> = ({ passengers, onPassengerCh
               <span className="font-medium text-gray-900">{passenger.name}</span>
               <div className="flex items-center gap-2">
                 <span className={`text-xs px-2 py-1 rounded ${passenger.isAdult ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"}`}>{passenger.isAdult ? "Adult" : "Child"}</span>
-                {onPassengerChange && (
-                  <button onClick={() => onPassengerChange(passenger.id)} className="text-blue-600 text-xs hover:text-blue-800 font-medium">
-                    Change
-                  </button>
-                )}
               </div>
             </div>
             <div className="text-sm text-gray-600">

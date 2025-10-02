@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import InputField from "@/components/input/InputField";
+import { colors } from "@/app/design-system/colors";
 
 interface ChatMessage {
   id: string;
@@ -41,22 +42,18 @@ const AISeatAssistant: React.FC<AISeatAssistantProps> = ({ onSuggestionApply }) 
     {
       icon: "/ic_best_window_seat.svg",
       label: "Kursi jendela terbaik",
-      color: "bg-blue-50",
     },
     {
       icon: "/ic_family_seat.svg",
       label: "Tempat duduk keluarga",
-      color: "bg-green-50",
     },
     {
       icon: "/ic_quiet_zone.svg",
       label: "Area tenang",
-      color: "bg-purple-50",
     },
     {
       icon: "/ic_scenic_view.svg",
       label: "Pemandangan indah",
-      color: "bg-orange-50",
     },
   ];
 
@@ -92,51 +89,61 @@ const AISeatAssistant: React.FC<AISeatAssistantProps> = ({ onSuggestionApply }) 
 
   return (
     <div className="bg-white rounded-2xl p-6 border">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 flex items-center justify-center">
-          <img src="/ic_wifi.svg" alt="ChatBot" className="w-6 h-6" />
+      <div className="flex items-center gap-3 mb-4 p-4 rounded-2xl" style={{ backgroundColor: colors.violet.light }}>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center relative" style={{ backgroundColor: colors.violet.normal }}>
+          <img src="/ic_robot.svg" alt="AI" className="w-6 h-6" />
+
+          <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white bg-green-500" />
         </div>
         <div>
-          <h4 className="font-semibold text-gray-900">Asisten Pemilihan Kursi AI</h4>
-          <p className="text-xs text-gray-500">Dapatkan rekomendasi yang dipersonalisasi</p>
+          <h4 className="font-semibold text-gray-900">AI Assistant</h4>
+          <p className="text-xs text-gray-600">Online dan siap membantu</p>
         </div>
       </div>
 
-      {/* Quick Suggestions */}
-      <div className="space-y-2 mb-4">
-        {suggestions.map((suggestion, index) => (
-          <div key={index} className={`${suggestion.color} rounded-lg p-3 cursor-pointer hover:opacity-80 transition-opacity`}>
-            <div className="flex items-center gap-2">
-              <img src={suggestion.icon} alt={suggestion.label} className="w-4 h-4" />
-              <span className="text-sm font-medium text-gray-700">{suggestion.label}</span>
+      <div className="space-y-3 mb-4 max-h-96 overflow-y-auto">
+        <div className="space-y-2">
+          {suggestions.map((suggestion, index) => (
+            <div key={index} className="bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 cursor-pointer transition-colors border border-gray-200">
+              <div className="flex items-center gap-2">
+                <img src={suggestion.icon} alt={suggestion.label} className="w-4 h-4" />
+                <span className="text-sm font-medium text-gray-700">{suggestion.label}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <div className="space-y-3">
+          {messages.map((msg) => (
+            <div key={msg.id} className={`flex items-start gap-3 ${msg.sender === "user" ? "flex-row-reverse" : ""}`}>
+              {msg.sender === "ai" && (
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: colors.violet.normal }}>
+                  <img src="/ic_robot.svg" alt="AI" className="w-4 h-4" />
+                </div>
+              )}
+              <div className={`rounded-2xl px-4 py-3 max-w-xs text-sm ${msg.sender === "ai" ? "bg-gray-100 text-gray-800" : "text-white"}`} style={msg.sender === "user" ? { backgroundColor: colors.violet.normal } : {}}>
+                <p>{msg.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Chat Messages */}
-      <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`text-xs p-2 rounded-lg ${msg.sender === "ai" ? "bg-gray-100 mr-4" : "bg-blue-100 ml-4"}`}>
-            <p className="text-gray-700">{msg.text}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Input */}
-      <div className="flex gap-2">
-        <InputField
-          label=""
-          value={message}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Tanyakan apapun..."
-          className="flex-1 text-sm px-1 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-        <button onClick={handleSendMessage} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-          <img src="/ic_send.svg" alt="Send Button" className="h-6 w-6" />
-        </button>
+      <div className="border-t border-gray-200 pt-4">
+        <div className="flex gap-2">
+          <InputField
+            label=""
+            value={message}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Tanyakan apapun..."
+            className="flex-1 text-sm px-3 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:border-transparent"
+            style={{ focusRingColor: colors.violet.normal }}
+          />
+          <button onClick={handleSendMessage} className="px-3 py-2 text-white rounded-2xl hover:opacity-90 transition-colors" style={{ backgroundColor: colors.violet.normal }}>
+            <img src="/ic_send.svg" alt="Send Button" className="h-5 w-5" />
+          </button>
+        </div>
       </div>
     </div>
   );
