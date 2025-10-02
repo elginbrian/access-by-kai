@@ -12,9 +12,8 @@ const OAuthSuccessPage = () => {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        // Check if profile is complete
         if (user.profile?.nomor_telepon) {
-          router.push("/dashboard");
+          router.push("/");
         } else {
           router.push("/auth/complete-profile");
         }

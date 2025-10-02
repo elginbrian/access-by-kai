@@ -32,7 +32,7 @@ export function AuthGuard({ children, requireAuth = true, requireRole, fallbackP
     }
 
     if (!requireAuth && isAuthenticated) {
-      router.push("/dashboard");
+      router.push("/");
       return;
     }
   }, [user, loading, isAuthenticated, requireAuth, requireRole, router, fallbackPath]);

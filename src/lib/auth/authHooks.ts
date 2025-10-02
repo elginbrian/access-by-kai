@@ -20,7 +20,7 @@ export function useLogin() {
       if (data.user) {
         toast.success("Login berhasil!");
         queryClient.invalidateQueries({ queryKey: ["auth"] });
-        router.push("/dashboard");
+        router.push("/");
       }
     },
     onError: (error: any) => {
@@ -179,7 +179,7 @@ export function useOAuthCallback() {
         queryClient.invalidateQueries({ queryKey: ["auth"] });
 
         if (data.user.profile?.nomor_telepon) {
-          router.push("/dashboard");
+          router.push("/");
         } else {
           router.push("/auth/complete-profile");
         }
@@ -206,7 +206,7 @@ export function useCompleteGoogleProfile() {
 
       toast.success("Profil berhasil dilengkapi!");
       queryClient.invalidateQueries({ queryKey: ["auth"] });
-      router.push("/dashboard");
+      router.push("/");
     },
     onError: (error: any) => {
       toast.error(error.message || "Terjadi kesalahan saat melengkapi profil");
