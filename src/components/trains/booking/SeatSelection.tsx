@@ -244,7 +244,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({ onClose, onSeatSelect, se
         </div>
 
         <div className="lg:col-span-4 space-y-6">
-          <AISeatAssistant onSuggestionApply={handleUseAISuggestion} />
+          <AISeatAssistant jadwalId={jadwalId} currentCar={currentCar} totalPassengers={passengers.length} onSeatSelect={onSeatSelect} />
         </div>
       </div>
 

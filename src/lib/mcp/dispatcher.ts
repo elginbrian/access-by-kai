@@ -47,6 +47,7 @@ export const AVAILABLE_ACTIONS = [
   "jadwal_kursi.list",
   "jadwal_kursi.get",
   "jadwal_kursi.byGerbong",
+  "jadwal_kursi.availableByGerbong",
   "jadwal_gerbong.list",
   "jadwal_gerbong.get",
   "jadwal_gerbong.byJadwal",
@@ -115,6 +116,9 @@ export async function dispatch(action: Action) {
     case "jadwal_kursi.byGerbong":
       if (!params?.jadwalGerbongId) throw new Error("missing param jadwalGerbongId");
       return await jadwalKursiSvc.listJadwalKursiByGerbong(Number(params.jadwalGerbongId));
+    case "jadwal_kursi.availableByGerbong":
+      if (!params?.jadwalId || !params?.nomorGerbong) throw new Error("missing param jadwalId or nomorGerbong");
+      return await jadwalKursiSvc.listAvailableTemplateKursiByGerbong(Number(params.jadwalId), Number(params.nomorGerbong));
     case "jadwal_gerbong.list":
       return await jadwalGerbongSvc.listJadwalGerbong();
     case "jadwal_gerbong.get":
