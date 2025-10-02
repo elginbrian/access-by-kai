@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { AuthProvider } from "@/lib/auth/AuthContext";
 import { ToastProvider } from "@/lib/providers/ToastProvider";
+import { BookingTimerProvider } from "@/lib/providers/BookingTimerProvider";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -28,8 +29,10 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {children}
-        <ToastProvider />
+        <BookingTimerProvider>
+          {children}
+          <ToastProvider />
+        </BookingTimerProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

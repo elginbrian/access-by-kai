@@ -6,7 +6,9 @@ import { CentralBookingProvider } from "@/lib/hooks/useCentralBooking";
 export default function BookingLayout({ children }: { children: React.ReactNode }) {
   return (
     <BookingProvider>
-      <CentralBookingProvider>{children}</CentralBookingProvider>
+      <CentralBookingProvider>
+        <div className="relative">{children}</div>
+      </CentralBookingProvider>
     </BookingProvider>
   );
 }
