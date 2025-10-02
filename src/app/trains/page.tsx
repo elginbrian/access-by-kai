@@ -6,6 +6,7 @@ import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 import SearchSummary from "@/components/trains/trainSummary/SearchSummary";
 import PromoBanner from "@/components/trains/promotions/PromoBanner";
 import FloatingChat from "@/components/trains/floatButton/FloatingChat";
+import ChatSidebar from "@/components/trains/chat/ChatSidebar";
 import ErrorBoundary, { TrainErrorFallback } from "@/components/ErrorBoundary";
 import FilterSection from "@/components/trains/sections/FilterSection";
 import ActiveFiltersDisplay from "@/components/trains/sections/ActiveFiltersDisplay";
@@ -17,12 +18,15 @@ import { useTrainScheduleSearch, useStationsForSearch, useAllTrainSchedules } fr
 import { useTrainFilters } from "@/lib/hooks/useTrainFilters";
 import { useTrainDataFiltering } from "@/lib/hooks/useTrainDataFiltering";
 import { usePagination } from "@/lib/hooks/usePagination";
+import { useChat } from "@/lib/hooks/useChat";
 import type { TrainScheduleSearchData } from "@/lib/validators/train-search";
 import { colors } from "@/app/design-system";
 
 const TrainBookingResults = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [isChatOpen, setIsChatOpen] = React.useState(false);
 
   const searchCriteria = React.useMemo((): TrainScheduleSearchData | null => {
     const fromParam = searchParams.get("from") || searchParams.get("departure");
@@ -142,7 +146,11 @@ const TrainBookingResults = () => {
   };
 
   const handleChatClick = () => {
-    console.log("Chat clicked");
+    setIsChatOpen(true);
+  };
+
+  const handleCloseChatSidebar = () => {
+    setIsChatOpen(false);
   };
 
   const handleNavClick = (section: string) => {
@@ -151,7 +159,7 @@ const TrainBookingResults = () => {
 
   return (
     <ErrorBoundary fallback={TrainErrorFallback}>
-      <div className="min-h-screen" style={{ backgroundColor: colors.violet.light }}>
+      <div className="min-h-screen relative" style={{ backgroundColor: colors.violet.light }}>
         <div className="sticky top-0 z-30" style={{ backgroundColor: colors.violet.light }}>
           <TrainNavigation onNavClick={handleNavClick} />
           {searchCriteria && (
@@ -242,7 +250,10 @@ const TrainBookingResults = () => {
         </div>
 
         {/* Floating Chat */}
-        <FloatingChat notificationCount={2} onClick={handleChatClick} />
+        <FloatingChat notificationCount={2} onClick={handleChatClick} isHidden={isChatOpen} />
+
+        {/* Chat Sidebar */}
+        <ChatSidebar isOpen={isChatOpen} onClose={handleCloseChatSidebar} />
       </div>
     </ErrorBoundary>
   );
