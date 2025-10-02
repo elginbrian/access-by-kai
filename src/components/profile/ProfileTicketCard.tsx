@@ -91,14 +91,28 @@ const ProfileTicketCard: React.FC<ProfileTicketCardProps> = ({ ticket, index }) 
                         <span className="text-gray-800">Gerbong: {ticket.class}</span>
                     </div>
                     <div className="flex flex-row gap-3">
-                        <button
-                            onClick={() => router.push(`/mytickets/${ticket.id}`)}
-                            aria-label={`Lihat E-Tiket ${ticket.id}`}
-                            className="flex items-center gap-2 px-6 py-3 border border-[#2563eb] rounded-xl font-bold text-white transition-all duration-200 transform hover:scale-105"
-                        >
-                            <img src="/ic_download_blue.svg" alt="Print" />
-                            <span className="text-[#2563eb]">E-Tiket</span>
-                        </button>
+                        {ticket.status === 'Dibatalkan' ? null : ticket.status === 'Akan Datang' ? (
+                            <button
+                                onClick={() => {
+
+                                }}
+                                aria-label={`Batalkan tiket ${ticket.id}`}
+                                className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold border border-red-600 text-white border border-red-600 transition-all duration-200 transform hover:scale-105"
+                            >
+                                <span className="text-red-600">Batalkan</span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    
+                                }}
+                                aria-label={`Lihat E-Tiket ${ticket.id}`}
+                                className="flex items-center gap-2 px-6 py-3 border border-[#2563eb] rounded-xl font-bold transition-all duration-200 transform hover:scale-105"
+                            >
+                                <img src="/ic_download_blue.svg" alt="Print" />
+                                <span className="text-[#2563eb]">E-Tiket</span>
+                            </button>
+                        )}
 
                         <button
                             onClick={() => router.push(`/mytickets/${ticket.id}`)}
