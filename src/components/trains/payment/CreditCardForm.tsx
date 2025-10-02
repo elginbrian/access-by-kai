@@ -35,7 +35,7 @@ const CreditCardForm: React.FC<CreditCardFormProps> = ({ cardNumber, cardName, e
         {/* Card Name */}
         <div>
           <label className="block text-sm font-medium text-black mb-2">Nama Pemegang Kartu</label>
-          <InputField label="John Doe" type="text" value={cardName} onChange={onCardNameChange} />
+          <InputField label="Nama sesuai kartu" type="text" value={cardName} onChange={onCardNameChange} />
         </div>
       </div>
 

@@ -34,27 +34,16 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   onResetFilters,
 }) => {
   return (
-    <div className="w-full lg:w-80 lg:flex-shrink-0 mb-2">
-      <div
-        className="lg:sticky lg:top-6 mt-4 mb-16 space-y-4 lg:max-h-screen lg:overflow-y-auto p-4 duration-200 [&::-webkit-scrollbar]:hidden"
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-      >
-        {/* Price Range */}
+    <div className="w-full lg:w-80 lg:flex-shrink-0 mb-2 lg:max-h-screen lg:overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+      <div className="mt-4 mb-16 space-y-4 p-4 duration-200">
         <PriceRangeFilter priceValue={priceValue} setPriceValue={setPriceValue} minPrice={minPrice} maxPrice={maxPrice} />
 
-        {/* Train Service Type */}
         <CheckboxFilter title="Jenis Kelas Kereta" icon="/ic_train_purple.svg" iconBgColor="bg-purple-100" options={trainTypes} onChange={onTrainTypeChange} />
 
-        {/* Departure Time */}
         <CheckboxFilter title="Waktu Keberangkatan" icon="/ic_clock.svg" iconBgColor="bg-blue-100" options={departureTimes} onChange={onDepartureTimeChange} />
 
-        {/* Arrival Time */}
         <CheckboxFilter title="Waktu Kedatangan" icon="/ic_arrival.svg" iconBgColor="bg-green-100" options={arrivalTimes} onChange={onArrivalTimeChange} />
 
-        {/* Reset Button */}
         {hasActiveFilters && (
           <div className="bg-white rounded-2xl p-5 shadow-lg">
             <button

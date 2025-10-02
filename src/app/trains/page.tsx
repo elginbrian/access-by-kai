@@ -139,17 +139,14 @@ const TrainBookingResults = () => {
 
   const handleViewOffers = () => {
     console.log("View offers clicked");
-    // Handle view offers logic here
   };
 
   const handleChatClick = () => {
     console.log("Chat clicked");
-    // Handle chat logic here
   };
 
   const handleNavClick = (section: string) => {
     console.log("Nav clicked:", section);
-    // Handle navigation logic here
   };
 
   return (

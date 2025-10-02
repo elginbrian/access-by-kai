@@ -17,13 +17,9 @@ const SeatSelectionBottomBar: React.FC<SeatSelectionBottomBarProps> = ({ selecte
         <div className="flex items-center gap-4">
           <div className="flex flex-col">
             <span className="text-sm text-gray-600">
-              {selectedSeatsCount} of {maxSelectableSeats} seats selected
+              {selectedSeatsCount} dari {maxSelectableSeats} kursi dipilih
             </span>
-            {!canContinue && (
-              <span className="text-xs text-orange-600">
-                Select {maxSelectableSeats - selectedSeatsCount} more seat{maxSelectableSeats - selectedSeatsCount !== 1 ? "s" : ""}
-              </span>
-            )}
+            {!canContinue && <span className="text-xs text-orange-600">Pilih {maxSelectableSeats - selectedSeatsCount} kursi lagi</span>}
           </div>
           <div className="text-lg font-bold text-gray-900">Total: {totalPrice}</div>
         </div>
@@ -42,7 +38,7 @@ const SeatSelectionBottomBar: React.FC<SeatSelectionBottomBarProps> = ({ selecte
             disabled={!canContinue}
             className={`flex items-center gap-2 px-6 py-2 rounded-lg transition-colors ${canContinue ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
           >
-            Continue Booking
+            Lanjutkan Pemesanan
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
