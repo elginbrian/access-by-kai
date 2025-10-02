@@ -20,6 +20,7 @@ import { useTrainFilters } from "@/lib/hooks/useTrainFilters";
 import { useTrainDataFiltering } from "@/lib/hooks/useTrainDataFiltering";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { useChat } from "@/lib/hooks/useChat";
+import { useScrollDirection } from "@/lib/hooks/useScrollDirection";
 import type { TrainScheduleSearchData } from "@/lib/validators/train-search";
 import { colors } from "@/app/design-system";
 
@@ -29,6 +30,9 @@ const TrainBookingResults = () => {
 
   const [isChatOpen, setIsChatOpen] = React.useState(false);
   const [isScheduleEditOpen, setIsScheduleEditOpen] = React.useState(false);
+
+  // Hook untuk mendeteksi arah scroll
+  const { scrollDirection, isAtTop } = useScrollDirection(10);
 
   const searchCriteria = React.useMemo((): TrainScheduleSearchData | null => {
     const fromParam = searchParams.get("from") || searchParams.get("departure");
@@ -63,6 +67,22 @@ const TrainBookingResults = () => {
     console.log("Final search criteria:", criteria);
     return criteria;
   }, [searchParams]);
+
+  const defaultSummaryData = React.useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const todayFormatted = new Date().toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    return {
+      departure: "Semua",
+      arrival: "Semua",
+      date: todayFormatted,
+      passengers: "1 Penumpang",
+    };
+  }, []);
 
   const { data: stations = [], isLoading: stationsLoading } = useStationsForSearch();
   const { data: searchResults = [], isLoading: searchLoading, error: searchError } = useTrainScheduleSearch(searchCriteria);
@@ -123,7 +143,10 @@ const TrainBookingResults = () => {
   };
 
   const handleSwitchStations = () => {
-    if (!searchCriteria) return;
+    if (searchCriteria === null) {
+      console.log("Cannot switch stations when showing all results");
+      return;
+    }
 
     const newParams = new URLSearchParams(searchParams.toString());
 
@@ -166,26 +189,29 @@ const TrainBookingResults = () => {
   return (
     <ErrorBoundary fallback={TrainErrorFallback}>
       <div className="min-h-screen relative" style={{ backgroundColor: colors.violet.light }}>
-        <div className="sticky top-0 z-30" style={{ backgroundColor: colors.violet.light }}>
+        <div
+          className={`sticky z-30 transition-all duration-300 ease-in-out ${isAtTop ? "top-0" : scrollDirection === "down" ? "-translate-y-full top-0" : "top-0 translate-y-0 shadow-lg backdrop-blur-sm"}`}
+          style={{
+            backgroundColor: isAtTop ? colors.violet.light : `${colors.violet.light}f0`,
+          }}
+        >
           <TrainNavigation onNavClick={handleNavClick} />
-          {searchCriteria && (
-            <SearchSummary
-              departure={stationsLoading ? "Memuat stasiun..." : departureStation?.label || `Stasiun ID: ${searchCriteria.departureStationId}`}
-              arrival={stationsLoading ? "Memuat stasiun..." : arrivalStation?.label || `Stasiun ID: ${searchCriteria.arrivalStationId}`}
-              date={
-                searchCriteria?.departureDate
-                  ? new Date(searchCriteria.departureDate).toLocaleDateString("id-ID", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })
-                  : ""
-              }
-              passengers={`${passengersCount} ${parseInt(passengersCount) === 1 ? "Penumpang" : "Penumpang"}`}
-              onEditSchedule={handleEditSchedule}
-              onSwitchStations={handleSwitchStations}
-            />
-          )}
+          <SearchSummary
+            departure={searchCriteria ? (stationsLoading ? "Memuat stasiun..." : departureStation?.label || `Stasiun ID: ${searchCriteria.departureStationId}`) : defaultSummaryData.departure}
+            arrival={searchCriteria ? (stationsLoading ? "Memuat stasiun..." : arrivalStation?.label || `Stasiun ID: ${searchCriteria.arrivalStationId}`) : defaultSummaryData.arrival}
+            date={
+              searchCriteria?.departureDate
+                ? new Date(searchCriteria.departureDate).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : defaultSummaryData.date
+            }
+            passengers={searchCriteria ? `${passengersCount} ${parseInt(passengersCount) === 1 ? "Penumpang" : "Penumpang"}` : defaultSummaryData.passengers}
+            onEditSchedule={handleEditSchedule}
+            onSwitchStations={handleSwitchStations}
+          />
         </div>
 
         {isScheduleEditOpen && (
@@ -201,7 +227,12 @@ const TrainBookingResults = () => {
                       departureDate: searchCriteria.departureDate,
                       passengers: parseInt(passengersCount),
                     }
-                  : undefined
+                  : {
+                      departureStationId: 0,
+                      arrivalStationId: 0,
+                      departureDate: new Date().toISOString().split("T")[0],
+                      passengers: 1,
+                    }
               }
             />
           </div>

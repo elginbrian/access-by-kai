@@ -46,7 +46,6 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ onClick }) => {
         </div>
       )}
 
-      {/* Main Button */}
       <button
         onClick={handleClick}
         disabled={!validation.isValid}
