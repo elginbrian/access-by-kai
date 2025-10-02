@@ -111,7 +111,7 @@ const MyTicketDetailPage: React.FC = () => {
                 <div className="w-8 h-8 bg-white/20 rounded flex items-center justify-center">
                   <img src="/ic_train.svg" alt="Train" className="w-5 h-5" />
                 </div>
-                <span className="font-semibold">{ticketDetail.trainName}</span>
+                <span className="font-semibold truncate max-w-[420px] block">{ticketDetail.trainName}</span>
               </div>
               <div className="text-right">
                 <div className="text-sm opacity-90">No. Tiket</div>
@@ -141,10 +141,10 @@ const MyTicketDetailPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between mb-6 mx-7">
-                  <div className="text-center">
+                  <div className="text-center min-w-0">
                     <div className="text-sm text-gray-600 mb-3">JAKARTA (GMR)</div>
                     <div className="font-bold text-2xl text-gray-900 mb-3">08:00</div>
-                    <div className="text-xs text-gray-500 mb-3">{ticketDetail.date}</div>
+                    <div className="text-xs text-gray-500 mb-3 truncate">{new Date(ticketDetail.date || "").toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}</div>
                   </div>
 
                   <div className="flex-1 px-4">
@@ -160,10 +160,10 @@ const MyTicketDetailPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="text-center">
+                  <div className="text-center min-w-0">
                     <div className="text-sm text-gray-600 mb-3">SURABAYA (SBY)</div>
                     <div className="font-bold text-2xl text-gray-900 mb-3">15:30</div>
-                    <div className="text-xs text-gray-500 mb-3">{ticketDetail.date}</div>
+                    <div className="text-xs text-gray-500 mb-3 truncate">{new Date(ticketDetail.date || "").toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}</div>
                   </div>
                 </div>
 
@@ -189,8 +189,11 @@ const MyTicketDetailPage: React.FC = () => {
 
                 {/* Action Button */}
                 <div className="mt-6 flex justify-end">
-                  <button onClick={() => {}} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105">
-                    Lihat Detail
+                  <button
+                    onClick={() => window.print()}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
+                  >
+                    Cetak / Lihat
                   </button>
                 </div>
               </div>

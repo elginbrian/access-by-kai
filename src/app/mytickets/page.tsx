@@ -180,7 +180,8 @@ const MyTicketsPage: React.FC = () => {
               <TicketCard
                 key={ticket.id || index}
                 ticket={{
-                  id: ticket.ticketNumber ?? ticket.id ?? `unknown-${index}`,
+                  id: ticket.id ?? `unknown-${index}`,
+                  ticketNumber: ticket.ticketNumber ?? ticket.id ?? `unknown-${index}`,
                   trainName: ticket.trainName ?? "-",
                   date: ticket.date ?? "-",
                   duration: ticket.duration ?? "-",
@@ -190,7 +191,7 @@ const MyTicketsPage: React.FC = () => {
                   class: ticket.seat?.class ?? "-",
                   totalPrice: ticket.price?.total ? `Rp ${ticket.price.total.toLocaleString("id-ID")}` : "-",
                 }}
-                onDetail={() => router.push(`/mytickets/${ticket.id ?? ticket.ticketNumber}`)}
+                onDetail={() => router.push(`/mytickets/${ticket.ticketNumber ?? ticket.id}`)}
               />
             ))
           )}

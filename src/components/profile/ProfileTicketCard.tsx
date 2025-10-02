@@ -25,6 +25,16 @@ interface ProfileTicketCardProps {
 const ProfileTicketCard: React.FC<ProfileTicketCardProps> = ({ ticket, index }) => {
   const router = useRouter();
 
+  const formatDate = (d: string) => {
+    try {
+      const dt = new Date(d);
+      if (Number.isNaN(dt.getTime())) return d;
+      return dt.toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+    } catch (e) {
+      return d;
+    }
+  };
+
   const statusColor = (s: string) => {
     if (s === "Selesai") return `bg-green-100 text-green-700 border-green-200`;
     if (s === "Dibatalkan") return `bg-red-100 text-red-700 border-red-200`;
@@ -40,63 +50,64 @@ const ProfileTicketCard: React.FC<ProfileTicketCardProps> = ({ ticket, index }) 
       }}
     >
       {/* Ticket Content */}
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <span className={`${statusColor(ticket.status)} px-4 py-2 rounded-full text-sm font-bold`}>{ticket.status}</span>
-            <span className="ml-4 text-sm" style={{ color: colors.base.darkActive }}>
+      <div className="p-4 md:p-6">
+        <div className="flex items-center justify-between mb-6 min-w-0">
+          <div className="min-w-0">
+            <span className={`${statusColor(ticket.status)} px-3 py-1 rounded-full text-sm font-bold`}>{ticket.status}</span>
+            <span className="ml-4 text-sm truncate block" style={{ color: colors.base.darkActive, maxWidth: 420 }}>
               Booking ID: {ticket.id}
             </span>
           </div>
-          <div className="text-right">
-            <div className="text-sm" style={{ color: colors.base.darkActive }}>
-              {ticket.date}
+          <div className="text-right min-w-0">
+            <div className="text-sm truncate" style={{ color: colors.base.darkActive, maxWidth: 160 }}>
+              {formatDate(ticket.date)}
             </div>
           </div>
         </div>
 
         <div>
           {/* Journey Info */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-3">
-                <img src="/ic_train_blue.svg" alt="" className="w-5 h-5" />
-                <div className="font-bold text-lg" style={{ color: colors.base.darker }}>
-                  {ticket.title}
-                </div>
+          <div className="flex items-center justify-between mb-4 min-w-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <img src="/ic_train_blue.svg" alt="" className="w-5 h-5 flex-shrink-0" />
+              <div className="font-bold text-lg truncate" style={{ color: colors.base.darker, maxWidth: 420 }}>
+                {ticket.title}
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-3">
-                <div className="font-bold text-lg" style={{ color: colors.base.darker }}>
+            <div className="flex items-center gap-3 min-w-0 justify-center">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="font-semibold text-2xl text-gray-800 truncate" style={{ maxWidth: 140 }}>
                   {ticket.from}
                 </div>
-                <img src="/ic_arrow_right_gray.svg" alt="Arrow" className="w-3 h-3" />
-                <div className="font-bold text-lg" style={{ color: colors.base.darker }}>
+                <img src="/ic_arrow_right_gray.svg" alt="Arrow" className="w-4 h-4 flex-shrink-0 mx-2" />
+                <div className="font-semibold text-2xl text-gray-800 truncate" style={{ maxWidth: 140 }}>
                   {ticket.to}
                 </div>
               </div>
             </div>
 
-            <div className="font-bold text-xl text-black">{ticket.price}</div>
+            <div className="font-bold text-xl text-black flex-shrink-0 ml-4">{ticket.price}</div>
           </div>
 
-          <div className="flex items-center justify-between mb-4">
-            <div style={{ color: colors.base.darker }}>
-              {ticket.class} - KA {index + 1}
+          <div className="mt-2 flex items-center text-sm text-gray-600 gap-4 min-w-0">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline gap-3">
+                <div className="font-medium truncate">{ticket.class}</div>
+                <div className="text-xs text-gray-500 truncate">|</div>
+                <div className="text-xs text-gray-500 truncate">{ticket.time}</div>
+              </div>
             </div>
-            <div className="text-sm" style={{ color: colors.base.darkActive }}>
-              {ticket.time.split(" - ")[0]} - {ticket.time.split(" - ")[1]}
+            <div className="w-28 flex-shrink-0 text-right">
+              <div className="font-medium">{ticket.people} orang</div>
             </div>
-            <div style={{ color: colors.base.darker }}>{ticket.people} orang</div>
           </div>
         </div>
         {/* Action Buttons */}
-        <div className="flex flex-row gap-3 justify-between border-t pt-4">
+        <div className="flex flex-row gap-3 justify-between border-t pt-4 flex-wrap">
           <div className="flex flex-row items-center gap-3">
-            <span className="text-gray-800">Kursi: {ticket.class}</span>
-            <span className="text-gray-800">Gerbong: {ticket.class}</span>
+            <span className="text-gray-800 truncate">Kursi: {ticket.class}</span>
+            <span className="text-gray-800 truncate">Gerbong: {ticket.class}</span>
           </div>
           <div className="flex flex-row gap-3">
             {ticket.status === "Dibatalkan" ? null : ticket.status === "Akan Datang" ? (

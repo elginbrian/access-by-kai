@@ -29,21 +29,49 @@ const ProfilePageClient: React.FC<Props> = ({ profile }) => {
   const itemsPerPage = 10;
 
   const mappedTickets = useMemo(() => {
+    const fmtDate = (d?: string) => {
+      if (!d) return "-";
+      try {
+        const dt = new Date(d);
+        if (Number.isNaN(dt.getTime())) return d;
+        return dt.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+      } catch (e) {
+        return d;
+      }
+    };
+
+    const fmtTime = (d?: string) => {
+      if (!d) return "-";
+      try {
+        const dt = new Date(d);
+        if (Number.isNaN(dt.getTime())) return d;
+        return dt.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+      } catch (e) {
+        return d;
+      }
+    };
+
     return (tickets || []).map((t) => {
       const statusLabel = t.status === "active" ? "Akan Datang" : t.status === "completed" ? "Selesai" : t.status === "cancelled" ? "Dibatalkan" : t.status;
-      const time = `${t.departureTime || "-"} - ${t.arrivalTime || "-"}`;
+      const depTime = fmtTime(t.departureTime);
+      const arrTime = fmtTime(t.arrivalTime);
+      const time = `${depTime} - ${arrTime}`;
       const price = t.price?.total ? `Rp ${Number(t.price.total).toLocaleString("id-ID")}` : "-";
+
+      const fromLabel = t.departureStation?.code ?? t.departureStation?.name ?? "-";
+      const toLabel = t.arrivalStation?.code ?? t.arrivalStation?.name ?? "-";
+
       return {
         id: t.id || t.ticketNumber,
         status: statusLabel,
         title: t.trainName || "-",
         class: t.seat?.class || "-",
-        from: t.departureStation?.name || "-",
-        to: t.arrivalStation?.name || "-",
+        from: fromLabel,
+        to: toLabel,
         time,
         price,
         people: 1,
-        date: t.date || "-",
+        date: fmtDate(t.date),
       };
     });
   }, [tickets]);
