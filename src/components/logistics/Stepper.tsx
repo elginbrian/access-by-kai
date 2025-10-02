@@ -44,7 +44,7 @@ const Stepper: React.FC<StepperProps> = ({ currentStep }) => {
                             {/* connector */}
                             {idx < steps.length - 1 && (
                                 <div className="flex-1 h-1 mx-3 relative">
-                                    <div className={`absolute left-0 top-0 h-1 w-full rounded-full ${step.id < currentStep ? 'bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]' : 'bg-gray-200'}`}></div>
+                                    <div className={`absolute left-0 top-0 h-1 w-full rounded-full ${step.id < currentStep ? 'bg-[#1bc95b]' : 'bg-gray-200'}`}></div>
                                 </div>
                             )}
                         </div>
