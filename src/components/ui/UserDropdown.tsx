@@ -7,9 +7,10 @@ interface Props {
   displayAvatar?: string;
   onLogout?: () => Promise<void> | void;
   onNavigate?: (path: string) => void;
+  profilePath?: string;
 }
 
-const UserDropdown: React.FC<Props> = ({ displayName = "User", displayAvatar, onLogout, onNavigate }) => {
+const UserDropdown: React.FC<Props> = ({ displayName = "User", displayAvatar, onLogout, onNavigate, profilePath }) => {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -24,7 +25,7 @@ const UserDropdown: React.FC<Props> = ({ displayName = "User", displayAvatar, on
           <button
             onClick={() => {
               setOpen(false);
-              onNavigate?.("/profile");
+              onNavigate?.(profilePath ?? "/profile");
             }}
             className="block w-full text-left px-4 py-2 hover:bg-gray-100"
           >

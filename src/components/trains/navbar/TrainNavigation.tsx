@@ -17,9 +17,11 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
   const router = useRouter();
   const { user, isAuthenticated, loading } = useAuth();
 
+  const uid = user?.profile?.user_id ?? user?.id;
   const displayName = userName || user?.profile?.nama_lengkap || "";
   const displayAvatar = userAvatar || user?.profile?.foto_profil_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest";
   const userIsLoggedIn = isAuthenticated || !!userName;
+  const profilePath = uid ? `/profile/${uid}` : "/profile";
 
   const handleAuthClick = async () => {
     if (userIsLoggedIn) {
@@ -64,7 +66,7 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
           </div>
           <div className="flex items-center space-x-4">
             {userIsLoggedIn ? (
-              <UserDropdown displayName={displayName} displayAvatar={displayAvatar} onLogout={handleAuthClick} onNavigate={(p) => router.push(p)} />
+              <UserDropdown displayName={displayName} displayAvatar={displayAvatar} onLogout={handleAuthClick} onNavigate={(p) => router.push(p)} profilePath={profilePath} />
             ) : (
               <div className="flex items-center space-x-3">
                 <button onClick={() => handleNavClick("/auth/login")} className="text-purple-600 hover:text-purple-700 transition-colors font-medium text-sm px-4 py-2 rounded-full border border-purple-600 hover:bg-purple-50">

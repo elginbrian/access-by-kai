@@ -37,23 +37,20 @@ function mapTicketStatus(dbStatus: string | null): "active" | "cancelled" | "com
   }
 }
 
-export function useUserTickets(params?: TicketListParams) {
-  const { user } = useAuth();
-  // parse user id to number and guard against invalid values (NaN)
-  const rawUserId = user?.id;
-  const parsedUserId = rawUserId == null ? NaN : typeof rawUserId === "string" ? parseInt(rawUserId, 10) : (rawUserId as number);
+export function useUserTickets(userId: number, params?: TicketListParams) {
+  if (userId == null || Number.isNaN(userId)) {
+    return useQuery<TicketData[], Error>({
+      queryKey: ["userTickets", userId, params],
+      queryFn: async () => {
+        throw new Error("useUserTickets requires a numeric userId parameter (pengguna.user_id)");
+      },
+      enabled: false,
+    });
+  }
 
   return useQuery<TicketData[], Error>({
-    queryKey: ["userTickets", parsedUserId, params],
+    queryKey: ["userTickets", userId, params],
     queryFn: async (): Promise<TicketData[]> => {
-      if (!user?.id) throw new Error("User not authenticated");
-      if (Number.isNaN(parsedUserId)) {
-        // Avoid making a bad request to Supabase (penumpang.user_id=NaN). Return empty list.
-        return [];
-      }
-
-      const userId = parsedUserId;
-
       const query = supabase
         .from("tiket")
         .select(
@@ -74,13 +71,13 @@ export function useUserTickets(params?: TicketListParams) {
             pemesanan_id,
             stasiun_asal_id,
             stasiun_tujuan_id,
-            tanggal_berangkat,
+            waktu_berangkat,
             waktu_berangkat,
             waktu_tiba,
-            pemesanan!inner(
+              pemesanan!inner(
               pemesanan_id,
               user_id,
-              total_harga,
+              total_bayar,
               biaya_admin,
               waktu_pembuatan,
               status_pemesanan
@@ -88,23 +85,31 @@ export function useUserTickets(params?: TicketListParams) {
           ),
           penumpang!inner(
             penumpang_id,
-            nama_penumpang,
+            nama_lengkap,
             user_id
           ),
           jadwal_kursi!inner(
             jadwal_kursi_id,
-            nomor_kursi,
-            kelas_layanan,
+            kode_kursi,
+            keterangan,
             harga_kursi,
             jadwal_gerbong!inner(
               jadwal_gerbong_id,
-              nama_gerbong,
+              nomor_gerbong_aktual,
+              master_gerbong!inner(
+                master_gerbong_id,
+                nomor_gerbong,
+                tipe_gerbong
+              ),
               jadwal!inner(
                 jadwal_id,
-                nama_jadwal,
-                nomor_kereta,
-                master_kereta!inner(
-                  kereta_id,
+                kode_jadwal,
+                nomor_ka,
+                tanggal_keberangkatan,
+                waktu_berangkat_origin,
+                waktu_tiba_destination,
+                  master_kereta!inner(
+                  master_kereta_id,
                   nama_kereta
                 )
               )
@@ -135,75 +140,93 @@ export function useUserTickets(params?: TicketListParams) {
       if (error) throw error;
 
       return (data || []).map((ticket: any) => {
-        const segment = ticket.pemesanan_segment;
-        const booking = segment.pemesanan;
-        const passenger = ticket.penumpang;
-        const seatInfo = ticket.jadwal_kursi;
-        const railcar = seatInfo.jadwal_gerbong;
-        const schedule = railcar.jadwal;
-        const train = schedule.master_kereta;
+        // Top-level tiket attributes (guaranteed by the tiket table)
+        const top = ticket;
+
+        // Optional nested relations (may be undefined) used as fallbacks
+        const segment = ticket.pemesanan_segment ?? null;
+        const booking = segment?.pemesanan ?? null;
+        const passenger = ticket.penumpang ?? null;
+        const seatInfo = ticket.jadwal_kursi ?? null;
+        const railcar = seatInfo?.jadwal_gerbong ?? null;
+        const schedule = railcar?.jadwal ?? null;
+        const train = schedule?.master_kereta ?? null;
 
         return {
-          id: ticket.kode_tiket,
-          ticketNumber: ticket.kode_tiket,
-          trainName: train.nama_kereta,
-          trainNumber: schedule.nomor_kereta,
+          // identify by kode_tiket (top-level)
+          id: String(top.kode_tiket ?? ""),
+          ticketNumber: String(top.kode_tiket ?? ""),
+
+          // fallback to nested values only if available
+          trainName: String(train?.nama_kereta ?? ""),
+          trainNumber: schedule?.nomor_ka ? String(schedule.nomor_ka) : undefined,
+
+          // keep station placeholders but prefer nested if available
           departureStation: {
-            code: "GMR",
-            name: "JAKARTA",
+            code: segment?.stasiun_asal_id ? String(segment.stasiun_asal_id) : "",
+            name: "",
           },
           arrivalStation: {
-            code: "SBY",
-            name: "SURABAYA",
+            code: segment?.stasiun_tujuan_id ? String(segment.stasiun_tujuan_id) : "",
+            name: "",
           },
-          departureTime: segment.waktu_berangkat || "08:00",
-          arrivalTime: segment.waktu_tiba || "15:30",
-          date: segment.tanggal_berangkat,
-          duration: "7j 30m",
+
+          // times: prefer segment times, otherwise use empty strings
+          departureTime: String(segment?.waktu_berangkat ?? ""),
+          arrivalTime: String(segment?.waktu_tiba ?? ""),
+          date: String(segment?.waktu_berangkat ?? ""),
+          duration: "",
+
+          // passenger/seat info: prefer nested but fallback to top-level ids
           passenger: {
-            id: passenger.penumpang_id,
-            name: passenger.nama_penumpang,
+            id: Number(passenger?.penumpang_id ?? top.penumpang_id ?? 0),
+            name: String(passenger?.nama_lengkap ?? ""),
           },
           seat: {
-            car: railcar.nama_gerbong,
-            number: seatInfo.nomor_kursi,
-            class: seatInfo.kelas_layanan,
+            car: String(railcar?.nomor_gerbong_aktual ?? railcar?.master_gerbong?.nomor_gerbong ?? ""),
+            number: String(seatInfo?.kode_kursi ?? top.jadwal_kursi_id ?? ""),
+            class: String(railcar?.master_gerbong?.tipe_gerbong ?? ""),
           },
+
+          // pricing: prefer booking total if available, otherwise use ticket harga
           price: {
-            ticketPrice: ticket.harga_tiket,
-            adminFee: booking.biaya_admin || 5000,
-            total: booking.total_harga,
+            ticketPrice: Number(top.harga_tiket ?? 0),
+            adminFee: Number(booking?.biaya_admin ?? 0),
+            total: Number(booking?.total_bayar ?? top.harga_tiket ?? 0),
             currency: "IDR",
           },
-          status: mapTicketStatus(ticket.status_tiket),
-          bookingId: booking.pemesanan_id,
-          segmentId: segment.segment_id,
-          checkInTime: ticket.waktu_check_in ?? undefined,
-          boardingTime: ticket.waktu_boarding ?? undefined,
-          boardingGate: ticket.gate_boarding ?? undefined,
+
+          status: mapTicketStatus(top.status_tiket),
+
+          bookingId: Number(booking?.pemesanan_id ?? 0),
+          segmentId: Number(top.segment_id ?? 0),
+          qrCode: undefined,
+          checkInTime: top.waktu_check_in ?? undefined,
+          boardingTime: top.waktu_boarding ?? undefined,
+          boardingGate: top.gate_boarding ?? undefined,
           createdAt: undefined,
           updatedAt: undefined,
         } as TicketData;
       });
     },
-    enabled: !!user?.id && !Number.isNaN(parsedUserId),
     staleTime: 5 * 60 * 1000,
   });
 }
-
-export function useTicketDetail(params: TicketDetailParams) {
-  const { user } = useAuth();
-  const rawUserId = user?.id;
-  const parsedUserId = rawUserId == null ? NaN : typeof rawUserId === "string" ? parseInt(rawUserId, 10) : (rawUserId as number);
+export function useTicketDetail(userId: number, params: TicketDetailParams) {
+  if (userId == null || Number.isNaN(userId)) {
+    return useQuery<TicketDetailData | null, Error>({
+      queryKey: ["ticketDetail", params.ticketId, userId],
+      queryFn: async () => {
+        throw new Error("useTicketDetail requires a numeric userId parameter (pengguna.user_id)");
+      },
+      enabled: false,
+    });
+  }
 
   return useQuery<TicketDetailData | null, Error>({
-    queryKey: ["ticketDetail", params.ticketId, parsedUserId],
+    queryKey: ["ticketDetail", params.ticketId, userId],
     queryFn: async (): Promise<TicketDetailData | null> => {
-      if (!user?.id) throw new Error("User not authenticated");
       if (!params.ticketId) return null;
-      if (Number.isNaN(parsedUserId)) return null;
-
-      const userId = parsedUserId;
 
       const res: any = await supabase
         .from("tiket")
@@ -225,14 +248,14 @@ export function useTicketDetail(params: TicketDetailParams) {
             pemesanan_id,
             stasiun_asal_id,
             stasiun_tujuan_id,
-            tanggal_berangkat,
+            waktu_berangkat,
             waktu_berangkat,
             waktu_tiba,
             pemesanan!inner(
               pemesanan_id,
               kode_pemesanan,
               user_id,
-              total_harga,
+              total_bayar,
               biaya_admin,
               waktu_pembuatan,
               status_pemesanan
@@ -245,27 +268,32 @@ export function useTicketDetail(params: TicketDetailParams) {
           ),
           penumpang!inner(
             penumpang_id,
-            nama_penumpang,
+            nama_lengkap,
             user_id
           ),
           jadwal_kursi!inner(
             jadwal_kursi_id,
-            nomor_kursi,
-            kelas_layanan,
+            kode_kursi,
+            keterangan,
             harga_kursi,
             jadwal_gerbong!inner(
               jadwal_gerbong_id,
-              nama_gerbong,
+              nomor_gerbong_aktual,
+              master_gerbong!inner(
+                master_gerbong_id,
+                nomor_gerbong,
+                tipe_gerbong
+              ),
               tipe_gerbong,
-              fasilitas,
               jadwal!inner(
                 jadwal_id,
-                nama_jadwal,
-                nomor_kereta,
-                frekuensi_operasi,
-                hari_operasi,
-                master_kereta!inner(
-                  kereta_id,
+                kode_jadwal,
+                nomor_ka,
+                tanggal_keberangkatan,
+                waktu_berangkat_origin,
+                waktu_tiba_destination,
+                  master_kereta!inner(
+                  master_kereta_id,
                   nama_kereta
                 )
               )
@@ -296,7 +324,7 @@ export function useTicketDetail(params: TicketDetailParams) {
         id: data.kode_tiket,
         ticketNumber: data.kode_tiket,
         trainName: train.nama_kereta,
-        trainNumber: schedule.nomor_kereta,
+        trainNumber: schedule.nomor_ka,
         departureStation: {
           code: "GMR",
           name: "JAKARTA",
@@ -307,21 +335,21 @@ export function useTicketDetail(params: TicketDetailParams) {
         },
         departureTime: segment.waktu_berangkat || "08:00",
         arrivalTime: segment.waktu_tiba || "15:30",
-        date: segment.tanggal_berangkat,
+        date: segment.waktu_berangkat,
         duration: "7j 30m",
         passenger: {
           id: passenger.penumpang_id,
-          name: passenger.nama_penumpang,
+          name: passenger.nama_lengkap,
         },
         seat: {
-          car: railcar.nama_gerbong,
-          number: seatInfo.nomor_kursi,
-          class: seatInfo.kelas_layanan,
+          car: railcar.nomor_gerbong_aktual ?? railcar.master_gerbong?.nomor_gerbong ?? "",
+          number: seatInfo.kode_kursi,
+          class: railcar.master_gerbong?.tipe_gerbong || "",
         },
         price: {
           ticketPrice: data.harga_tiket,
           adminFee: booking.biaya_admin || 5000,
-          total: booking.total_harga,
+          total: booking.total_bayar,
           currency: "IDR",
         },
         status: mapTicketStatus(data.status_tiket),
@@ -349,30 +377,42 @@ export function useTicketDetail(params: TicketDetailParams) {
         },
         schedule: {
           id: schedule.jadwal_id,
-          frequency: schedule.frekuensi_operasi || "daily",
-          operationalDays: schedule.hari_operasi || [],
+          frequency: schedule.tanggal_keberangkatan || "daily",
+          operationalDays: [],
         },
         railcar: {
           id: railcar.jadwal_gerbong_id,
-          name: railcar.nama_gerbong,
-          type: railcar.tipe_gerbong || "standard",
-          facilities: railcar.fasilitas || [],
+          name: railcar.nomor_gerbong_aktual ?? railcar.master_gerbong?.nomor_gerbong ?? "",
+          type: railcar.master_gerbong?.tipe_gerbong || "standard",
+          facilities: Array.isArray(railcar.master_gerbong?.fasilitas_gerbong) ? railcar.master_gerbong.fasilitas_gerbong : [],
         },
       } as TicketDetailData;
     },
-    enabled: !!user?.id && !!params.ticketId,
+    enabled: !!params.ticketId,
     staleTime: 5 * 60 * 1000,
   });
 }
 
-export function useTicketActions() {
+export function useTicketActions(userId: number) {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+
+  if (userId == null || Number.isNaN(userId)) {
+    return {
+      cancelTicket: {
+        mutateAsync: async () => {
+          throw new Error("useTicketActions requires a numeric userId parameter (pengguna.user_id)");
+        },
+      },
+      updateTicket: {
+        mutateAsync: async () => {
+          throw new Error("useTicketActions requires a numeric userId parameter (pengguna.user_id)");
+        },
+      },
+    } as any;
+  }
 
   const cancelTicket = useMutation({
     mutationFn: async (ticketId: string) => {
-      if (!user?.id) throw new Error("User not authenticated");
-
       const { error } = await supabase.from("tiket").update({ status_tiket: "DIBATALKAN" }).eq("kode_tiket", ticketId);
 
       if (error) throw error;
@@ -385,8 +425,6 @@ export function useTicketActions() {
 
   const updateTicket = useMutation({
     mutationFn: async ({ ticketId, updates }: { ticketId: string; updates: any }) => {
-      if (!user?.id) throw new Error("User not authenticated");
-
       const { error } = await supabase.from("tiket").update(updates).eq("kode_tiket", ticketId);
 
       if (error) throw error;

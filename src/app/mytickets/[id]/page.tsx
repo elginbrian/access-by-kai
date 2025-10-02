@@ -12,9 +12,11 @@ const MyTicketDetailPage: React.FC = () => {
   const router = useRouter();
   const { user } = useAuth();
   const ticketId = params?.id as string;
+  const rawUserId = user?.profile?.user_id;
+  const parsedUserId = rawUserId == null ? NaN : typeof rawUserId === "string" ? parseInt(rawUserId, 10) : (rawUserId as number);
 
-  const { data: ticketDetail, isLoading, error } = useTicketDetail({ ticketId });
-  const { cancelTicket } = useTicketActions();
+  const { data: ticketDetail, isLoading, error } = useTicketDetail(parsedUserId, { ticketId });
+  const { cancelTicket } = useTicketActions(parsedUserId);
 
   const getCellFilled = (index: number): boolean => {
     const seed = ticketId?.split("").reduce((s, ch) => s + ch.charCodeAt(0), 0) + index;

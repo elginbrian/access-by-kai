@@ -21,7 +21,10 @@ const MyTicketsPage: React.FC = () => {
     limit: 50,
   };
 
-  const { data: tickets = [], isLoading: ticketsLoading, error: ticketsError } = useUserTickets(ticketParams);
+  const rawUserId = user?.profile?.user_id;
+  const parsedUserId = rawUserId == null ? NaN : typeof rawUserId === "string" ? parseInt(rawUserId, 10) : (rawUserId as number);
+
+  const { data: tickets = [], isLoading: ticketsLoading, error: ticketsError } = useUserTickets(parsedUserId, ticketParams);
 
   const filteredTickets = tickets.filter(
     (ticket: any) => ticket.trainName.toLowerCase().includes(searchQuery.toLowerCase()) || ticket.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase()) || ticket.passenger.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -33,7 +36,6 @@ const MyTicketsPage: React.FC = () => {
     { icon: "/ic_car.svg", title: "Shower Locker & Luxury Lounge", description: "Pesan fasilitas tambah untuk kenyamanan Anda", link: "Lihat Opsi" },
   ];
 
-  // Show loading state
   if (authLoading || ticketsLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -47,8 +49,21 @@ const MyTicketsPage: React.FC = () => {
       </div>
     );
   }
-
   // Show error state
+  if (!authLoading && Number.isNaN(parsedUserId)) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <MyTicketsHeader userName={user?.email?.split("@")[0] || "User"} />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Profil belum lengkap</h3>
+            <p className="text-gray-600 mb-4">Mohon lengkapi profil Anda agar user_id numerik tersedia.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   if (ticketsError) {
     return (
       <div className="min-h-screen bg-gray-50">

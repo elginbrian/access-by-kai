@@ -103,7 +103,11 @@ const NavBar = () => {
                   {/* Avatar + Dropdown */}
                   <div className="relative">
                     <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="flex items-center space-x-2 group">
-                      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Profile" className="w-9 h-9 rounded-full border-2 border-white/30 group-hover:border-white/50 transition-colors" />
+                      <img
+                        src={user?.profile?.foto_profil_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
+                        alt="Profile"
+                        className="w-9 h-9 rounded-full border-2 border-white/30 group-hover:border-white/50 transition-colors"
+                      />
                       {user?.profile?.nama_lengkap && <span className="text-white text-sm font-medium">{user.profile.nama_lengkap}</span>}
                     </button>
 
@@ -112,7 +116,8 @@ const NavBar = () => {
                         <button
                           onClick={() => {
                             setIsMenuOpen(false);
-                            router.push("/profile");
+                            const uid = user?.profile?.user_id ?? user?.id;
+                            if (uid) router.push(`/profile/${uid}`);
                           }}
                           className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                         >
@@ -195,8 +200,17 @@ const NavBar = () => {
                       <img src="/ic_bell.svg" alt="Notifications" />
                       <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     </button>
-                    <button onClick={handleAuthClick} className="flex items-center space-x-2">
-                      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Profile" className="w-9 h-9 rounded-full border-2 border-white/30" />
+                    <button
+                      onClick={() => {
+                        const uid = user?.profile?.user_id ?? user?.id;
+                        if (uid) {
+                          setIsMenuOpen(false);
+                          router.push(`/profile/${uid}`);
+                        }
+                      }}
+                      className="flex items-center space-x-2"
+                    >
+                      <img src={user?.profile?.foto_profil_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="Profile" className="w-9 h-9 rounded-full border-2 border-white/30" />
                       {user?.profile?.nama_lengkap && <span className="text-white text-sm font-medium">{user.profile.nama_lengkap}</span>}
                     </button>
                   </div>
