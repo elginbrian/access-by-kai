@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import Stepper from '@/components/logistics/Stepper';
 import NavBarServices from '@/components/navbar/NavBarServices';
 import PriceForm from '@/components/logistics/simulation/PriceForm';
@@ -8,6 +9,12 @@ import FileUploadCard from '@/components/logistics/simulation/FileUploadCard';
 import EstimatedCost from '@/components/logistics/simulation/EstimatedCost';
 
 const LogisticsPriceSimulationPage = () => {
+    const router = useRouter();
+
+    function goToBooking() {
+        router.push('/logistic/booking');
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 font-sans">
             <NavBarServices service="Logistics" />
@@ -45,7 +52,19 @@ const LogisticsPriceSimulationPage = () => {
                     </button>
                 </div>
 
-                <EstimatedCost />
+                <div className="mt-8 bg-white p-6 rounded-lg shadow-lg">
+
+                    <EstimatedCost />
+                    <button
+                        onClick={goToBooking}
+                        className="w-full py-3 rounded-lg text-white font-semibold bg-gradient-to-b from-[#6b46c1] to-[#3b82f6] hover:opacity-95 mt-6 flex items-center justify-center gap-2"
+                    >
+                        <span className="flex items-center justify-center gap-2">
+                            Selanjutnya
+                            <img src="/ic_arrow_right.svg" alt="" className="h-4 w-4" />
+                        </span>
+                    </button>
+                </div>
             </main>
         </div>
     );
