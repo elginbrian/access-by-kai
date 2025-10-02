@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import NavBarEPorter from '@/components/eporter/NavBarEPorter';
+import NavBarServices from '@/components/navbar/NavBarServices';
 import TicketInfoCard from '@/components/eporter/booking/TicketInfoCard';
 import PassengerListCard from '@/components/eporter/booking/PassengerListCard';
 import PortersList from '@/components/eporter/booking/PortersList';
@@ -68,7 +68,7 @@ const KAIEPorterBookingPage = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
             {/* Navigation */}
-            <NavBarEPorter />
+            <NavBarServices service="E-Porter" />
 
             {/* Main Content */}
             <div className="container mx-auto px-8 py-8">
