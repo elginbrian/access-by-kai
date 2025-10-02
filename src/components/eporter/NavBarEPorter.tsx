@@ -4,7 +4,7 @@ import React from 'react';
 
 const NavBarEPorter: React.FC = () => {
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-8 py-4 bg-white">
+        <nav className="sticky top-0 w-full z-30 flex items-center justify-between px-8 py-4 bg-white">
             <div className="flex items-center gap-2">
                 <div className="bg-blue-600 p-2 rounded-lg">
                     <img src="/ic_train.svg" alt="Train" />

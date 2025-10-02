@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import HeroSection from '@/components/eporter/HeroSection';
 import ActiveTicketsList from '@/components/eporter/ActiveTicketsList';
-import NavBarEPorter from '@/components/eporter/NavBar';
+import NavBarEPorter from '@/components/eporter/NavBarEPorter';
 import PorterBookingForm from '@/components/eporter/PorterBookingForm';
 
 // Sample ticket data - in a real app this would come from an API
