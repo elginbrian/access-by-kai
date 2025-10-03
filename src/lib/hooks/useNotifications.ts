@@ -313,3 +313,22 @@ export const useMyReviews = (userId?: string) => {
     staleTime: 60000, // 1 minute
   });
 };
+
+// Hook for admin reports (paginated)
+export const useAdminReports = (page = 1, limit = 20) => {
+  return useQuery({
+    queryKey: ["admin-reports", page, limit],
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/reports?page=${page}&limit=${limit}`, {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch admin reports");
+      }
+
+      return response.json();
+    },
+    staleTime: 60000, // 1 minute
+  });
+};

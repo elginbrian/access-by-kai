@@ -1,9 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useNotifications, useAdminReports } from "@/lib/hooks/useNotifications";
+import SummarizerLarge from "@/components/admin/SummarizerLarge";
 
-// Assuming 'colors' and 'Column' are defined elsewhere,
-// for example in a design system and a table component respectively.
-// We'll add placeholder types for this standalone file.
 namespace colors {
   export const violet = {
     light: "#f5f3ff",
@@ -88,32 +87,66 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const { data: notifData, isLoading: notifLoading, refetch: refetchNotifs } = useNotifications({ page, limit: 20 });
+  const [reports, setReports] = useState<any[]>([]);
+  const [reportsPage, setReportsPage] = useState(1);
+  const [reportsTotalPages, setReportsTotalPages] = useState(1);
+  const [reportsSummary, setReportsSummary] = useState<any | null>(null);
 
   useEffect(() => {
-    const fetchAdminNotifications = async () => {
-      setIsLoading(true);
+    if (notifData) {
+      setNotifications(notifData.data || []);
+      setTotalPages(Math.ceil((notifData.total || 0) / 20));
+    }
+  }, [notifData]);
+
+  const { data: reportsData, isLoading: reportsLoading, refetch: refetchReports } = useAdminReports(reportsPage, 20);
+
+  useEffect(() => {
+    if (reportsData) {
+      setReports(reportsData.data || []);
+      setReportsTotalPages(reportsData.pagination?.totalPages || 1);
+    }
+  }, [reportsData]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchReportsSummary() {
+      if (!reports || reports.length === 0) {
+        setReportsSummary(null);
+        return;
+      }
+
       try {
-        const res = await fetch(`/api/admin/notifications?page=${page}&limit=20`, { credentials: "include" });
+        const toSummarize = reports.slice(0, 5);
+        const res = await fetch(`/api/admin/reports/summarize`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reports: toSummarize }),
+        });
         const json = await res.json();
-        if (json?.success) {
-          setNotifications(json.data || []);
-          setTotalPages(json.pagination?.totalPages || 1);
+        if (!mounted) return;
+        if (json?.ok) {
+          if (json.structured) setReportsSummary(json.data ?? null);
+          else setReportsSummary({ summary_lines: json.lines ?? [json.summary ?? "Ringkasan tidak tersedia"], recommendations: [] });
         } else {
-          console.error("Failed to fetch admin notifications", json);
+          setReportsSummary(null);
         }
       } catch (e) {
-        console.error(e);
-      } finally {
-        setIsLoading(false);
+        console.error("Failed to summarize reports", e);
+        setReportsSummary(null);
       }
-    };
+    }
 
-    fetchAdminNotifications();
-  }, [page]);
+    fetchReportsSummary();
+    return () => {
+      mounted = false;
+    };
+  }, [reports]);
 
   const handleSendNotification = async () => {
     setStatusMessage(null);
-    // build payload
+
     const payload: any = {
       judul: selectedType + " - " + (message ? message.substring(0, 40) : "Notifikasi Baru"),
       pesan: message,
@@ -121,15 +154,11 @@ export default function Page() {
       priority_level: "NORMAL",
     };
 
-    // broadcast when 'Semua' target is chosen
     if (selectedTarget === "Semua") {
       payload.broadcast = true;
     } else if (selectedTarget === "Pelanggan") {
-      // leaving user_id empty means admin likely wants to broadcast to customers only;
-      // for now, we treat as broadcast as well
       payload.broadcast = true;
     } else {
-      // Admin-internal: send to admin user (current admin id not available here); fallback to broadcast
       payload.broadcast = true;
     }
 
@@ -154,7 +183,9 @@ export default function Page() {
 
         <div className="space-y-6">
           {/* AI Recommendations Section */}
-          <div className="space-y-4">{/* Commented out sections from original code */}</div>
+          <div className="space-y-4">
+            <SummarizerLarge overrideStructured={reportsSummary} skipFetch={true} />
+          </div>
 
           {/* Create Notification Form */}
           <div className="bg-white rounded-xl shadow p-6">
@@ -226,11 +257,9 @@ export default function Page() {
             {statusMessage && <p className="mt-3 text-sm text-gray-700">{statusMessage}</p>}
           </div>
 
-          {/* Notifications Table */}
           <div className="bg-white rounded-xl shadow p-4">
             <TableKelola title="Daftar Notifikasi" description="Riwayat notifikasi yang dikirim ke pengguna" columns={notificationColumns} data={notifications} />
 
-            {/* Simple pagination control */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-4">
                 <button onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 rounded-md border text-sm text-gray-600 hover:bg-gray-50">
@@ -240,6 +269,37 @@ export default function Page() {
                   Halaman {page} dari {totalPages}
                 </span>
                 <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 rounded-md border text-sm text-gray-600 hover:bg-gray-50">
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-xl shadow p-4 mt-6">
+            <TableKelola
+              title="Laporan Pengguna"
+              description="Daftar laporan/keluhan yang dikirim pengguna melalui landing page"
+              columns={[
+                { key: "id", label: "ID" },
+                { key: "title", label: "Judul" },
+                { key: "name", label: "Nama" },
+                { key: "email", label: "Email" },
+                { key: "issueType", label: "Jenis" },
+                { key: "description", label: "Deskripsi", className: "max-w-[600px]" },
+                { key: "created_at", label: "Dibuat" },
+              ]}
+              data={reports}
+            />
+
+            {reportsTotalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <button onClick={() => setReportsPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 rounded-md border text-sm text-gray-600 hover:bg-gray-50">
+                  Previous
+                </button>
+                <span className="px-4 py-2 text-sm text-gray-600">
+                  Halaman {reportsPage} dari {reportsTotalPages}
+                </span>
+                <button onClick={() => setReportsPage((p) => Math.min(reportsTotalPages, p + 1))} className="px-3 py-1.5 rounded-md border text-sm text-gray-600 hover:bg-gray-50">
                   Next
                 </button>
               </div>
