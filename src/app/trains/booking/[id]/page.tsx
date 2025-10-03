@@ -82,19 +82,21 @@ function TrainBookingContent() {
     setTrainTicketPrice,
   ]);
 
-  // Hydrate selected seats from central booking when returning to booking page
   React.useEffect(() => {
     try {
       const seatsFromCentral = bookingData.passengers.map((p) => p.seat || "");
-      // if central has seats saved, apply them to local seat selection
+
       const hasAnySeat = seatsFromCentral.some((s) => s && s !== "Belum dipilih");
       if (hasAnySeat) {
-        handleSeatSelect(seatsFromCentral);
+        const same = seatsFromCentral.length === selectedSeats.length && seatsFromCentral.every((s, i) => s === selectedSeats[i]);
+        if (!same) {
+          handleSeatSelect(seatsFromCentral);
+        }
       }
     } catch (e) {
       // ignore
     }
-  }, [bookingData.passengers, handleSeatSelect]);
+  }, [bookingData.passengers, handleSeatSelect, selectedSeats]);
 
   const bookerInfo = getBookerData();
   const allPassengersInfo = getAllPassengersData();
