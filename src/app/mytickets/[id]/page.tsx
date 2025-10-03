@@ -6,8 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import NavBarServices from "@/components/navbar/NavBarServices";
 import { useTicketDetail, useTicketActions } from "@/lib/hooks/useTickets";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { useTicketTransfer } from "@/lib/hooks/useTicketTransfer";
-import TransferTicketModal from "@/components/mytickets/TransferTicketModal";
+import TransferFlowModal from "@/components/mytickets/TransferFlowModal";
 import toast from "react-hot-toast";
 
 const MyTicketDetailPage: React.FC = () => {
@@ -20,7 +19,6 @@ const MyTicketDetailPage: React.FC = () => {
 
   const { data: ticketDetail, isLoading, error } = useTicketDetail(parsedUserId, { ticketId });
   const { cancelTicket } = useTicketActions(parsedUserId);
-  const { transferTicket, isLoading: isTransferLoading } = useTicketTransfer();
 
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
 
@@ -45,23 +43,7 @@ const MyTicketDetailPage: React.FC = () => {
     }
   };
 
-  const handleTransferTicket = async (nikTarget: string, namaTarget: string) => {
-    try {
-      await transferTicket({
-        ticketId: ticketId,
-        targetNik: nikTarget,
-        targetNama: namaTarget,
-      });
-
-      // Redirect to tickets list after successful transfer
-      setTimeout(() => {
-        router.push("/mytickets");
-      }, 2000);
-    } catch (error) {
-      // Error is already handled by the hook with toast
-      console.error("Transfer failed:", error);
-    }
-  };
+  // legacy transfer logic removed - using TransferFlowModal instead
 
   const handleAction = (action: string) => {
     switch (action) {
@@ -305,8 +287,14 @@ const MyTicketDetailPage: React.FC = () => {
         </div>
       </main>
 
-      {/* Transfer Modal */}
-      <TransferTicketModal isOpen={isTransferModalOpen} onClose={() => setIsTransferModalOpen(false)} onTransfer={handleTransferTicket} ticketNumber={ticketDetail?.ticketNumber || ticketDetail?.id || ""} isLoading={isTransferLoading} />
+      {/* Transfer Flow Modal (trusted contacts + two-way accept + waiting) */}
+      <TransferFlowModal
+        isOpen={isTransferModalOpen}
+        onClose={() => setIsTransferModalOpen(false)}
+        ticketId={String(ticketDetail?.tiketId ?? ticketDetail?.id ?? "")}
+        ticketNumber={String(ticketDetail?.ticketNumber ?? ticketDetail?.id ?? "")}
+        currentUserId={parsedUserId}
+      />
 
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

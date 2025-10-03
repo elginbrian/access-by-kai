@@ -87,6 +87,19 @@ export function usePayment(): PaymentState & PaymentActions {
 
     loadSnapScript();
 
+    // load grecaptcha script if site key available
+    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+    if (siteKey && typeof window !== "undefined" && !(window as any).grecaptcha) {
+      const existing = document.querySelector(`script[src*="recaptcha"]`);
+      if (!existing) {
+        const s = document.createElement("script");
+        s.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+        s.async = true;
+        s.defer = true;
+        document.head.appendChild(s);
+      }
+    }
+
     return () => {
       if (statusCheckIntervalRef.current) {
         clearInterval(statusCheckIntervalRef.current);
@@ -127,13 +140,51 @@ export function usePayment(): PaymentState & PaymentActions {
           setState((prev) => ({ ...prev, isLoading: false, error: "Silakan login untuk melanjutkan pemesanan" }));
           return;
         }
-        const resp = await fetch("/api/bookings/checkout", {
+        // try checkout; if server asks for captcha, run reCAPTCHA v3 and retry with token
+        let resp = await fetch("/api/bookings/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ bookingData, enabledPayments: paymentMethods, userId: numericUserId }),
         });
 
-        const data = await resp.json();
+        let data = await resp.json();
+
+        if (resp.status === 428 && data && data.captchaRequired) {
+          // Try to run reCAPTCHA v3: requires NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+          const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+          if (siteKey && typeof window !== "undefined" && (window as any).grecaptcha) {
+            try {
+              const runRecaptcha = () =>
+                new Promise<string>((resolve, reject) => {
+                  (window as any).grecaptcha.ready(() => {
+                    try {
+                      (window as any).grecaptcha
+                        .execute(siteKey, { action: "checkout" })
+                        .then((token: string) => resolve(token))
+                        .catch(reject);
+                    } catch (e) {
+                      reject(e);
+                    }
+                  });
+                });
+
+              const token = await runRecaptcha();
+              resp = await fetch("/api/bookings/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ bookingData, enabledPayments: paymentMethods, userId: numericUserId, captchaToken: token }),
+              });
+
+              data = await resp.json();
+            } catch (e) {
+              console.warn("reCAPTCHA execution failed", e);
+            }
+          } else {
+            // no site key or grecaptcha not loaded — surface helpful error
+            setState((prev) => ({ ...prev, isLoading: false, error: "Captcha diperlukan tapi belum dikonfigurasi" }));
+            return;
+          }
+        }
 
         if (!resp.ok) {
           setState((prev) => ({ ...prev, isLoading: false, error: data.error || "Gagal membuat pembayaran" }));

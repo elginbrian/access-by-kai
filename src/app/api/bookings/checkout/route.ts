@@ -1,10 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase";
+import { evaluateFraud } from "@/lib/antiFraud/simpleRules";
 import { midtransService } from "@/lib/midtrans";
 import * as jadwalKursiSvc from "@/lib/mcp/services/jadwal_kursi";
 
 const supabase = createClient();
+
+async function verifyCaptcha(token?: string | null, remoteIp?: string | null): Promise<boolean> {
+  if (!token) return false;
+  const secret = process.env.RECAPTCHA_SECRET;
+  if (!secret) {
+    console.warn("RECAPTCHA_SECRET not configured; rejecting captcha verification");
+    return false;
+  }
+
+  try {
+    const params = new URLSearchParams();
+    params.append("secret", secret);
+    params.append("response", token);
+    if (remoteIp) params.append("remoteip", remoteIp);
+
+    const resp = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString(),
+    });
+
+    const data = await resp.json();
+    if (!data || !data.success) return false;
+    if (typeof data.score === "number") {
+      return data.score >= 0.5;
+    }
+    return true;
+  } catch (e) {
+    console.warn("Error verifying captcha:", e);
+    return false;
+  }
+}
 
 const BookingPassengerSchema = z.object({
   name: z.string(),
@@ -51,16 +84,41 @@ const CheckoutRequestSchema = z.object({
     }),
   }),
   userId: z.number().optional(),
+  captchaToken: z.string().optional(),
   enabledPayments: z.array(z.string()).optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { bookingData, userId, enabledPayments } = CheckoutRequestSchema.parse(body);
+    const { bookingData, userId, captchaToken, enabledPayments } = CheckoutRequestSchema.parse(body);
 
     if (!userId) {
       return NextResponse.json({ error: "User must be authenticated to create a booking" }, { status: 401 });
+    }
+
+    try {
+      const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || null;
+      const fraudResult = await evaluateFraud({ supabase, userId, ip, passengerCount: (bookingData.passengers || []).length, totalAmount: bookingData.pricing.total });
+      if (fraudResult.action === "block") {
+        try {
+          await (supabase as any).from("fraud_events").insert({ user_id: userId || null, ip: ip || null, reason: fraudResult.reason || "blocked_by_rule", score: fraudResult.score || 1, created_at: new Date().toISOString() });
+        } catch (e) {}
+        return NextResponse.json({ error: "Pemesanan diblokir karena aktivitas mencurigakan" }, { status: 403 });
+      }
+      if (fraudResult.action === "flag") {
+        try {
+          await (supabase as any).from("fraud_events").insert({ user_id: userId || null, ip: ip || null, reason: fraudResult.reason || "flagged_by_rule", score: fraudResult.score || 0.5, created_at: new Date().toISOString() });
+        } catch (e) {}
+
+        // Require captcha when flagged. If client did not provide a valid captcha, tell them to solve it.
+        const captchaOk = await verifyCaptcha(captchaToken);
+        if (!captchaOk) {
+          return NextResponse.json({ error: "Captcha required", captchaRequired: true }, { status: 428 });
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to run anti-fraud check", e);
     }
 
     const rawCode = `BK${Date.now().toString().slice(-6)}${Math.random().toString(36).substring(2, 4).toUpperCase()}`;
@@ -145,7 +203,6 @@ export async function POST(request: NextRequest) {
           penumpang = penumpangRes;
           penumpangCreated = true;
         } else if (penumpangError) {
-          // handle duplicate identity (unique constraint on tipe_identitas+nomor_identitas)
           if ((penumpangError as any).code === "23505") {
             try {
               const { data: existing } = await supabase.from("penumpang").select().match({ tipe_identitas: penumpangPayload.tipe_identitas, nomor_identitas: penumpangPayload.nomor_identitas }).limit(1).maybeSingle();
