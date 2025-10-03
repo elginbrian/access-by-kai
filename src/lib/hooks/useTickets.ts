@@ -437,23 +437,14 @@ export function useTicketDetail(userId: number, params: TicketDetailParams) {
 export function useTicketActions(userId: number) {
   const queryClient = useQueryClient();
 
-  if (userId == null || Number.isNaN(userId)) {
-    return {
-      cancelTicket: {
-        mutateAsync: async () => {
-          throw new Error("useTicketActions requires a numeric userId parameter (pengguna.user_id)");
-        },
-      },
-      updateTicket: {
-        mutateAsync: async () => {
-          throw new Error("useTicketActions requires a numeric userId parameter (pengguna.user_id)");
-        },
-      },
-    } as any;
-  }
+  const isValidUserId = userId != null && !Number.isNaN(userId);
 
   const cancelTicket = useMutation({
     mutationFn: async (ticketId: string) => {
+      if (!isValidUserId) {
+        throw new Error("useTicketActions requires a numeric userId parameter (pengguna.user_id)");
+      }
+      
       const { error } = await supabase.from("tiket").update({ status_tiket: "DIBATALKAN" }).eq("kode_tiket", ticketId);
 
       if (error) throw error;
@@ -466,6 +457,10 @@ export function useTicketActions(userId: number) {
 
   const updateTicket = useMutation({
     mutationFn: async ({ ticketId, updates }: { ticketId: string; updates: any }) => {
+      if (!isValidUserId) {
+        throw new Error("useTicketActions requires a numeric userId parameter (pengguna.user_id)");
+      }
+      
       const { error } = await supabase.from("tiket").update(updates).eq("kode_tiket", ticketId);
 
       if (error) throw error;

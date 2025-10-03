@@ -1,11 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useParams, useRouter } from "next/navigation";
 import NavBarServices from "@/components/navbar/NavBarServices";
 import { useTicketDetail, useTicketActions } from "@/lib/hooks/useTickets";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { useTicketTransfer } from "@/lib/hooks/useTicketTransfer";
+import TransferTicketModal from "@/components/mytickets/TransferTicketModal";
 import toast from "react-hot-toast";
 
 const MyTicketDetailPage: React.FC = () => {
@@ -18,6 +20,9 @@ const MyTicketDetailPage: React.FC = () => {
 
   const { data: ticketDetail, isLoading, error } = useTicketDetail(parsedUserId, { ticketId });
   const { cancelTicket } = useTicketActions(parsedUserId);
+  const { transferTicket, isLoading: isTransferLoading } = useTicketTransfer();
+
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
 
   const getCellFilled = (index: number): boolean => {
     const seed = ticketId?.split("").reduce((s, ch) => s + ch.charCodeAt(0), 0) + index;
@@ -40,10 +45,28 @@ const MyTicketDetailPage: React.FC = () => {
     }
   };
 
+  const handleTransferTicket = async (nikTarget: string, namaTarget: string) => {
+    try {
+      await transferTicket({
+        ticketId: ticketId,
+        targetNik: nikTarget,
+        targetNama: namaTarget,
+      });
+
+      // Redirect to tickets list after successful transfer
+      setTimeout(() => {
+        router.push("/mytickets");
+      }, 2000);
+    } catch (error) {
+      // Error is already handled by the hook with toast
+      console.error("Transfer failed:", error);
+    }
+  };
+
   const handleAction = (action: string) => {
     switch (action) {
       case "transfer":
-        toast("Fitur transfer tiket akan segera tersedia", { icon: "ℹ️" });
+        setIsTransferModalOpen(true);
         break;
       case "cancel":
         handleCancelTicket();
@@ -243,27 +266,27 @@ const MyTicketDetailPage: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Kelola Tiket</h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-              <div className="bg-blue-50 hover:bg-blue-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition">
-                <img src="/ic_switch_blue.svg" alt="WiFi" />
+              <button onClick={() => handleAction("transfer")} className="bg-blue-50 hover:bg-blue-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
+                <img src="/ic_switch_blue.svg" alt="Transfer Tiket" />
                 <div className="text-sm text-gray-800">Transfer Tiket</div>
-              </div>
+              </button>
 
-              <div className="bg-red-50 hover:bg-red-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition">
+              <button onClick={() => handleAction("cancel")} className="bg-red-50 hover:bg-red-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
                 <img src="/ic_cancel.svg" alt="Pembatalan" />
                 <div className="text-sm text-gray-800">Pembatalan</div>
-              </div>
+              </button>
 
-              <div className="bg-yellow-50 hover:bg-yellow-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition">
+              <button onClick={() => handleAction("reschedule")} className="bg-yellow-50 hover:bg-yellow-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
                 <div className="mb-3 text-orange-500">
                   <img src="/ic_reschedule_orange.svg" alt="Reschedule" />
                 </div>
                 <div className="text-sm text-gray-800">Reschedule</div>
-              </div>
+              </button>
 
-              <div className="bg-green-50 hover:bg-green-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition">
+              <button onClick={() => handleAction("change-seat")} className="bg-green-50 hover:bg-green-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
                 <img src="/ic_change_seat.svg" alt="Ganti Kursi" />
                 <div className="text-sm text-gray-800">Ganti Kursi</div>
-              </div>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -282,6 +305,9 @@ const MyTicketDetailPage: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Transfer Modal */}
+      <TransferTicketModal isOpen={isTransferModalOpen} onClose={() => setIsTransferModalOpen(false)} onTransfer={handleTransferTicket} ticketNumber={ticketDetail?.ticketNumber || ticketDetail?.id || ""} isLoading={isTransferLoading} />
 
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

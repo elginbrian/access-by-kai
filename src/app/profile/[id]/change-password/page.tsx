@@ -19,7 +19,10 @@ const ChangePasswordPage = () => {
 
     return (
         <div className="min-h-screen flex" style={{ backgroundColor: colors.base.lightHover }}>
-            <ProfileSidebar />
+            <ProfileSidebar 
+                kaiPayBalance={125000} 
+                railPointBalance={2450} 
+            />
 
             {/* Main content with left margin */}
             <div className="flex-1 ml-80 bg-[#f9fafb]">

@@ -82,7 +82,11 @@ const ProfilePageClient: React.FC<Props> = ({ profile }) => {
 
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: colors.base.lightHover }}>
-      <ProfileSidebar profile={profile ?? undefined} />
+      <ProfileSidebar 
+        profile={profile ?? undefined} 
+        kaiPayBalance={125000} 
+        railPointBalance={2450} 
+      />
 
       <div className="flex-1 ml-80 bg-[#f9fafb]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

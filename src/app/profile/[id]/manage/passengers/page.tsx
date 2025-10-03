@@ -66,7 +66,10 @@ const ManagePassengersPage: React.FC = () => {
         <div className="min-h-screen flex" style={{ backgroundColor: colors.base.lightHover }}>
             {/* Sidebar - hidden on mobile */}
             <div className="hidden lg:block">
-                <ProfileSidebar />
+                <ProfileSidebar 
+                    kaiPayBalance={125000} 
+                    railPointBalance={2450} 
+                />
             </div>
 
             {/* Main content */}
