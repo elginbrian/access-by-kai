@@ -67,7 +67,7 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
   };
 
   return (
-    <nav className={`${isTransparent ? "bg-transparent" : "bg-white shadow-sm"} ${isHome ? "absolute top-0 left-0" : "relative"} w-full z-50 transition-colors duration-200`}>
+    <nav className={`${isTransparent ? "bg-transparent" : "bg-white "} ${isHome ? "fixed top-0 left-0" : "relative"} w-full z-50 transition-colors duration-200`}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-3">
@@ -77,7 +77,7 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
             <span className={`${isTransparent ? "text-white" : "text-black"} text-xl font-bold`}>KAI</span>
           </div>
           <div className="flex space-x-8">
-            <button onClick={() => handleNavClick("/")} className={`${isTransparent ? "text-white" : "text-purple-600"} ${isActive("/") ? "underline underline-offset-4 font-semibold" : "font-medium"} hover:opacity-80 transition-all`}>
+            <button onClick={() => handleNavClick("/")} className={`${isTransparent ? "text-white" : isActive("/") ? "text-purple-600 underline underline-offset-4 font-semibold" : "text-black font-medium"} hover:opacity-80 transition-all`}>
               Beranda
             </button>
 

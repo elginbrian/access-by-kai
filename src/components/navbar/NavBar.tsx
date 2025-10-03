@@ -152,7 +152,6 @@ const NavBar = () => {
                 </>
               ) : (
                 <>
-                  {/* Login/Register buttons when not logged in */}
                   <button onClick={() => handleNavClick("/auth/login")} className="text-white hover:text-white/70 transition-colors font-medium text-sm px-4 py-2 rounded-full border border-white/30 hover:border-white/50">
                     Masuk
                   </button>
@@ -163,14 +162,12 @@ const NavBar = () => {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 rounded-md text-white hover:bg-white/10">
               {isMenuOpen ? <XIcon /> : <MenuIcon />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {isMenuOpen && (
           <div
             className="md:hidden backdrop-blur-lg"
@@ -193,7 +190,6 @@ const NavBar = () => {
                 Logistik
               </button>
 
-              {/* Mobile Auth Section */}
               <div className="border-t border-white/10 pt-2 mt-2">
                 {isAuthenticated ? (
                   <div className="flex items-center space-x-4 px-3 py-2">

@@ -150,8 +150,34 @@ const SearchCard = () => {
   return (
     <div className="w-full max-w-[100rem] flex justify-center mx-auto p-6 pt-20">
       <div className="bg-white rounded-3xl shadow-2xl p-8 w-full">
-        <div className="relative flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold" style={{ color: colors.base.darker }}>
+              Pesan Perjalanan Keretamu
+            </h1>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <label htmlFor="roundTrip" className="text-sm font-medium text-gray-600">
+                Pulang Pergi
+              </label>
+              <input
+                id="roundTrip"
+                type="checkbox"
+                className="w-5 h-5"
+                checked={!!watchedValues.returnDate}
+                onChange={(e) => {
+                  if (!e.target.checked) {
+                    setValue("returnDate", "");
+                  } else {
+                    const dep = getValues("departureDate") || today;
+                    setValue("returnDate", dep);
+                  }
+                }}
+              />
+            </div>
+
             <div style={{ width: 220 }}>
               <PassengerSelect
                 value={{
@@ -166,30 +192,6 @@ const SearchCard = () => {
               />
             </div>
           </div>
-
-          <h1 className="absolute left-1/2 transform -translate-x-1/2 text-3xl font-bold text-center pointer-events-none" style={{ color: colors.base.darker }}>
-            Pesan Perjalanan Keretamu
-          </h1>
-
-          <div className="flex items-center space-x-2">
-            <label htmlFor="roundTrip" className="text-sm font-medium text-gray-600">
-              Pulang Pergi
-            </label>
-            <input
-              id="roundTrip"
-              type="checkbox"
-              className="w-5 h-5"
-              checked={!!watchedValues.returnDate}
-              onChange={(e) => {
-                if (!e.target.checked) {
-                  setValue("returnDate", "");
-                } else {
-                  const dep = getValues("departureDate") || today;
-                  setValue("returnDate", dep);
-                }
-              }}
-            />
-          </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -198,19 +200,21 @@ const SearchCard = () => {
             {/* Departure */}
             <div className="flex-1 min-w-[200px]">
               <label className="flex items-center text-sm font-semibold mb-2" style={{ color: colors.violet.normal }}>
-                <img src="/ic_train.svg" alt="Train Icon" style={{ color: colors.violet.normal }} />
-                <span className="ml-2">Dari (Keberangkatan)</span>
+                <span className="">Dari (Keberangkatan)</span>
               </label>
-              <CustomSelect
-                options={stationOptions}
-                value={watchedValues.departureStationId || ""}
-                onChange={(value) => setValue("departureStationId", typeof value === "string" && value.startsWith("city:") ? value : Number(value))}
-                placeholder={stationsLoading ? "Memuat stasiun..." : "Pilih stasiun keberangkatan"}
-                disabled={stationsLoading}
-                loading={stationsLoading}
-                searchable={true}
-                error={!!errors.departureStationId}
-              />
+              <div className="relative">
+                <CustomSelect
+                  className=""
+                  options={stationOptions}
+                  value={watchedValues.departureStationId || ""}
+                  onChange={(value) => setValue("departureStationId", typeof value === "string" && value.startsWith("city:") ? value : Number(value))}
+                  placeholder={stationsLoading ? "Memuat stasiun..." : "Pilih stasiun keberangkatan"}
+                  disabled={stationsLoading}
+                  loading={stationsLoading}
+                  searchable={true}
+                  error={!!errors.departureStationId}
+                />
+              </div>
             </div>
 
             {/* Swap Button */}
@@ -241,18 +245,21 @@ const SearchCard = () => {
             <div className="flex-1 min-w-[200px]">
               <label className="flex items-center text-sm font-semibold mb-2" style={{ color: colors.violet.normal }}>
                 <img src="/ic_train.svg" alt="Train Icon" style={{ color: colors.violet.normal }} />
-                <span className="ml-2">Ke (Tujuan)</span>
+                <span className="">Ke (Tujuan)</span>
               </label>
-              <CustomSelect
-                options={stationOptions}
-                value={watchedValues.arrivalStationId || ""}
-                onChange={(value) => setValue("arrivalStationId", typeof value === "string" && value.startsWith("city:") ? value : Number(value))}
-                placeholder={stationsLoading ? "Memuat stasiun..." : "Pilih stasiun tujuan"}
-                disabled={stationsLoading}
-                loading={stationsLoading}
-                searchable={true}
-                error={!!errors.arrivalStationId}
-              />
+              <div className="relative">
+                <CustomSelect
+                  className=""
+                  options={stationOptions}
+                  value={watchedValues.arrivalStationId || ""}
+                  onChange={(value) => setValue("arrivalStationId", typeof value === "string" && value.startsWith("city:") ? value : Number(value))}
+                  placeholder={stationsLoading ? "Memuat stasiun..." : "Pilih stasiun tujuan"}
+                  disabled={stationsLoading}
+                  loading={stationsLoading}
+                  searchable={true}
+                  error={!!errors.arrivalStationId}
+                />
+              </div>
             </div>
 
             {/* Departure Date */}
