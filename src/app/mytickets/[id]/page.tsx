@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Icon from "@/components/ui/Icon";
 import { useParams, useRouter } from "next/navigation";
 import NavBarServices from "@/components/navbar/NavBarServices";
 import { useTicketDetail, useTicketActions } from "@/lib/hooks/useTickets";
@@ -20,7 +21,7 @@ const MyTicketDetailPage: React.FC = () => {
   const { data: ticketDetail, isLoading, error } = useTicketDetail(parsedUserId, { ticketId });
   const { cancelTicket } = useTicketActions(parsedUserId);
   const { transferTicket, isLoading: isTransferLoading } = useTicketTransfer();
-  
+
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
 
   const getCellFilled = (index: number): boolean => {
@@ -51,7 +52,7 @@ const MyTicketDetailPage: React.FC = () => {
         targetNik: nikTarget,
         targetNama: namaTarget,
       });
-      
+
       // Redirect to tickets list after successful transfer
       setTimeout(() => {
         router.push("/mytickets");
@@ -96,7 +97,6 @@ const MyTicketDetailPage: React.FC = () => {
     );
   }
 
-  // Error state
   if (error || !ticketDetail) {
     return (
       <div className="min-h-screen bg-gray-50 font-sans">
@@ -104,9 +104,7 @@ const MyTicketDetailPage: React.FC = () => {
         <main className="max-w-6xl mx-auto p-8">
           <div className="text-center py-12">
             <div className="text-red-500 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
+              <Icon name="alert" className="w-16 h-16 mx-auto" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Tiket tidak ditemukan</h3>
             <p className="text-gray-600 mb-4">Tiket yang Anda cari tidak ditemukan atau tidak dapat diakses.</p>
@@ -268,36 +266,24 @@ const MyTicketDetailPage: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Kelola Tiket</h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-              <button
-                onClick={() => handleAction("transfer")}
-                className="bg-blue-50 hover:bg-blue-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer"
-              >
+              <button onClick={() => handleAction("transfer")} className="bg-blue-50 hover:bg-blue-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
                 <img src="/ic_switch_blue.svg" alt="Transfer Tiket" />
                 <div className="text-sm text-gray-800">Transfer Tiket</div>
               </button>
 
-              <button
-                onClick={() => handleAction("cancel")}
-                className="bg-red-50 hover:bg-red-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer"
-              >
+              <button onClick={() => handleAction("cancel")} className="bg-red-50 hover:bg-red-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
                 <img src="/ic_cancel.svg" alt="Pembatalan" />
                 <div className="text-sm text-gray-800">Pembatalan</div>
               </button>
 
-              <button
-                onClick={() => handleAction("reschedule")}
-                className="bg-yellow-50 hover:bg-yellow-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer"
-              >
+              <button onClick={() => handleAction("reschedule")} className="bg-yellow-50 hover:bg-yellow-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
                 <div className="mb-3 text-orange-500">
                   <img src="/ic_reschedule_orange.svg" alt="Reschedule" />
                 </div>
                 <div className="text-sm text-gray-800">Reschedule</div>
               </button>
 
-              <button
-                onClick={() => handleAction("change-seat")}
-                className="bg-green-50 hover:bg-green-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer"
-              >
+              <button onClick={() => handleAction("change-seat")} className="bg-green-50 hover:bg-green-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
                 <img src="/ic_change_seat.svg" alt="Ganti Kursi" />
                 <div className="text-sm text-gray-800">Ganti Kursi</div>
               </button>
@@ -321,13 +307,7 @@ const MyTicketDetailPage: React.FC = () => {
       </main>
 
       {/* Transfer Modal */}
-      <TransferTicketModal
-        isOpen={isTransferModalOpen}
-        onClose={() => setIsTransferModalOpen(false)}
-        onTransfer={handleTransferTicket}
-        ticketNumber={ticketDetail?.ticketNumber || ticketDetail?.id || ""}
-        isLoading={isTransferLoading}
-      />
+      <TransferTicketModal isOpen={isTransferModalOpen} onClose={() => setIsTransferModalOpen(false)} onTransfer={handleTransferTicket} ticketNumber={ticketDetail?.ticketNumber || ticketDetail?.id || ""} isLoading={isTransferLoading} />
 
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
