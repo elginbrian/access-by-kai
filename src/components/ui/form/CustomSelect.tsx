@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { colors } from "@/app/design-system";
+import Icon from "@/components/ui/Icon";
 
 export interface SelectOption {
   value: string | number;
@@ -149,9 +150,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, p
         {loading ? (
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 ml-2" style={{ borderColor: colors.violet.normal }} />
         ) : (
-          <svg className={`w-5 h-5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke={colors.base.darkHover} strokeWidth="2">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
+          <Icon name="chevDown" className={`w-5 h-5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
         )}
       </div>
 

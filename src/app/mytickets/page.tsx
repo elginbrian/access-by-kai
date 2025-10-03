@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Icon from "@/components/ui/Icon";
 import { useRouter } from "next/navigation";
 import MyTicketsHeader from "@/components/mytickets/MyTicketsHeader";
 import ServiceCard from "@/components/mytickets/ServiceCard";
@@ -71,9 +72,7 @@ const MyTicketsPage: React.FC = () => {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-12">
             <div className="text-red-500 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
+              <Icon name="alert" className="w-16 h-16 mx-auto" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Gagal memuat tiket</h3>
             <p className="text-gray-600 mb-4">Terjadi kesalahan saat mengambil data tiket Anda.</p>
@@ -108,11 +107,7 @@ const MyTicketsPage: React.FC = () => {
               value={searchQuery}
               onChange={(e: { target: { value: React.SetStateAction<string> } }) => setSearchQuery(e.target.value)}
               className="w-full rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              lefticon={
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
-                </svg>
-              }
+              lefticon={<Icon name="search" className="w-5 h-5 text-gray-400" />}
             />
           </div>
         </div>
@@ -163,9 +158,7 @@ const MyTicketsPage: React.FC = () => {
           {filteredTickets.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-4">
-                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+                <Icon name="file" className="w-16 h-16 mx-auto" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">{searchQuery ? "Tidak ada tiket yang ditemukan" : "Belum ada tiket"}</h3>
               <p className="text-gray-600 mb-4">{searchQuery ? `Tidak ditemukan tiket yang sesuai dengan "${searchQuery}"` : "Anda belum memiliki tiket perjalanan kereta api."}</p>
@@ -201,9 +194,7 @@ const MyTicketsPage: React.FC = () => {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center space-x-2 mb-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2L2 7v10c0 5.55 3.84 9.36 9 10.93 5.16-1.57 9-5.38 9-10.93V7l-10-5z" />
-            </svg>
+            <Icon name="grid" className="w-5 h-5" />
             <span className="font-bold">RailTravel</span>
           </div>
           <p className="text-gray-400 text-sm">© 2024 RailTravel. Semua hak cipta dilindungi.</p>

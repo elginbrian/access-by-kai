@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Fragment } from "react";
+import Icon from "@/components/ui/Icon";
 import { Menu, Transition } from "@headlessui/react";
 
 interface Props {
@@ -41,10 +42,7 @@ const UserDropdown: React.FC<Props> = ({ displayName = "User", displayAvatar = "
               <Menu.Item>
                 {({ active }) => (
                   <button onClick={() => go(profilePath ?? "/profile")} className={`${active ? "bg-gray-100" : ""} w-full text-left px-4 py-2 flex items-center gap-3 text-sm`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5.121 17.804A9 9 0 1118.88 6.196" />
-                      <path d="M12 12v.01" />
-                    </svg>
+                    <Icon name="user" className="w-4 h-4 text-gray-600" />
                     Profil
                   </button>
                 )}
@@ -53,10 +51,7 @@ const UserDropdown: React.FC<Props> = ({ displayName = "User", displayAvatar = "
               <Menu.Item>
                 {({ active }) => (
                   <button onClick={() => go("/mytickets")} className={`${active ? "bg-gray-100" : ""} w-full text-left px-4 py-2 flex items-center gap-3 text-sm`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M3 7h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
-                      <path d="M7 3v4" />
-                    </svg>
+                    <Icon name="box" className="w-4 h-4 text-gray-600" />
                     Tiket Saya
                   </button>
                 )}
@@ -69,11 +64,7 @@ const UserDropdown: React.FC<Props> = ({ displayName = "User", displayAvatar = "
               <Menu.Item>
                 {({ active }) => (
                   <button onClick={() => onLogout?.()} className={`${active ? "bg-gray-100" : ""} w-full text-left px-4 py-2 flex items-center gap-3 text-sm text-red-600`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V7" />
-                      <path d="M16 17l5-5-5-5" />
-                      <path d="M21 12H9" />
-                    </svg>
+                    <Icon name="logout" className="w-4 h-4" />
                     Keluar
                   </button>
                 )}

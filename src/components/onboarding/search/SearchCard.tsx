@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Icon from "@/components/ui/Icon";
 import { colors } from "../../../app/design-system";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -131,21 +132,8 @@ const SearchCard = () => {
     setValue("arrivalStationId", currentDeparture);
   };
 
-  const SwapIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="17 1 21 5 17 9" />
-      <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-      <polyline points="7 23 3 19 7 15" />
-      <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-    </svg>
-  );
-
-  const SearchIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.35-4.35" />
-    </svg>
-  );
+  const SwapIcon = () => <Icon name="swap" className="w-5 h-5" />;
+  const SearchIcon = () => <Icon name="search" className="w-5 h-5" />;
 
   return (
     <div className="w-full max-w-[100rem] flex justify-center mx-auto p-6 pt-20">
