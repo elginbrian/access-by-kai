@@ -67,7 +67,10 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
   };
 
   return (
-    <nav className={`${isTransparent ? "bg-transparent" : "bg-white "} ${isHome ? "fixed top-0 left-0" : "relative"} w-full z-50 transition-colors duration-200`}>
+    <nav
+      className={`${isTransparent ? "bg-transparent" : "bg-white "} ${isHome ? "fixed top-0 left-0" : "relative"} w-full z-50 transition-colors duration-200`}
+      style={isHome ? { right: "var(--ai-sidebar-width, 0px)", width: "calc(100% - var(--ai-sidebar-width, 0px))" } : undefined}
+    >
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-3">

@@ -31,20 +31,11 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ isOpen, onClose }) => {
   return (
     <>
       <div
-        className={`fixed inset-0 transition-all duration-300 ease-in-out ${isOpen ? "opacity-100 visible z-20" : "opacity-0 invisible z-[-1]"}`}
-        onClick={onClose}
+        className={`fixed right-0 bg-white shadow-2xl z-20 flex flex-col transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? "pointer-events-auto" : "pointer-events-none"}`}
         style={{
-          top: "64px",
-          backgroundColor: isOpen ? "rgba(0, 0, 0, 0.4)" : "rgba(0, 0, 0, 0)",
-        }}
-      />
-
-      <div
-        className={`fixed right-0 w-full sm:w-120 bg-white shadow-2xl z-20 flex flex-col transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
-        style={{
-          top: "64px",
-          height: "calc(100vh - 64px)",
-          maxHeight: "calc(100vh - 64px)",
+          top: "0px",
+          height: "100vh",
+          width: "var(--ai-sidebar-width, 0px)",
         }}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0" style={{ backgroundColor: colors.violet.light }}>

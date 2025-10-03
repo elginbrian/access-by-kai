@@ -6,8 +6,6 @@ import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 import SearchSummary from "@/components/trains/trainSummary/SearchSummary";
 import ScheduleEditCard from "@/components/trains/schedule/ScheduleEditCard";
 import PromoBanner from "@/components/trains/promotions/PromoBanner";
-import FloatingChat from "@/components/trains/floatButton/FloatingChat";
-import ChatSidebar from "@/components/trains/chat/ChatSidebar";
 import ErrorBoundary, { TrainErrorFallback } from "@/components/ErrorBoundary";
 import FilterSection from "@/components/trains/sections/FilterSection";
 import ActiveFiltersDisplay from "@/components/trains/sections/ActiveFiltersDisplay";
@@ -320,12 +318,6 @@ const TrainBookingResults = () => {
             </div>
           </div>
         </div>
-
-        {/* Floating Chat */}
-        <FloatingChat notificationCount={2} onClick={handleChatClick} isHidden={isChatOpen} />
-
-        {/* Chat Sidebar */}
-        <ChatSidebar isOpen={isChatOpen} onClose={handleCloseChatSidebar} />
       </div>
     </ErrorBoundary>
   );

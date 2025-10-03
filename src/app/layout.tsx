@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/lib/providers/Providers";
+import ChatShellClient from "@/components/global/ChatShellClient";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,7 +31,10 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <div style={{ paddingRight: "var(--ai-sidebar-width, 0px)", transition: "padding-right 0.3s" }}>{children}</div>
+          <ChatShellClient />
+        </Providers>
       </body>
     </html>
   );

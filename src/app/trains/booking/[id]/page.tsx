@@ -21,7 +21,6 @@ import PassengerManager from "@/components/trains/booking/PassengerManager";
 import SeatSelector from "@/components/trains/booking/SeatSelector";
 import SeatCounter from "@/components/trains/booking/SeatCounter";
 import PaymentButton from "@/components/trains/booking/PaymentButton";
-import FloatingChatButton from "@/components/trains/booking/FloatingChatButton";
 import LoadingScreen from "@/components/trains/booking/LoadingScreen";
 import AuthRequiredScreen from "@/components/trains/booking/AuthRequiredScreen";
 import ErrorScreen from "@/components/trains/booking/ErrorScreen";

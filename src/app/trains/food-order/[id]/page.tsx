@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from "react";
 import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 import BookingProgress from "@/components/trains/booking/BookingProgress";
-import FloatingChat from "@/components/trains/floatButton/FloatingChat";
 import FoodMenuTabs from "@/components/trains/food-order/FoodMenuTabs";
 import FoodMenuGrid from "@/components/trains/food-order/FoodMenuGrid";
 import OrderSummary from "@/components/trains/food-order/OrderSummary";
@@ -200,8 +199,6 @@ const TrainFoodOrderContent = () => {
           <FloatingCartButton itemCount={cart.reduce((sum, item) => sum + item.quantity, 0)} onClick={() => console.log("Cart clicked")} />
         </div>
       </div>
-      {/* Floating Chat */}
-      <FloatingChat notificationCount={2} onClick={handleChatClick} />
     </div>
   );
 };

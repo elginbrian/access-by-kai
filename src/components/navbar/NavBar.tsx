@@ -60,6 +60,8 @@ const NavBar = () => {
         paddingRight: "20px",
         position: "fixed",
         zIndex: 100,
+        right: "var(--ai-sidebar-width, 0px)",
+        width: "calc(100% - var(--ai-sidebar-width, 0px))",
       }}
     >
       <nav
