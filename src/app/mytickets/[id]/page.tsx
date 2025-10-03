@@ -82,7 +82,6 @@ const MyTicketDetailPage: React.FC = () => {
     }
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 font-sans">
