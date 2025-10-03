@@ -14,8 +14,7 @@ const QUERY_KEYS = {
   ulasanByService: (service: string) => ["ulasan", "service", service],
 };
 
-// List ulasan with filters
-export function useUlasanList(filters?: { jenis_layanan?: string; penilaian?: number; platform?: string; limit?: number }) {
+export function useUlasanList(filters?: { jenis_layanan?: UlasanRow["jenis_layanan"]; penilaian?: number; platform?: string; limit?: number }) {
   return useQuery({
     queryKey: [...QUERY_KEYS.ulasan, filters],
     queryFn: async () => {
@@ -73,7 +72,7 @@ export function useUlasanByUser(userId: number) {
 }
 
 // Get ulasan by service type
-export function useUlasanByService(jenisLayanan: string) {
+export function useUlasanByService(jenisLayanan: UlasanRow["jenis_layanan"]) {
   return useQuery({
     queryKey: QUERY_KEYS.ulasanByService(jenisLayanan),
     queryFn: async () => {
