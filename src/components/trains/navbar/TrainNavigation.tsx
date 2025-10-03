@@ -61,6 +61,11 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
   };
   const isHome = pathname === "/";
 
+  const isActive = (path: string) => {
+    if (path === "/") return pathname === "/";
+    return pathname.startsWith(path);
+  };
+
   return (
     <nav className={`${isTransparent ? "bg-transparent" : "bg-white shadow-sm"} ${isHome ? "absolute top-0 left-0" : "relative"} w-full z-50 transition-colors duration-200`}>
       <div className="max-w-7xl mx-auto px-6">
@@ -72,16 +77,19 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
             <span className={`${isTransparent ? "text-white" : "text-black"} text-xl font-bold`}>KAI</span>
           </div>
           <div className="flex space-x-8">
-            <button onClick={() => handleNavClick("/")} className={`${isTransparent ? "text-white" : "text-purple-600"} font-medium hover:opacity-80 transition-opacity`}>
+            <button onClick={() => handleNavClick("/")} className={`${isTransparent ? "text-white" : "text-purple-600"} ${isActive("/") ? "underline underline-offset-4 font-semibold" : "font-medium"} hover:opacity-80 transition-all`}>
               Beranda
             </button>
-            <button onClick={() => handleNavClick("/trains")} className={`${isTransparent ? "text-white" : "text-black"} hover:text-purple-600 transition-colors`}>
+
+            <button onClick={() => handleNavClick("/trains")} className={`${isTransparent ? "text-white" : isActive("/trains") ? "text-purple-600 font-semibold" : "text-black font-medium"} hover:text-purple-600 transition-colors`}>
               Antarkota
             </button>
-            <button onClick={() => handleNavClick("/e-porter")} className={`${isTransparent ? "text-white" : "text-black"} hover:text-purple-600 transition-colors`}>
+
+            <button onClick={() => handleNavClick("/e-porter")} className={`${isTransparent ? "text-white" : isActive("/e-porter") ? "text-purple-600 font-semibold" : "text-black font-medium"} hover:text-purple-600 transition-colors`}>
               E-Porter
             </button>
-            <button onClick={() => handleNavClick("/logistic")} className={`${isTransparent ? "text-white" : "text-black"} hover:text-purple-600 transition-colors`}>
+
+            <button onClick={() => handleNavClick("/logistic")} className={`${isTransparent ? "text-white" : isActive("/logistic") ? "text-purple-600 font-semibold" : "text-black font-medium"} hover:text-purple-600 transition-colors`}>
               Logistik
             </button>
           </div>

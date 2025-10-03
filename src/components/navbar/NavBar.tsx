@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { signOut } from "@/lib/auth/authService";
 import toast from "react-hot-toast";
@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isAuthenticated, loading } = useAuth();
 
   const handleAuthClick = async () => {
@@ -27,6 +28,12 @@ const NavBar = () => {
 
   const handleNavClick = (path: string) => {
     router.push(path);
+  };
+
+  const isActive = (path: string) => {
+    if (!pathname) return false;
+    if (path === "/") return pathname === "/";
+    return pathname.startsWith(path);
   };
 
   const MenuIcon = () => (
@@ -73,16 +80,16 @@ const NavBar = () => {
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center space-x-6">
-              <button onClick={() => handleNavClick("/")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
+              <button onClick={() => handleNavClick("/")} className={`text-white ${isActive("/") ? "underline underline-offset-4 font-semibold" : "hover:text-white/70"} transition-colors font-medium text-sm`}>
                 Beranda
               </button>
-              <button onClick={() => handleNavClick("/trains")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
+              <button onClick={() => handleNavClick("/trains")} className={`text-white ${isActive("/trains") ? "text-purple-300 font-semibold" : "hover:text-white/70"} transition-colors font-medium text-sm`}>
                 Antarkota
               </button>
-              <button onClick={() => handleNavClick("/e-porter")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
+              <button onClick={() => handleNavClick("/e-porter")} className={`text-white ${isActive("/e-porter") ? "text-purple-300 font-semibold" : "hover:text-white/70"} transition-colors font-medium text-sm`}>
                 E-Porter
               </button>
-              <button onClick={() => handleNavClick("/logistic")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
+              <button onClick={() => handleNavClick("/logistic")} className={`text-white ${isActive("/logistic") ? "text-purple-300 font-semibold" : "hover:text-white/70"} transition-colors font-medium text-sm`}>
                 Logistik
               </button>
             </div>
@@ -173,16 +180,16 @@ const NavBar = () => {
             }}
           >
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <button onClick={() => handleNavClick("/")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
+              <button onClick={() => handleNavClick("/")} className={`block w-full text-left px-3 py-2 rounded-md ${isActive("/") ? "underline underline-offset-4 font-semibold text-white" : "text-white hover:bg-white/10"}`}>
                 Beranda
               </button>
-              <button onClick={() => handleNavClick("/trains")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
+              <button onClick={() => handleNavClick("/trains")} className={`block w-full text-left px-3 py-2 rounded-md ${isActive("/trains") ? "text-purple-300 font-semibold" : "text-white hover:bg-white/10"}`}>
                 Antarkota
               </button>
-              <button onClick={() => handleNavClick("/e-porter")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
+              <button onClick={() => handleNavClick("/e-porter")} className={`block w-full text-left px-3 py-2 rounded-md ${isActive("/e-porter") ? "text-purple-300 font-semibold" : "text-white hover:bg-white/10"}`}>
                 E-Porter
               </button>
-              <button onClick={() => handleNavClick("/logistic")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
+              <button onClick={() => handleNavClick("/logistic")} className={`block w-full text-left px-3 py-2 rounded-md ${isActive("/logistic") ? "text-purple-300 font-semibold" : "text-white hover:bg-white/10"}`}>
                 Logistik
               </button>
 

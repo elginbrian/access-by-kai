@@ -90,7 +90,7 @@ const KAIEPorterPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
       <NavBarServices service="E-Porter" />
 
-      <div className="container mx-auto px-8 py-16">
+      <div className="container mx-auto px-8">
         <HeroSection
           title="Santai. Kami Urus Bagasimu."
           description="KAI e-Porter adalah layanan porter resmi di stasiun untuk membantu penumpang membawa barang bawaan. Pesan porter langsung lewat aplikasi, pilih jumlah sesuai kebutuhan, dan nikmati perjalanan lebih nyaman tanpa repot mengangkat koper"
