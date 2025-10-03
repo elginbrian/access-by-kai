@@ -8,6 +8,7 @@ import { TrainSearchSchema, type TrainSearchFormData } from "../../../lib/valida
 import { useStationsForSearch } from "../../../lib/hooks/train-search";
 import { useRouter } from "next/navigation";
 import CustomSelect from "../../ui/form/CustomSelect";
+import PassengerSelect, { PassengerValue } from "../../ui/form/PassengerSelect";
 
 const SearchCard = () => {
   const router = useRouter();
@@ -27,6 +28,7 @@ const SearchCard = () => {
       departureDate: "",
       returnDate: "",
       passengers: 1,
+      passengerBreakdown: { adults: 1, infants: 0 },
     },
   });
 
@@ -112,7 +114,9 @@ const SearchCard = () => {
       departure: getDepartureStations().join(","),
       arrival: getArrivalStations().join(","),
       departureDate: data.departureDate,
+      passengers: String(data.passengers || 1),
       ...(data.returnDate && { returnDate: data.returnDate }),
+      roundTrip: data.returnDate ? "true" : "false",
     });
 
     router.push(`/trains?${searchParams.toString()}`);
@@ -146,10 +150,47 @@ const SearchCard = () => {
   return (
     <div className="w-full max-w-[100rem] flex justify-center mx-auto p-6 pt-20">
       <div className="bg-white rounded-3xl shadow-2xl p-8 w-full">
-        {/* Title */}
-        <h1 className="text-3xl font-bold mb-8 text-center" style={{ color: colors.base.darker }}>
-          Pesan Perjalanan Keretamu
-        </h1>
+        <div className="relative flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-2">
+            <div style={{ width: 220 }}>
+              <PassengerSelect
+                value={{
+                  adults: watchedValues.passengerBreakdown?.adults ?? 1,
+                  infants: watchedValues.passengerBreakdown?.infants ?? 0,
+                }}
+                onChange={(val: PassengerValue) => {
+                  const total = val.adults + val.infants;
+                  setValue("passengers", total);
+                  setValue("passengerBreakdown", { adults: val.adults, infants: val.infants });
+                }}
+              />
+            </div>
+          </div>
+
+          <h1 className="absolute left-1/2 transform -translate-x-1/2 text-3xl font-bold text-center pointer-events-none" style={{ color: colors.base.darker }}>
+            Pesan Perjalanan Keretamu
+          </h1>
+
+          <div className="flex items-center space-x-2">
+            <label htmlFor="roundTrip" className="text-sm font-medium text-gray-600">
+              Pulang Pergi
+            </label>
+            <input
+              id="roundTrip"
+              type="checkbox"
+              className="w-5 h-5"
+              checked={!!watchedValues.returnDate}
+              onChange={(e) => {
+                if (!e.target.checked) {
+                  setValue("returnDate", "");
+                } else {
+                  const dep = getValues("departureDate") || today;
+                  setValue("returnDate", dep);
+                }
+              }}
+            />
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* Form Row - Exactly like original */}

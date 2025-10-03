@@ -1,4 +1,4 @@
-import NavBar from "@/components/navbar/NavBar";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 import Footer from "@/components/footer/Footer";
 import SearchCard from "@/components/onboarding/search/SearchCard";
 import ServicesSection from "@/components/onboarding/services/ServicesSection";
@@ -13,11 +13,10 @@ import { colors } from "./design-system";
 export default function Home() {
   return (
     <div className="bg-white min-h-screen w-full relative">
-      <NavBar />
+      <TrainNavigation />
 
-      {/* Hero Section */}
-      <section className="relative w-full h-[615px] overflow-hidden rounded-b-[32px]">
-        <img src="/img_bg_onboarding.png" alt="Onboarding Background" className="absolute inset-0 w-full h-full object-cover rounded-b-[32px]" />
+      <section className="relative w-full h-[600px] overflow-hidden rounded-b-[32px]">
+        <img src="/header.png" alt="Onboarding Background" className="absolute inset-0 w-full h-full object-cover rounded-b-[32px]" />
         <div className="absolute inset-0 bg-black opacity-30 z-10" />
         <div className="relative z-20 h-full flex flex-col items-center justify-center text-center">
           <h1 className="text-[56px] font-bold text-white mb-0 leading-tight drop-shadow-lg">
@@ -29,17 +28,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Overlapping Search Card */}
       <div className="absolute left-0 right-0 top-[400px] flex justify-center z-20">
         <SearchCard />
       </div>
 
-      {/* Main Content Sections */}
-      <div className="pt-[72px]">
+      <div className="pt-[84px]">
         <ServicesSection />
         <PromotionsSection />
         <div className="relative">
-          {/* Ornament line image, centered and behind both sections */}
           <div className="relative z-10">
             <DestinationSection />
           </div>

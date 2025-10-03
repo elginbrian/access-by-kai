@@ -51,9 +51,7 @@ const InputField: React.FC<InputFieldProps> = ({ label, startIcon, endIcon, valu
           }}
           // If an onChange handler is provided but no explicit `value` prop was passed,
           // prefer uncontrolled defaultValue (works with react-hook-form's register).
-          {...(typeof onChange === "function"
-            ? (typeof value === "undefined" ? { defaultValue: value ?? "", onChange } : { value: value ?? "", onChange })
-            : { defaultValue: value ?? "" })}
+          {...(typeof onChange === "function" ? (typeof value === "undefined" ? { defaultValue: value ?? "", onChange } : { value: value ?? "", onChange }) : { defaultValue: value ?? "" })}
           {...props}
         />
 

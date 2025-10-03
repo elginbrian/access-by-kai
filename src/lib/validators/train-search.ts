@@ -20,6 +20,14 @@ export const TrainSearchSchema = z
 
     passengers: z.number().min(1, "Minimal 1 penumpang").max(8, "Maksimal 8 penumpang").optional().default(1),
 
+    passengerBreakdown: z
+      .object({
+        adults: z.number().min(1, "Minimal 1 dewasa").max(8, "Maksimal 8 dewasa"),
+        infants: z.number().min(0, "Minimal 0 bayi").max(8, "Maksimal 8 bayi"),
+      })
+      .optional()
+      .default({ adults: 1, infants: 0 }),
+
     trainClass: z
       .enum(["EKSEKUTIF", "EKONOMI", "LUXURY", "PRIORITY"], {
         required_error: "Kelas kereta harus dipilih",
@@ -50,6 +58,16 @@ export const TrainSearchSchema = z
     }
   );
 
+// passenger breakdown (used by the UI) - only adults and infants are supported here
+export const PassengerBreakdownSchema = z
+  .object({
+    adults: z.number().min(1, "Minimal 1 dewasa").max(8, "Maksimal 8 dewasa"),
+    infants: z.number().min(0, "Minimal 0 bayi").max(8, "Maksimal 8 bayi"),
+  })
+  .default({ adults: 1, infants: 0 });
+
+// extend main search schema to allow passengerBreakdown
+// (passengerBreakdown was embedded directly into TrainSearchSchema above)
 export type TrainSearchFormData = z.infer<typeof TrainSearchSchema>;
 
 export const TrainScheduleSearchSchema = z.object({

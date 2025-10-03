@@ -77,16 +77,13 @@ const NavBar = () => {
                 Beranda
               </button>
               <button onClick={() => handleNavClick("/trains")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
-                Tiket
+                Antarkota
               </button>
-              <button onClick={() => handleNavClick("/routes")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
-                Rute
+              <button onClick={() => handleNavClick("/e-porter")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
+                E-Porter
               </button>
-              <button onClick={() => handleNavClick("/about")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
-                Tentang
-              </button>
-              <button onClick={() => handleNavClick("/contact")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
-                Kontak
+              <button onClick={() => handleNavClick("/logistic")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
+                Logistik
               </button>
             </div>
 
@@ -180,16 +177,13 @@ const NavBar = () => {
                 Beranda
               </button>
               <button onClick={() => handleNavClick("/trains")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
-                Tiket
+                Antarkota
               </button>
-              <button onClick={() => handleNavClick("/routes")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
-                Rute
+              <button onClick={() => handleNavClick("/e-porter")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
+                E-Porter
               </button>
-              <button onClick={() => handleNavClick("/about")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
-                Tentang
-              </button>
-              <button onClick={() => handleNavClick("/contact")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
-                Kontak
+              <button onClick={() => handleNavClick("/logistic")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
+                Logistik
               </button>
 
               {/* Mobile Auth Section */}

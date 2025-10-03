@@ -16,9 +16,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Access by KAI",
   description: "Sistem manajemen perkeretaapian yang komprehensif untuk Indonesia",
-  // icons: {
-  //   icon: "/ic_logo.svg",
-  // },
+  icons: {
+    icon: "/access_logo.png",
+    shortcut: "/access_logo.png",
+  },
 };
 
 export default function RootLayout({

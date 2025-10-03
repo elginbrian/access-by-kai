@@ -15,7 +15,7 @@ const SearchSummary: React.FC<SearchSummaryProps> = ({ departure, arrival, date,
   return (
     <div className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-between shadow-lg p-6 rounded-2xl">
+        <div className="flex items-center justify-between border-2 p-6 rounded-2xl">
           <div className="flex items-center space-x-6">
             <div>
               <div className="flex items-center space-x-1 text-xs text-black mb-1">
