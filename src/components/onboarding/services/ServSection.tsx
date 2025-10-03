@@ -2,17 +2,19 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { colors } from "@/app/design-system";
 
 interface ServiceCardProps {
     icon: string;
     title: string;
+    colors: string[];
     description: string;
     index: number;
     clickable?: boolean;
     onClick?: () => void;
 }
 
-const ServCard: React.FC<ServiceCardProps> = ({ icon, title, description, index, clickable = false, onClick }) => {
+const ServCard: React.FC<ServiceCardProps> = ({ icon, colors, title, description, index, clickable = false, onClick }) => {
     return (
         <div
             onClick={clickable ? onClick : undefined}
@@ -34,7 +36,7 @@ const ServCard: React.FC<ServiceCardProps> = ({ icon, title, description, index,
             <div
                 className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
                 style={{
-                    background: index % 2 === 0 ? "linear-gradient(135deg, #a855f7 0%, #6b46c1 100%)" : "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                    background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`,
                 }}
             >
                 <img src={icon} alt={title} className="w-8 h-8" />
@@ -49,35 +51,41 @@ const ServSection: React.FC = () => {
 
     const services = [
         {
-            icon: "/ic_ticket_booking.svg",
+            icon: "/ic_train.svg",
             title: "Antar Kota",
             description: "Pesan tiket kereta dengan mudah",
             href: "/trains",
+            colors: ["#8eb5f5ff", "#2563eb"], 
         },
         {
             icon: "/ic_train.svg",
             title: "Kereta Lokal",
             description: "Tiket kereta lokal untuk perjalanan sehari-hari",
+            colors: ["#f7ce67ff", "#e1852fff"],
         },
         {
             icon: "/ic_train.svg",
             title: "Commuter Line",
             description: "Tiket commuter untuk perjalanan harian",
+            colors: ["#f17474ff", "#de3333ff"],
         },
         {
             icon: "/ic_train.svg",
             title: "LRT",
             description: "Tiket light rail transit",
+            colors: ["#e23232ff", "#a144c9ff"],
         },
         {
             icon: "/ic_train.svg",
             title: "Bandara",
             description: "Tiket kereta bandara",
+            colors: ["#55ecf7ff", "#335edeff"],
         },
         {
             icon: "/ic_train.svg",
             title: "Whoosh",
             description: "Tiket kereta cepat",
+            colors: ["#ef3535ff", "#ab0f0fff"],
         },
     ];
 
@@ -102,6 +110,7 @@ const ServSection: React.FC = () => {
                                 title={service.title}
                                 description={service.description}
                                 clickable={Boolean(service.href)}
+                                colors={service.colors}
                                 onClick={() => {
                                     if (service.href) router.push(service.href);
                                 }}
