@@ -8,7 +8,6 @@ import { useTicketDetail, useTicketActions } from "@/lib/hooks/useTickets";
 import { useAuth } from "@/lib/auth/AuthContext";
 import TransferFlowModal from "@/components/mytickets/TransferFlowModal";
 import CancelTicketModal from "@/components/mytickets/CancelTicketModal";
-import { useSeatChange } from "@/lib/hooks/useSeatChange";
 import toast from "react-hot-toast";
 
 const MyTicketDetailPage: React.FC = () => {
@@ -21,7 +20,6 @@ const MyTicketDetailPage: React.FC = () => {
 
   const { data: ticketDetail, isLoading, error } = useTicketDetail(parsedUserId, { ticketId });
   const { cancelTicket } = useTicketActions(parsedUserId);
-  const { startSeatChange } = useSeatChange();
 
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -33,7 +31,7 @@ const MyTicketDetailPage: React.FC = () => {
 
   const handleCancelTicket = async () => {
     if (!ticketDetail) return;
-
+    
     // Open the cancel modal instead of simple confirm
     setIsCancelModalOpen(true);
   };
@@ -50,46 +48,10 @@ const MyTicketDetailPage: React.FC = () => {
         toast("Fitur reschedule akan segera tersedia", { icon: "ℹ️" });
         break;
       case "change-seat":
-        handleChangeSeat();
+        toast("Fitur ganti kursi akan segera tersedia", { icon: "ℹ️" });
         break;
       default:
         break;
-    }
-  };
-
-  const handleChangeSeat = async () => {
-    if (!ticketDetail) {
-      toast.error("Data tiket tidak ditemukan");
-      return;
-    }
-
-    if (ticketDetail.status !== "active") {
-      toast.error("Hanya tiket aktif yang dapat diganti kursinya");
-      return;
-    }
-
-    try {
-      // Calculate change fee (15% of original ticket price)
-      const changeFee = Math.round(ticketDetail.price.ticketPrice * 0.15);
-      const adminFee = 5000;
-      const totalFee = changeFee + adminFee;
-
-      const confirmMessage = `Ganti kursi dari ${ticketDetail.seat.number} ke kursi baru?
-
-Biaya ganti kursi: Rp ${changeFee.toLocaleString("id-ID")}
-Biaya admin: Rp ${adminFee.toLocaleString("id-ID")}
-Total biaya: Rp ${totalFee.toLocaleString("id-ID")}
-
-Lanjutkan ke pemilihan kursi?`;
-
-      const confirmed = window.confirm(confirmMessage);
-
-      if (confirmed) {
-        startSeatChange(ticketDetail, parsedUserId);
-      }
-    } catch (error) {
-      console.error("Error starting seat change:", error);
-      toast.error("Gagal memulai proses ganti kursi");
     }
   };
 
@@ -143,6 +105,18 @@ Lanjutkan ke pemilihan kursi?`;
                   <img src="/ic_train.svg" alt="Train" className="w-5 h-5" />
                 </div>
                 <span className="font-semibold truncate max-w-[420px] block">{ticketDetail.trainName}</span>
+                {/* Status Badge */}
+                {ticketDetail.status !== "active" && (
+                  <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    ticketDetail.status === "cancelled" ? "bg-red-500 text-white" :
+                    ticketDetail.status === "completed" ? "bg-green-500 text-white" :
+                    ticketDetail.status === "expired" ? "bg-gray-500 text-white" : ""
+                  }`}>
+                    {ticketDetail.status === "cancelled" && "DIBATALKAN"}
+                    {ticketDetail.status === "completed" && "SELESAI"}
+                    {ticketDetail.status === "expired" && "KADALUARSA"}
+                  </div>
+                )}
               </div>
               <div className="text-right">
                 <div className="text-sm opacity-90">No. Tiket</div>
@@ -272,49 +246,89 @@ Lanjutkan ke pemilihan kursi?`;
               </div>
             </div>
           </div>
-          <div className="w-full p-6 border-t border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Kelola Tiket</h3>
+          {/* Kelola Tiket - only show for active tickets */}
+          {ticketDetail.status === "active" && (
+            <div className="w-full p-6 border-t border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Kelola Tiket</h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-              <button onClick={() => handleAction("transfer")} className="bg-blue-50 hover:bg-blue-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
-                <img src="/ic_switch_blue.svg" alt="Transfer Tiket" />
-                <div className="text-sm text-gray-800">Transfer Tiket</div>
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+                <button onClick={() => handleAction("transfer")} className="bg-blue-50 hover:bg-blue-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
+                  <img src="/ic_switch_blue.svg" alt="Transfer Tiket" />
+                  <div className="text-sm text-gray-800">Transfer Tiket</div>
+                </button>
 
-              <button onClick={() => handleAction("cancel")} className="bg-red-50 hover:bg-red-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
-                <img src="/ic_cancel.svg" alt="Pembatalan" />
-                <div className="text-sm text-gray-800">Pembatalan</div>
-              </button>
+                <button onClick={() => handleAction("cancel")} className="bg-red-50 hover:bg-red-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
+                  <img src="/ic_cancel.svg" alt="Pembatalan" />
+                  <div className="text-sm text-gray-800">Pembatalan</div>
+                </button>
 
-              <button onClick={() => handleAction("reschedule")} className="bg-yellow-50 hover:bg-yellow-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
-                <div className="mb-3 text-orange-500">
-                  <img src="/ic_reschedule_orange.svg" alt="Reschedule" />
+                <button onClick={() => handleAction("reschedule")} className="bg-yellow-50 hover:bg-yellow-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
+                  <div className="mb-3 text-orange-500">
+                    <img src="/ic_reschedule_orange.svg" alt="Reschedule" />
+                  </div>
+                  <div className="text-sm text-gray-800">Reschedule</div>
+                </button>
+
+                <button onClick={() => handleAction("change-seat")} className="bg-green-50 hover:bg-green-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
+                  <img src="/ic_change_seat.svg" alt="Ganti Kursi" />
+                  <div className="text-sm text-gray-800">Ganti Kursi</div>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button className="w-full bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center gap-3 hover:from-blue-700 hover:to-purple-700 transition">
+                  <img src="/ic_print.svg" alt="Print" />
+                  Cetak E-Boarding Pass
+                </button>
+
+                <button className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg flex items-center justify-center gap-3 hover:bg-gray-200 transition">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 4v16M4 12h16" />
+                  </svg>
+                  Tambah Penumpang Bayi
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Status Info for non-active tickets */}
+          {ticketDetail.status !== "active" && (
+            <div className="w-full p-6 border-t border-gray-200">
+              <div className="text-center py-8">
+                <div className="mb-4">
+                  {ticketDetail.status === "cancelled" && (
+                    <div className="inline-flex items-center px-4 py-2 rounded-full bg-red-100 text-red-800">
+                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      Tiket Dibatalkan
+                    </div>
+                  )}
+                  {ticketDetail.status === "completed" && (
+                    <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-800">
+                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      Perjalanan Selesai
+                    </div>
+                  )}
+                  {ticketDetail.status === "expired" && (
+                    <div className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-800">
+                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      </svg>
+                      Tiket Kadaluarsa
+                    </div>
+                  )}
                 </div>
-                <div className="text-sm text-gray-800">Reschedule</div>
-              </button>
-
-              <button onClick={() => handleAction("change-seat")} className="bg-green-50 hover:bg-green-100 rounded-lg p-6 flex flex-col items-center justify-center text-center transition cursor-pointer">
-                <img src="/ic_change_seat.svg" alt="Ganti Kursi" />
-                <div className="text-sm text-gray-800">Ganti Kursi</div>
-              </button>
+                <p className="text-gray-600 text-sm">
+                  {ticketDetail.status === "cancelled" && "Tiket ini telah dibatalkan dan tidak dapat digunakan."}
+                  {ticketDetail.status === "completed" && "Perjalanan Anda telah selesai. Terima kasih telah menggunakan layanan kami."}
+                  {ticketDetail.status === "expired" && "Tiket ini telah melewati batas waktu dan tidak dapat digunakan."}
+                </p>
+              </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button
-                onClick={() => window.print()}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center gap-3 hover:from-blue-700 hover:to-purple-700 transition">
-                <img src="/ic_print.svg" alt="Print" />
-                Cetak E-Boarding Pass
-              </button>
-
-              <button className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg flex items-center justify-center gap-3 hover:bg-gray-200 transition">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 4v16M4 12h16" />
-                </svg>
-                Tambah Penumpang Bayi
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       </main>
 

@@ -169,6 +169,10 @@ export function useCancelTicketWithRefund() {
       queryClient.invalidateQueries({ queryKey: ["ticketDetail"] });
       queryClient.invalidateQueries({ queryKey: ["pembatalan_tiket"] });
       queryClient.invalidateQueries({ queryKey: ["pengguna"] }); // For updated KAIPay balance
+      
+      // Force refresh all ticket-related queries to ensure status updates
+      queryClient.refetchQueries({ queryKey: ["userTickets"] });
+      queryClient.refetchQueries({ queryKey: ["ticketDetail"] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
