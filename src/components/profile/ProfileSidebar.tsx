@@ -16,6 +16,8 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
   const pathname = usePathname();
   const userId = profile?.user_id;
   const email = profile?.email || "john.doe@email.com";
+
+  const name = profile?.nama_lengkap ? String(profile.nama_lengkap) : email ? String(email).split("@")[0] : "Pengguna";
   const avatarInitials = (profile?.nama_lengkap || "JD")
     .split(" ")
     .map((s) => s[0])
@@ -23,28 +25,28 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
     .join("");
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID').format(amount);
+    return new Intl.NumberFormat("id-ID").format(amount);
   };
 
   const navigationItems = [
     {
       label: "Riwayat Tiket",
-      path: userId ? `/${userId}` : '#',
+      path: userId ? `/${userId}` : "#",
       icon: null,
     },
     {
-      label: "KAI Pay & RaiPoint", 
-      path: userId ? `/${userId}/paycard` : '#',
+      label: "KAI Pay & RaiPoint",
+      path: userId ? `/${userId}/paycard` : "#",
       icon: null,
     },
     {
       label: "Ganti Kata Sandi",
-      path: userId ? `/${userId}/change-password` : '#',
+      path: userId ? `/${userId}/change-password` : "#",
       icon: null,
     },
     {
       label: "Daftar Penumpang",
-      path: userId ? `/${userId}/manage/passengers` : '#',
+      path: userId ? `/${userId}/manage/passengers` : "#",
       icon: null,
     },
     {
@@ -85,10 +87,7 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
       <div className="space-y-4 mb-8">
         {userId ? (
           <>
-            <Link 
-              href={`/${userId}/paycard`}
-              className="block"
-            >
+            <Link href={`/${userId}/paycard`} className="block">
               <div
                 className="text-white rounded-xl p-5 shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
                 style={{
@@ -104,10 +103,7 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
               </div>
             </Link>
 
-            <Link 
-              href={`/${userId}/paycard`}
-              className="block"
-            >
+            <Link href={`/${userId}/paycard`} className="block">
               <div
                 className="text-white rounded-xl p-5 shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
                 style={{
@@ -159,25 +155,17 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
       <nav className="space-y-2">
         {navigationItems.map((item) => {
           const isActive = isActivePath(item.path);
-          const isDisabled = item.path === '#';
-          
+          const isDisabled = item.path === "#";
+
           return isDisabled ? (
-            <div
-              key={item.path}
-              className="block w-full text-left px-4 py-3 rounded-xl font-medium opacity-50 cursor-not-allowed border border-gray-100"
-              style={{ color: colors.base.darkActive }}
-            >
+            <div key={item.path} className="block w-full text-left px-4 py-3 rounded-xl font-medium opacity-50 cursor-not-allowed border border-gray-100" style={{ color: colors.base.darkActive }}>
               {item.label}
             </div>
           ) : (
             <Link
               key={item.path}
               href={item.path}
-              className={`block w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-[1.02] ${
-                isActive
-                  ? "text-white shadow-md"
-                  : "hover:bg-gray-50 border border-gray-100"
-              }`}
+              className={`block w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-[1.02] ${isActive ? "text-white shadow-md" : "hover:bg-gray-50 border border-gray-100"}`}
               style={
                 isActive
                   ? {
@@ -191,12 +179,8 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
             </Link>
           );
         })}
-        
-        <button 
-          onClick={handleLogout}
-          className="w-full text-left px-4 py-3 rounded-xl hover:bg-red-50 transition-all duration-200 transform hover:scale-[1.01] border border-gray-100" 
-          style={{ color: colors.red.normal }}
-        >
+
+        <button onClick={handleLogout} className="w-full text-left px-4 py-3 rounded-xl hover:bg-red-50 transition-all duration-200 transform hover:scale-[1.01] border border-gray-100" style={{ color: colors.red.normal }}>
           Keluar
         </button>
       </nav>
