@@ -23,6 +23,7 @@ export * from "./pemesanan_segment";
 export * from "./log_perpindahan_kursi";
 export * from "./permintaan_perpindahan_kursi";
 export * from "./template_kursi";
+export * from "./useSeatChange";
 export * from "./connecting_routes";
 export * from "./program_loyalitas";
 export * from "./jadwal_gerbong";
