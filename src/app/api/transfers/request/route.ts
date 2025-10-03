@@ -3,9 +3,8 @@ import { createAdminClient } from "@/lib/supabase";
 import { TransferRequestSchema } from "@/lib/validators/transfer";
 import { checkTransferAllowed } from "@/lib/services/transferAntiFraud";
 
-const admin: any = createAdminClient();
-
 export async function POST(req: Request) {
+  const admin: any = createAdminClient();
   try {
     const body = await req.json();
     const parsed = TransferRequestSchema.parse(body);

@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase";
 
-const admin: any = createAdminClient();
-
 export async function GET(req: Request) {
+  const admin: any = createAdminClient();
   try {
     const url = new URL(req.url);
     const userId = url.searchParams.get("userId");
@@ -16,4 +15,7 @@ export async function GET(req: Request) {
   } catch (err: any) {
     return NextResponse.json({ ok: false, error: err?.message ?? String(err) }, { status: 500 });
   }
+}
+export async function POST(req: Request) {
+  const admin: any = createAdminClient();
 }

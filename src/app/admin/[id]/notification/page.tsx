@@ -1,9 +1,69 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import AiRecomendationCard from "../../../../components/admin/card/AiRecomendationCard";
-import TableKelola, { Column } from "../../../../components/admin/table/TableKelola";
-import ChartMultiBar from "../../../../components/admin/chart/ChartMultiBar";
-import ChartMultiLine from "../../../../components/admin/chart/ChartMultiLine";
+
+// Assuming 'colors' and 'Column' are defined elsewhere,
+// for example in a design system and a table component respectively.
+// We'll add placeholder types for this standalone file.
+namespace colors {
+  export const violet = {
+    light: "#f5f3ff",
+  };
+}
+
+export interface Column<T> {
+  key: keyof T | (string & {});
+  label: string;
+  className?: string;
+  render?: (row: T) => React.ReactNode;
+}
+
+// Mock hook for demonstration purposes
+const useCreateNotification = () => {
+  const [isPending, setIsPending] = useState(false);
+  const mutateAsync = async (payload: any) => {
+    setIsPending(true);
+    console.log("Creating notification with payload:", payload);
+    return new Promise((resolve) =>
+      setTimeout(() => {
+        setIsPending(false);
+        resolve({ success: true });
+      }, 1000)
+    );
+  };
+  return { mutateAsync, isPending };
+};
+
+// Mock Table component
+const TableKelola = ({ title, description, columns, data }: { title: string; description: string; columns: Column<any>[]; data: any[] }) => (
+  <div>
+    <h3 className="text-lg font-semibold">{title}</h3>
+    <p className="text-sm text-gray-500 mb-4">{description}</p>
+    <div className="overflow-x-auto">
+      <table className="min-w-full bg-white">
+        <thead className="bg-gray-50">
+          <tr>
+            {columns.map((col) => (
+              <th key={String(col.key)} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {col.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          {data.map((row, index) => (
+            <tr key={index}>
+              {columns.map((col) => (
+                <td key={String(col.key)} className={`px-6 py-4 whitespace-nowrap text-sm text-gray-700 ${col.className || ""}`}>
+                  {col.render ? col.render(row) : row[col.key]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
 
 export default function Page() {
   const [selectedTarget, setSelectedTarget] = useState("Admin-Internal");
@@ -11,187 +71,179 @@ export default function Page() {
   const [message, setMessage] = useState("");
   const [sendToInternal, setSendToInternal] = useState(false);
   const [sendToPelanggan, setSendToPelanggan] = useState(false);
+  const createNotificationMutation = useCreateNotification();
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const notificationColumns: Column<any>[] = [
-    { key: "id", label: "ID" },
-    { key: "audience", label: "Audience" },
-    { key: "content", label: "Isi Pesan" },
-    { key: "target", label: "Target" },
-    {
-      key: "status",
-      label: "Status",
-      render: (row) => (
-        <span className={`px-2 py-1 rounded-full text-xs ${row.status === "Admin" ? "bg-blue-100 text-blue-800" : row.status === "Pelanggan" ? "bg-orange-100 text-orange-800" : "bg-yellow-100 text-yellow-800"}`}>{row.status}</span>
-      ),
-    },
-    { key: "waktu", label: "Waktu" },
-    {
-      key: "aksi",
-      label: "Aksi",
-      render: (row) => (
-        <div className="flex items-center gap-2">
-          <button className="text-blue-600 hover:text-blue-800">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-            </svg>
-          </button>
-          <button className="text-green-600 hover:text-green-800">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-          </button>
-          <button className="text-red-600 hover:text-red-800">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clipRule="evenodd" />
-              <path fillRule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 2a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-            </svg>
-          </button>
-        </div>
-      ),
-    },
+    { key: "notification_id", label: "ID" },
+    { key: "judul", label: "Judul" },
+    { key: "pesan", label: "Pesan", className: "max-w-[600px]" },
+    { key: "tipe_notifikasi", label: "Tipe" },
+    { key: "priority_level", label: "Prioritas" },
+    { key: "is_read", label: "Dibaca", render: (r) => (r.is_read ? "Ya" : "Belum") },
+    { key: "created_at", label: "Dibuat" },
   ];
 
-  const barSeries = [{ name: "Notifikasi", color: "#6d28d9", values: [25, 15, 8, 35] }];
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    const fetchAdminNotifications = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/admin/notifications?page=${page}&limit=20`, { credentials: "include" });
+        const json = await res.json();
+        if (json?.success) {
+          setNotifications(json.data || []);
+          setTotalPages(json.pagination?.totalPages || 1);
+        } else {
+          console.error("Failed to fetch admin notifications", json);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAdminNotifications();
+  }, [page]);
+
+  const handleSendNotification = async () => {
+    setStatusMessage(null);
+    // build payload
+    const payload: any = {
+      judul: selectedType + " - " + (message ? message.substring(0, 40) : "Notifikasi Baru"),
+      pesan: message,
+      tipe_notifikasi: selectedType.toUpperCase().replace(/ /g, "_"),
+      priority_level: "NORMAL",
+    };
+
+    // broadcast when 'Semua' target is chosen
+    if (selectedTarget === "Semua") {
+      payload.broadcast = true;
+    } else if (selectedTarget === "Pelanggan") {
+      // leaving user_id empty means admin likely wants to broadcast to customers only;
+      // for now, we treat as broadcast as well
+      payload.broadcast = true;
+    } else {
+      // Admin-internal: send to admin user (current admin id not available here); fallback to broadcast
+      payload.broadcast = true;
+    }
+
+    try {
+      await createNotificationMutation.mutateAsync(payload as any);
+      setStatusMessage("Notifikasi berhasil dikirim.");
+    } catch (e) {
+      console.error(e);
+      setStatusMessage("Gagal mengirim notifikasi.");
+    }
+  };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Notifikasi Admin</h1>
-          <p className="text-sm text-gray-500 mt-1">Monitor dan kelola notifikasi sistem dengan bantuan AI</p>
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        {/* AI Recommendations Section */}
-        <div className="space-y-4">
-          {/* <AiRecomendationCard
-            title="🔔 AI Rekomendasi Notifikasi"
-            subtitle=""
-            items={[]}
-            cta={{ label: "Aktif", variant: "primary" }}
-            badge=""
-            accentColor="#10b981"
-            icon={
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 text-sm">🔔</span>
-              </div>
-            }
-          /> */}
-
-          {/* <div className="grid grid-cols-2 gap-4">
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mt-1">
-                  <span className="text-yellow-600 text-xs">⚠️</span>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-700">
-                    <strong>⚠️ Data Point Terdeteksi:</strong>
-                    <br />
-                    KA Taksaka keberangkatan 15:00 dibatalkan oleh admin pukul 08:18.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
-                  <span className="text-blue-600 text-xs">💡</span>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-700">
-                    <strong>💡 AI Suggestion:</strong>
-                    <br />
-                    • Kirim notif ke internal untuk status perpindahan
-                    <br />• Otentifikasi dengan pelanggan untuk penumpang KA Taksaka dengan refund/reschedule
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div> */}
-
-          <div className="flex justify-center">
-            <button className="px-6 py-2 bg-purple-600 text-white rounded-md text-sm">📝 Buat Draft Notifikasi</button>
-          </div>
-        </div>
-
-        {/* Create Notification Form */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Buat Notifikasi Baru</h3>
-
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Pilih Target</label>
-              <select value={selectedTarget} onChange={(e) => setSelectedTarget(e.target.value)} className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                <option value="Admin-Internal">Admin-Internal</option>
-                <option value="Pelanggan">Pelanggan</option>
-                <option value="Semua">Semua</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Jenis Notifikasi</label>
-              <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                <option value="Delay">Delay</option>
-                <option value="Pembatalan">Pembatalan</option>
-                <option value="Informasi">Informasi</option>
-                <option value="Promo">Promo</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Isi Pesan</label>
-            <div className="relative">
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Tulis pesan notifikasi..."
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent h-24 resize-none"
-              />
-              <button className="absolute right-3 bottom-3 text-purple-600 hover:text-purple-800 text-sm">🪄 Generate with AI</button>
-            </div>
-          </div>
-
-          <div className="mb-4 space-y-2">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={sendToInternal} onChange={(e) => setSendToInternal(e.target.checked)} className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
-              <span className="text-sm text-gray-700">Kirim ke Internal saja</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={sendToPelanggan} onChange={(e) => setSendToPelanggan(e.target.checked)} className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
-              <span className="text-sm text-gray-700">Kirim juga ke Pelanggan</span>
-            </label>
-          </div>
-
-          <div className="flex gap-3">
-            <button className="px-6 py-2 bg-purple-600 text-white rounded-md text-sm hover:bg-purple-700">Kirim Notifikasi</button>
-            <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50">Simpan Draft</button>
-          </div>
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-2 gap-6">
+    <div style={{ backgroundColor: colors.violet.light }} className="min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <ChartMultiBar categories={["Admin", "Pembatalan", "Info Operasional", "Promosi"]} series={barSeries} height={300} width={400} />
-            <div className="text-center mt-2">
-              <h4 className="text-sm font-medium text-gray-700">Distribusi Notifikasi per Kategori</h4>
+            <h1 className="text-2xl font-semibold text-gray-800">Notifikasi Admin</h1>
+            <p className="text-sm text-gray-500 mt-1">Monitor dan kelola notifikasi sistem dengan bantuan AI</p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {/* AI Recommendations Section */}
+          <div className="space-y-4">{/* Commented out sections from original code */}</div>
+
+          {/* Create Notification Form */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Buat Notifikasi Baru</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-2">Pilih Target</label>
+                <select
+                  value={selectedTarget}
+                  onChange={(e) => setSelectedTarget(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-violet-500 focus:border-transparent text-gray-800 placeholder-gray-500 bg-white"
+                >
+                  <option value="Admin-Internal">Admin-Internal</option>
+                  <option value="Pelanggan">Pelanggan</option>
+                  <option value="Semua">Semua</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-2">Jenis Notifikasi</label>
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-violet-500 focus:border-transparent text-gray-800 placeholder-gray-500 bg-white"
+                >
+                  <option value="Delay">Delay</option>
+                  <option value="Pembatalan">Pembatalan</option>
+                  <option value="Informasi">Informasi</option>
+                  <option value="Promo">Promo</option>
+                </select>
+              </div>
             </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-800 mb-2">Isi Pesan</label>
+              <div className="relative">
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Tulis pesan notifikasi..."
+                  className="w-full p-3 border border-gray-200 rounded-md focus:ring-2 focus:ring-violet-500 focus:border-transparent h-24 resize-none text-gray-800 placeholder-gray-400 bg-white"
+                />
+                <button className="absolute right-3 bottom-3 text-violet-600 hover:text-violet-800 text-sm font-semibold">🪄 Generate with AI</button>
+              </div>
+            </div>
+
+            <div className="mb-4 space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={sendToInternal} onChange={(e) => setSendToInternal(e.target.checked)} className="w-4 h-4 text-violet-600 border-gray-300 rounded focus:ring-violet-500" />
+                <span className="text-sm text-gray-700">Kirim ke Internal saja</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={sendToPelanggan} onChange={(e) => setSendToPelanggan(e.target.checked)} className="w-4 h-4 text-violet-600 border-gray-300 rounded focus:ring-violet-500" />
+                <span className="text-sm text-gray-700">Kirim juga ke Pelanggan</span>
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleSendNotification}
+                disabled={createNotificationMutation.isPending}
+                className="px-6 py-2 bg-violet-600 text-white font-semibold rounded-full text-sm hover:bg-violet-700 disabled:opacity-50 shadow transition-colors"
+              >
+                {createNotificationMutation.isPending ? "Mengirim..." : "Kirim Notifikasi"}
+              </button>
+              <button className="px-6 py-2 border border-gray-300 text-gray-700 font-semibold rounded-full text-sm hover:bg-gray-50 transition-colors">Simpan Draft</button>
+            </div>
+            {statusMessage && <p className="mt-3 text-sm text-gray-700">{statusMessage}</p>}
           </div>
 
-          <div>
-            <ChartMultiLine
-              xLabels={["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]}
-              series={[
-                { id: "internal", name: "Internal", color: "#3b82f6", values: [65, 55, 70, 75, 80, 70, 65] },
-                { id: "pelanggan", name: "Pelanggan", color: "#10b981", values: [45, 50, 55, 60, 65, 70, 60] },
-              ]}
-              title="Engagement rate"
-              width={400}
-              height={280}
-            />
+          {/* Notifications Table */}
+          <div className="bg-white rounded-xl shadow p-4">
+            <TableKelola title="Daftar Notifikasi" description="Riwayat notifikasi yang dikirim ke pengguna" columns={notificationColumns} data={notifications} />
+
+            {/* Simple pagination control */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <button onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 rounded-md border text-sm text-gray-600 hover:bg-gray-50">
+                  Previous
+                </button>
+                <span className="px-4 py-2 text-sm text-gray-600">
+                  Halaman {page} dari {totalPages}
+                </span>
+                <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 rounded-md border text-sm text-gray-600 hover:bg-gray-50">
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

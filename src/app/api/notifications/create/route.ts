@@ -46,10 +46,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { user_id, judul, pesan, tipe_notifikasi, priority_level = "NORMAL", reference_type, reference_id, action_url } = body;
+    const { user_id, judul, pesan, tipe_notifikasi, priority_level = "NORMAL", reference_type, reference_id, action_url, broadcast = false } = body;
 
-    // Validate required fields
-    if (!user_id || !judul || !pesan || !tipe_notifikasi) {
+    if (!broadcast && (!user_id || !judul || !pesan || !tipe_notifikasi)) {
       return NextResponse.json(
         {
           error: "Missing required fields: user_id, judul, pesan, tipe_notifikasi",
@@ -58,11 +57,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create notification
-    const { data: newNotification, error: insertError } = await (supabase as any)
-      .from("notifications")
-      .insert({
-        user_id,
+    let newNotification: any = null;
+    let insertError: any = null;
+
+    if (broadcast) {
+      const { data: users, error: usersError } = await supabase.from("pengguna").select("user_id");
+      if (usersError) {
+        console.error("Error fetching users for broadcast:", usersError);
+        return NextResponse.json({ error: "Failed to fetch users for broadcast" }, { status: 500 });
+      }
+
+      const rows = users.map((u: any) => ({
+        user_id: u.user_id,
         judul,
         pesan,
         tipe_notifikasi,
@@ -72,9 +78,33 @@ export async function POST(request: NextRequest) {
         action_url,
         is_read: false,
         created_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+      }));
+
+      const insertResult = await (supabase as any).from("notifications").insert(rows).select();
+      newNotification = insertResult.data;
+      insertError = insertResult.error;
+    } else {
+      // Create notification for single user
+      const insertResult = await (supabase as any)
+        .from("notifications")
+        .insert({
+          user_id,
+          judul,
+          pesan,
+          tipe_notifikasi,
+          priority_level,
+          reference_type,
+          reference_id,
+          action_url,
+          is_read: false,
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      newNotification = insertResult.data;
+      insertError = insertResult.error;
+    }
 
     if (insertError) {
       console.error("Error creating notification:", insertError);

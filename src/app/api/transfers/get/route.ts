@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase";
 
-const admin: any = createAdminClient();
-
 export async function GET(req: Request) {
+  const admin: any = createAdminClient();
   try {
     const url = new URL(req.url);
     const ticketId = url.searchParams.get("ticketId");

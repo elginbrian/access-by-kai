@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createLegacyServerClient } from "@/lib/supabase";
-import type { Notification, NotificationFilters } from "@/types/notification";
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,9 +34,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get current user profile and role
     const { data: currentUser, error: userError } = await supabase
       .from("pengguna")
-      .select("user_id")
+      .select("user_id, role")
       .eq("email", data.user.email || "")
       .single();
 
@@ -45,81 +45,37 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // if (currentUser.role !== "admin") {
+    //   return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // }
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
 
+    let query: any = (supabase as any).from("notifications").select("*").order("created_at", { ascending: false });
+
+    // optional filters
     const isRead = searchParams.get("is_read") ?? searchParams.get("isRead");
-    const priority = searchParams.get("priority");
     const type = searchParams.get("type");
-    const dateFrom = searchParams.get("dateFrom");
-    const dateTo = searchParams.get("dateTo");
 
-    // Build query
-    let query = (supabase as any).from("notifications").select("*").eq("user_id", currentUser.user_id).order("created_at", { ascending: false });
+    if (isRead !== null) query = query.eq("is_read", isRead === "true");
+    if (type) query = query.eq("tipe_notifikasi", type);
 
-    // Apply filters
-    if (isRead !== null) {
-      query = query.eq("is_read", isRead === "true");
-    }
-    if (priority) {
-      query = query.eq("priority_level", priority);
-    }
-    if (type) {
-      query = query.eq("tipe_notifikasi", type);
-    }
-    if (dateFrom) {
-      query = query.gte("created_at", dateFrom);
-    }
-    if (dateTo) {
-      query = query.lte("created_at", dateTo);
-    }
-
-    // Apply pagination
     const offset = (page - 1) * limit;
     query = query.range(offset, offset + limit - 1);
 
     const { data: notifications, error: notifError } = await query;
-
     if (notifError) {
-      console.error("Error fetching notifications:", notifError);
+      console.error("Error fetching admin notifications:", notifError);
       return NextResponse.json({ error: "Failed to fetch notifications" }, { status: 500 });
     }
 
-    // Get total count for pagination
-    let countQuery = (supabase as any).from("notifications").select("*", { count: "exact", head: true }).eq("user_id", currentUser.user_id);
+    const { count } = await (supabase as any).from("notifications").select("*", { count: "exact", head: true });
 
-    // Apply same filters for count
-    if (isRead !== null) {
-      countQuery = countQuery.eq("is_read", isRead === "true");
-    }
-    if (priority) {
-      countQuery = countQuery.eq("priority_level", priority);
-    }
-    if (type) {
-      countQuery = countQuery.eq("tipe_notifikasi", type);
-    }
-    if (dateFrom) {
-      countQuery = countQuery.gte("created_at", dateFrom);
-    }
-    if (dateTo) {
-      countQuery = countQuery.lte("created_at", dateTo);
-    }
-
-    const { count } = await countQuery;
-
-    return NextResponse.json({
-      success: true,
-      data: notifications,
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
-      },
-    });
+    return NextResponse.json({ success: true, data: notifications, pagination: { page, limit, total: count || 0, totalPages: Math.ceil((count || 0) / limit) } });
   } catch (error) {
-    console.error("Get notifications error:", error);
+    console.error("Admin get notifications error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

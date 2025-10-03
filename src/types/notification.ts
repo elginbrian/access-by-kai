@@ -1,29 +1,10 @@
-export type NotificationPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+export type NotificationPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT";
 
-export type NotificationType = 
-  | 'TRAIN_BOOKING'
-  | 'FACILITY_BOOKING'
-  | 'TICKET_TRANSFER'
-  | 'TICKET_CANCELLATION'
-  | 'PAYMENT_SUCCESS'
-  | 'PAYMENT_FAILED'
-  | 'SCHEDULE_CHANGE'
-  | 'PROMOTION'
-  | 'SYSTEM_UPDATE'
-  | 'REMINDER'
-  | 'REVIEW_REQUEST';
+export type NotificationType = "TRAIN_BOOKING" | "FACILITY_BOOKING" | "TICKET_TRANSFER" | "TICKET_CANCELLATION" | "PAYMENT_SUCCESS" | "PAYMENT_FAILED" | "SCHEDULE_CHANGE" | "PROMOTION" | "SYSTEM_UPDATE" | "REMINDER" | "REVIEW_REQUEST";
 
-export type NotificationReferenceType = 
-  | 'TRAIN_BOOKING'
-  | 'FACILITY_BOOKING'
-  | 'TICKET'
-  | 'PAYMENT'
-  | 'PROMOTION'
-  | 'SYSTEM'
-  | 'REVIEW';
+export type NotificationReferenceType = "TRAIN_BOOKING" | "FACILITY_BOOKING" | "TICKET" | "PAYMENT" | "PROMOTION" | "SYSTEM" | "REVIEW";
 
-// Enum for review service types (matching jenis_layanan_enum)
-export type JenisLayanan = 'BOOKING_TIKET' | 'EPORTER' | 'LOGISTIK' | 'LAPORAN_MANUAL';
+export type JenisLayanan = "BOOKING_TIKET" | "EPORTER" | "LOGISTIK" | "LAPORAN_MANUAL";
 
 export interface Notification {
   notification_id: number;
@@ -40,9 +21,8 @@ export interface Notification {
   read_at?: string;
 }
 
-// API compatible types (matching database schema exactly)
 export interface CreateNotificationRequest {
-  user_id: number;
+  user_id?: number;
   tipe_notifikasi: NotificationType;
   judul: string;
   pesan: string;
@@ -50,6 +30,8 @@ export interface CreateNotificationRequest {
   reference_type?: NotificationReferenceType;
   priority_level?: NotificationPriority;
   action_url?: string;
+
+  broadcast?: boolean;
 }
 
 export interface NotificationFilters {
@@ -68,7 +50,6 @@ export interface PaginatedNotifications {
   totalPages: number;
 }
 
-// Review System Types (matching ulasan table)
 export interface Review {
   ulasan_id: number;
   pengguna_id: number;
