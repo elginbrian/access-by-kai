@@ -94,7 +94,7 @@ const HelpCenterPage = () => {
               <div className="space-y-6">
                 {contactMethods.map((method, index) => (
                   <div key={index} className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: colors.blue.lighter }}>
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: colors.blue.light }}>
                       <img src={method.icon} alt={method.type} className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
@@ -113,7 +113,7 @@ const HelpCenterPage = () => {
               </div>
 
               {/* Quick Tips */}
-              <div className="mt-8 p-4 rounded-xl" style={{ backgroundColor: colors.blue.lighter }}>
+              <div className="mt-8 p-4 rounded-xl" style={{ backgroundColor: colors.blue.light }}>
                 <h3 className="font-semibold mb-2" style={{ color: colors.base.darker }}>
                   💡 Tips Cepat
                 </h3>
