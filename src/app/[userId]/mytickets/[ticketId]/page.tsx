@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useParams, useRouter } from "next/navigation";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import { useTicketDetail, useTicketActions } from "@/lib/hooks/useTickets";
 import { useAuth } from "@/lib/auth/AuthContext";
 import TransferFlowModal from "@/components/mytickets/TransferFlowModal";
 import CancelTicketModal from "@/components/mytickets/CancelTicketModal";
 import toast from "react-hot-toast";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 const MyTicketDetailPage: React.FC = () => {
   const params = useParams();
@@ -58,7 +58,7 @@ const MyTicketDetailPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 font-sans">
-        <NavBarServices service="" />
+        <TrainNavigation />
         <main className="max-w-6xl mx-auto p-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -72,7 +72,7 @@ const MyTicketDetailPage: React.FC = () => {
   if (error || !ticketDetail) {
     return (
       <div className="min-h-screen bg-gray-50 font-sans">
-        <NavBarServices service="" />
+        <TrainNavigation />
         <main className="max-w-6xl mx-auto p-8">
           <div className="text-center py-12">
             <div className="text-red-500 mb-4">
@@ -91,7 +91,7 @@ const MyTicketDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      <NavBarServices service="" />
+      <TrainNavigation />
 
       <main className="max-w-6xl mx-auto p-8">
         <h1 className="text-2xl font-semibold mb-2 text-black">Tiket Kereta Saya</h1>

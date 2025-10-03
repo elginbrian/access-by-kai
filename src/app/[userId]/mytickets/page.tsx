@@ -3,13 +3,13 @@
 import React, { useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { useRouter } from "next/navigation";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import ServiceCard from "@/components/mytickets/ServiceCard";
 import TicketCard from "@/components/mytickets/TicketCard";
 import InputField from "@/components/input/InputField";
 import { useUserTickets } from "@/lib/hooks/useTickets";
 import { useAuth } from "@/lib/auth/AuthContext";
 import type { TicketListParams } from "@/types/ticket";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 const MyTicketsPage: React.FC = () => {
   const router = useRouter();
@@ -40,7 +40,7 @@ const MyTicketsPage: React.FC = () => {
   if (authLoading || ticketsLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <NavBarServices />
+        <TrainNavigation />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -54,7 +54,7 @@ const MyTicketsPage: React.FC = () => {
   if (!authLoading && Number.isNaN(parsedUserId)) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <NavBarServices />
+        <TrainNavigation />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-12">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Profil belum lengkap</h3>
@@ -68,7 +68,7 @@ const MyTicketsPage: React.FC = () => {
   if (ticketsError) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <NavBarServices />
+        <TrainNavigation />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-12">
             <div className="text-red-500 mb-4">
@@ -87,7 +87,7 @@ const MyTicketsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavBarServices />
+      <TrainNavigation />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tabs + Search */}

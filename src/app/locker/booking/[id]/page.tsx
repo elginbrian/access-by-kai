@@ -2,8 +2,8 @@
 
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import { useFacilityDetail } from "@/lib/hooks/useFacilities";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 interface BookingPageProps {
   params: { id: string };
@@ -34,7 +34,7 @@ const BookingPage = ({ params }: BookingPageProps) => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-        <NavBarServices service="ShowLok" />
+        <TrainNavigation />
         <div className="container mx-auto px-8 py-16">
           <div className="text-center py-16">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -48,7 +48,7 @@ const BookingPage = ({ params }: BookingPageProps) => {
   if (error || !facility) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-        <NavBarServices service="ShowLok" />
+        <TrainNavigation />
         <div className="container mx-auto px-8 py-16">
           <div className="text-center py-16">
             <p className="text-red-600">Fasilitas tidak ditemukan</p>
@@ -66,7 +66,7 @@ const BookingPage = ({ params }: BookingPageProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <NavBarServices service="ShowLok" />
+      <TrainNavigation />
       
       <div className="container mx-auto px-8 py-16">
         <div className="mb-6">

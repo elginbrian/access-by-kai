@@ -72,9 +72,9 @@ const StepsSection: React.FC<StepsSectionProps> = ({
         {/* Right Side - Steps */}
         <div className="">
           {steps.map((step, index) => (
-            <div key={index} className={`flex items-start gap-6 ${index < steps.length - 1 ? "border-b border-black" : ""}`}>
+            <div key={index} className={`flex items-start gap-6`}>
               <div className="text-4xl font-bold text-gray-900">{step.number}</div>
-              <div className="flex items-start gap-4 border-l border-black pl-4">
+              <div className="flex items-start gap-4 pl-4">
                 <img src={step.icon} alt={step.title} className="w-12 h-12 flex-shrink-0" />
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{step.title}</h3>

@@ -3,13 +3,13 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import SimpleStationSelector from "@/components/showlok/SimpleStationSelector";
 import FacilityCard from "@/components/showlok/FacilityCard";
 import { useStationFacilities } from "@/lib/hooks/useFacilities";
 import { useUserTickets } from "@/lib/hooks/useTickets";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { getStationIdByCode, getStationIdsByName } from "@/lib/utils/stationHelpers";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 interface Props {
   ticketId: string | null;
@@ -57,7 +57,7 @@ const ClientShowlokDisplay: React.FC<Props> = ({ ticketId }) => {
   if (!selectedTicket) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-        <NavBarServices service="ShowLok" />
+        <TrainNavigation />
         <div className="container mx-auto px-8 py-16">
           <div className="text-center py-16">
             <p className="text-red-600">Tiket tidak ditemukan</p>
@@ -72,7 +72,7 @@ const ClientShowlokDisplay: React.FC<Props> = ({ ticketId }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <NavBarServices service="ShowLok" />
+      <TrainNavigation />
 
       <div className="container mx-auto px-8 py-16">
         <div className="mb-6">

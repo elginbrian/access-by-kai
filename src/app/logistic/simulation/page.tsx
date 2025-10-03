@@ -3,9 +3,9 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Stepper from "@/components/logistics/Stepper";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import PriceForm from "@/components/logistics/simulation/PriceForm";
 import EstimatedCost from "@/components/logistics/simulation/EstimatedCost";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 const LogisticsPriceSimulationPage = () => {
   const router = useRouter();
@@ -18,7 +18,7 @@ const LogisticsPriceSimulationPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans">
-      <NavBarServices service="Logistik" />
+      <TrainNavigation />
       <main className="max-w-6xl mx-auto p-4 md:p-8">
         <Stepper currentStep={1} />
         <div className="bg-white p-6 rounded-lg shadow-sm border">

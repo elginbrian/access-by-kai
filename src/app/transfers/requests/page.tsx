@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useTransferRequests } from "@/lib/hooks/useTransferRequests";
 import toast from "react-hot-toast";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 export default function TransferRequestsPage() {
   const { user } = useAuth();
@@ -14,7 +14,7 @@ export default function TransferRequestsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavBarServices service="" />
+      <TrainNavigation />
       <main className="max-w-4xl mx-auto p-6">
         <h1 className="text-xl font-semibold mb-4">Permintaan Transfer Tiket</h1>
         {loading && <div>Memuat...</div>}

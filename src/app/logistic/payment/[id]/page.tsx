@@ -3,13 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Stepper from "@/components/logistics/Stepper";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import Button from "@/components/button/Button";
 import SuccessModal from "@/components/logistics/payment/success/SuccessModal";
 import useLogisticPayment from "@/lib/hooks/useLogisticPayment";
 import PaymentMethodSelector from "@/components/trains/payment/PaymentMethodSelector";
 import PaymentSummary from "@/components/trains/payment/PaymentSummary";
 import useLogisticFlow from "@/lib/hooks/useLogisticFlow";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 const LogisticPaymentPage: React.FC = () => {
   const router = useRouter();
@@ -119,7 +119,7 @@ const LogisticPaymentPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans">
-      <NavBarServices service="Logistik" />
+      <TrainNavigation />
       <main className="max-w-6xl mx-auto p-4 md:p-8">
         <Stepper currentStep={3} />
 

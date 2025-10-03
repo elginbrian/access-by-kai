@@ -2,19 +2,28 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 import PaymentStatusCard from "@/components/trains/payment/PaymentStatusCard";
 import { PaymentStatus } from "@/lib/services/PaymentService";
 import BookingLayout from "@/components/layout/BookingLayout";
 import { PaymentPageSkeleton } from "@/components/ui/Skeleton";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(null);
 
   const handleStatusChange = (status: PaymentStatus) => {
     setPaymentStatus(status);
+    
+    // Invalidate quick booking recommendations cache when payment is successful
+    if (status.status === 'settlement' || status.status === 'capture') {
+      queryClient.invalidateQueries({ queryKey: ['user-quick-booking-recommendations'] });
+    }
   };
 
   if (!orderId) {
@@ -107,13 +116,35 @@ function PaymentSuccessContent() {
               </div>
             </button>
 
-            <button onClick={() => (window.location.href = "/my-tickets")} className="flex items-center gap-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+            <button 
+              onClick={() => {
+                const userId = user?.profile?.user_id || user?.id;
+                
+                console.log('Navigation data:', {
+                  userId,
+                  user
+                });
+                
+                if (userId) {
+                  const url = `/${userId}/mytickets/`;
+                  console.log('Navigating to:', url);
+                  window.location.href = url;
+                } else {
+                  // If no user ID, go to profile tickets
+                  console.log('Fallback to profile/tickets');
+                  window.location.href = "/profile/tickets";
+                }
+              }} 
+              className="flex items-center gap-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+            >
               <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
               </svg>
               <div className="text-left">
                 <div className="font-medium text-gray-900">Tiket Saya</div>
-                <div className="text-sm text-gray-600">Lihat semua tiket</div>
+                <div className="text-sm text-gray-600">
+                  {(!user?.profile?.user_id && !user?.id) ? "Login untuk melihat tiket" : "Lihat semua tiket Anda"}
+                </div>
               </div>
             </button>
 

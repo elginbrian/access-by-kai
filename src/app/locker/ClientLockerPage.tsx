@@ -4,9 +4,9 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import HeroSection from "@/components/eporter/HeroSection";
 import ActiveTicketsList from "@/components/eporter/ActiveTicketsList";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useUserTickets } from "@/lib/hooks/useTickets";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 interface Props {
   paymentSuccess?: boolean;
@@ -36,7 +36,7 @@ const ClientLockerPage: React.FC<Props> = ({ paymentSuccess = false }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <NavBarServices service="ShowLok" />
+      <TrainNavigation />
 
       <div className="container mx-auto px-8 py-16">
         <HeroSection
