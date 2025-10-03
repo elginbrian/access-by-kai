@@ -93,7 +93,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
                 onChange={(e) => handleFilterChange({ 
                   type: e.target.value as NotificationType || undefined 
                 })}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-3 py-2 border border-gray-300 rounded-md text-black text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Semua Tipe</option>
                 <option value="TRAIN_BOOKING">Pemesanan Kereta</option>
@@ -115,7 +115,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
                 onChange={(e) => handleFilterChange({ 
                   priority: e.target.value as NotificationPriority || undefined 
                 })}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-3 py-2 text-black border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Semua Prioritas</option>
                 <option value="LOW">Rendah</option>
@@ -133,7 +133,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
                     is_read: value === '' ? undefined : value === 'true'
                   });
                 }}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-3 text-black py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Semua Status</option>
                 <option value="false">Belum Dibaca</option>
