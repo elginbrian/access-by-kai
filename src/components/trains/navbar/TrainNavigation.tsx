@@ -98,7 +98,15 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
           </div>
           <div className="flex items-center space-x-4">
             {userIsLoggedIn ? (
-              <UserDropdown displayName={displayName} displayAvatar={displayAvatar} onLogout={handleAuthClick} onNavigate={(p) => router.push(p)} profilePath={profilePath} lightMode={isTransparent} />
+              <UserDropdown 
+                displayName={displayName} 
+                displayAvatar={displayAvatar} 
+                onLogout={handleAuthClick} 
+                onNavigate={(p) => router.push(p)} 
+                profilePath={profilePath} 
+                lightMode={isTransparent}
+                userId={uid}
+              />
             ) : (
               <div className="flex items-center space-x-3">
                 <button

@@ -127,6 +127,15 @@ const NavBar = () => {
                         >
                           Tiket Saya
                         </button>
+                        <button
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            router.push("/reviews");
+                          }}
+                          className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          Ulasan Layanan
+                        </button>
                         <div className="border-t" />
                         <button
                           onClick={async () => {
@@ -179,6 +188,9 @@ const NavBar = () => {
               </button>
               <button onClick={() => handleNavClick("/logistic")} className={`block w-full text-left px-3 py-2 rounded-md ${isActive("/logistic") ? "text-purple-300 font-semibold" : "text-white hover:bg-white/10"}`}>
                 Logistik
+              </button>
+              <button onClick={() => handleNavClick("/reviews")} className={`block w-full text-left px-3 py-2 rounded-md ${isActive("/reviews") ? "text-purple-300 font-semibold" : "text-white hover:bg-white/10"}`}>
+                Ulasan Layanan
               </button>
 
               <div className="border-t border-white/10 pt-2 mt-2">

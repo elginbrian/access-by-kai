@@ -28,3 +28,4 @@ export * from "./jadwal_gerbong";
 export * from "./jadwal_kursi";
 export * from "./menu_ketersediaan";
 export * from "./train-search";
+export * from "./ulasan";
