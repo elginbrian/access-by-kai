@@ -44,20 +44,28 @@ const FAQSection: React.FC = () => {
 
   const faqs = [
     {
-      question: 'Apa itu PIER?',
-      answer: 'PIER adalah platform e-commerce yang telah berkembang di usia yang ke-10 untuk membangun para vendor melalui teknologi terdepan. PIER berkomitmen untuk memberikan platform terbaik bagi para vendor.'
+      question: 'Apa itu Access by KAI?',
+      answer: 'Access by KAI adalah platform digital terpercaya untuk pemesanan tiket kereta api dan layanan pendukung perjalanan di Indonesia. Platform ini menyediakan layanan lengkap mulai dari pencarian jadwal, pemesanan tiket, hingga layanan tambahan seperti e-porter, logistik, dan pemesanan makanan di kereta.'
     },
     {
-      question: 'Mengapa harus melakukan registrasi vendor pada platform PIER?',
-      answer: 'Registrasi vendor pada platform PIER memberikan akses ke jutaan pelanggan, sistem pembayaran yang aman, dukungan logistik terintegrasi, dan berbagai tools untuk mengembangkan bisnis Anda.'
+      question: 'Bagaimana cara memesan tiket kereta api di platform ini?',
+      answer: 'Anda dapat memesan tiket dengan mudah melalui fitur pencarian di beranda. Pilih stasiun keberangkatan dan tujuan, tentukan tanggal perjalanan, jumlah penumpang, dan kelas kereta yang diinginkan. Sistem akan menampilkan jadwal dan harga tiket yang tersedia untuk dipilih.'
     },
     {
-      question: 'Dokumen apa saja yang perlu disiapkan untuk registrasi vendor?',
-      answer: 'Dokumen yang diperlukan meliputi KTP/identitas diri, NPWP, surat izin usaha, rekening bank atas nama perusahaan/individu, dan foto produk yang akan dijual.'
+      question: 'Layanan apa saja yang tersedia di Access by KAI?',
+      answer: 'Kami menyediakan berbagai layanan meliputi: pemesanan tiket kereta api, KAI e-Porter untuk bantuan bagasi, KAI Logistik untuk pengiriman paket, pemesanan makanan dan minuman di kereta, layanan hotel & shower di stasiun, serta fitur transfer tiket antar pengguna terpercaya.'
     },
     {
-      question: 'Berapa lama proses verifikasi vendor?',
-      answer: 'Proses verifikasi vendor biasanya memakan waktu 3-7 hari kerja setelah semua dokumen lengkap diterima dan diverifikasi oleh tim kami.'
+      question: 'Apakah saya bisa mengubah atau membatalkan tiket yang sudah dipesan?',
+      answer: 'Ya, platform kami menyediakan fitur ganti kursi dengan biaya tambahan 15% dari harga tiket. Untuk pembatalan tiket, kebijakan dan biaya pembatalan mengikuti ketentuan resmi PT KAI. Anda dapat mengakses fitur ini melalui halaman "Tiket Saya" setelah login.'
+    },
+    {
+      question: 'Bagaimana cara menggunakan layanan KAI e-Porter?',
+      answer: 'KAI e-Porter membantu Anda mengangkat bagasi di stasiun. Pilih tiket aktif Anda, tentukan penumpang yang membutuhkan bantuan, pilih titik pertemuan di stasiun, dan lakukan pemesanan. Porter resmi KAI akan membantu membawa barang bawaan Anda dengan aman.'
+    },
+    {
+      question: 'Apakah pembayaran di platform ini aman?',
+      answer: 'Ya, kami menggunakan sistem pembayaran yang aman dan terintegrasi dengan Midtrans. Platform mendukung berbagai metode pembayaran termasuk kartu kredit, e-wallet, dan transfer bank. Semua transaksi dienkripsi dan mengikuti standar keamanan internasional.'
     }
   ];
 
