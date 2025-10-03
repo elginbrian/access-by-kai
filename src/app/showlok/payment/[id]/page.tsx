@@ -1,141 +1,82 @@
 "use client";
 
-import React from 'react';
-import NavBarServices from '@/components/navbar/NavBarServices';
-import BookingDetailsCard, { type BookingDetail } from '@/components/hotels/payment/BookingDetailsCard';
-import TripDetailsCard, { type TripDetail } from '@/components/hotels/payment/TripDetailsCard';
-import PaymentMethodsCard, { type PaymentTab } from '@/components/hotels/payment/PaymentMethodsCard';
-import PaymentSummaryCard, { type PaymentSummaryItem } from '@/components/hotels/payment/PaymentSummaryCard';
-import HelpSupportCard from '@/components/hotels/payment/HelpSupportCard';
-import usePaymentForm from '@/lib/hooks/usePaymentForm';
+import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import NavBarServices from "@/components/navbar/NavBarServices";
 
-const ShowlokPaymentPage = () => {
-    // Use the payment form hook
-    const {
-        activeTab,
-        formData,
-        isProcessing,
-        setActiveTab,
-        updateFormData,
-        applyPromoCode,
-        processPayment
-    } = usePaymentForm({
-        onSuccess: (data: any) => {
-            console.log('Payment successful:', data);
-            alert('Pembayaran berhasil!');
-        },
-        onError: (error: string) => {
-            console.error('Payment failed:', error);
-            alert(`Pembayaran gagal: ${error}`);
-        }
-    });
-
-    // Sample data
-    const bookingDetail: BookingDetail = {
-        id: "booking-1",
-        title: "Luxury Lounge",
-        icon: "/ic_train.svg",
-        route: "Bekasi (BKS) → Bandung (BD)",
-        class: "Eksekutif",
-        date: "Senin, 15 Jan 2024",
-        time: "08:00 - 15:30",
-        passengers: 2,
-        passengerType: "Dewasa",
-        bgColor: "bg-yellow-50",
-        borderColor: "border-yellow-200",
-        iconBgColor: "bg-yellow-600"
-    };
-
-    const tripDetail: TripDetail = {
-        id: "trip-1",
-        title: "Argo Parahyangan",
-        trainCode: "KA 21",
-        icon: "/ic_train.svg",
-        route: "Bekasi (BKS) → Bandung (BD)",
-        class: "Eksekutif",
-        date: "Senin, 15 Jan 2024",
-        time: "08:00 - 15:30",
-        passengers: 2,
-        passengerType: "Dewasa",
-        bgColor: "bg-purple-50",
-        borderColor: "border-purple-200",
-        iconBgColor: "bg-purple-600"
-    };
-
-    const paymentTabs: PaymentTab[] = [
-        { id: "card", label: "Kartu Kredit/Debit", icon: "/ic_wifi.svg" },
-        { id: "transfer", label: "Transfer Bank" },
-        { id: "ewallet", label: "E-Wallet" },
-        { id: "qris", label: "QRIS" }
-    ];
-
-    const summaryItems: PaymentSummaryItem[] = [
-        { label: "Luxury Lounge (3x)", amount: "Rp 240.000" },
-        { label: "Biaya Admin", amount: "Rp 5.000" },
-        { label: "Asuransi Perjalanan", amount: "Rp 10.000" }
-    ];
-
-    const handleContactSupport = () => {
-        alert('Menghubungi customer service...');
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <NavBarServices service="Hotels" />
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left Column - Main Content */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Booking Details */}
-                        <BookingDetailsCard
-                            title="Detail Pemesanan"
-                            booking={bookingDetail}
-                        />
-
-                        {/* Trip Details */}
-                        <TripDetailsCard
-                            title="Detail Perjalanan"
-                            trip={tripDetail}
-                        />
-
-                        {/* Payment Methods */}
-                        <PaymentMethodsCard
-                            tabs={paymentTabs}
-                            activeTab={activeTab}
-                            onTabChange={setActiveTab}
-                            formData={formData}
-                            onFormDataChange={updateFormData}
-                            onPromoApply={applyPromoCode}
-                        />
-                    </div>
-
-                    {/* Right Column - Summary */}
-                    <div className="lg:col-span-1">
-                        <div className="sticky top-6 space-y-6">
-                            {/* Help Card */}
-                            <HelpSupportCard
-                                onContactSupport={handleContactSupport}
-                            />
-
-                            {/* Payment Summary */}
-                            <PaymentSummaryCard
-                                title="Ringkasan Pembayaran"
-                                items={summaryItems}
-                                total={{
-                                    label: "Total",
-                                    amount: "Rp 255.000"
-                                }}
-                                onPayNow={processPayment}
-                                loading={isProcessing}
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+interface PaymentPageProps {
+  params: { id: string };
 }
 
-export default ShowlokPaymentPage;
+const PaymentPage = ({ params }: PaymentPageProps) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const facilityId = params.id;
+  const ticketId = searchParams.get("ticket");
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleBack = () => {
+    router.push(`/showlok/booking/${facilityId}?ticket=${ticketId}`);
+  };
+
+  const handlePayment = async () => {
+    setIsProcessing(true);
+    
+    // Simulate payment processing
+    setTimeout(() => {
+      setIsProcessing(false);
+      // Redirect back to ShowLok main page after successful payment
+      router.push('/showlok?payment=success');
+    }, 2000);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+      <NavBarServices service="ShowLok" />
+      
+      <div className="container mx-auto px-8 py-16">
+        <div className="mb-6">
+          <button 
+            onClick={handleBack}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+            disabled={isProcessing}
+          >
+            <span>←</span> Kembali ke booking
+          </button>
+        </div>
+
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">
+          Pembayaran ShowLok
+        </h1>
+
+        <div className="bg-white rounded-3xl shadow-xl p-8">
+          <div className="text-center py-16">
+            <p className="text-gray-600 mb-6">
+              Halaman pembayaran sedang dalam pengembangan...
+            </p>
+            <div className="mt-4 text-sm text-gray-500 mb-8">
+              <p>Facility ID: {facilityId}</p>
+              <p>Ticket ID: {ticketId}</p>
+            </div>
+            
+            {isProcessing ? (
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="text-blue-600">Memproses pembayaran...</p>
+              </div>
+            ) : (
+              <button
+                onClick={handlePayment}
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors"
+              >
+                Bayar Sekarang
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PaymentPage;
