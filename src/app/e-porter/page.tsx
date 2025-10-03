@@ -6,10 +6,10 @@ import HeroSection from "@/components/eporter/HeroSection";
 import ActiveTicketsList from "@/components/eporter/ActiveTicketsList";
 import PassengerSelection from "@/components/eporter/PassengerSelection";
 import PickupDetails from "@/components/eporter/PickupDetails";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import PorterBookingForm from "@/components/eporter/PorterBookingForm";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useUserTickets } from "@/lib/hooks/useTickets";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 const KAIEPorterPage = () => {
   const { user } = useAuth();
@@ -87,8 +87,8 @@ const KAIEPorterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <NavBarServices service="E-Porter" />
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 pb-16">
+      <TrainNavigation />
 
       <div className="container mx-auto px-8">
         <HeroSection
