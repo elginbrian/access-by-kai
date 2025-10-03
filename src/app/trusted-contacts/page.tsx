@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useTrustedContacts } from "@/lib/hooks/useTrustedContacts";
 import toast from "react-hot-toast";
 import Icon from "@/components/ui/Icon";
 import { useRouter } from "next/navigation";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 export default function TrustedContactsPage() {
   const { user } = useAuth();
@@ -31,7 +31,7 @@ export default function TrustedContactsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      <NavBarServices service="" />
+      <TrainNavigation />
       <main className="max-w-4xl mx-auto p-6">
         <div className="flex items-center justify-between mb-6">
           <div>

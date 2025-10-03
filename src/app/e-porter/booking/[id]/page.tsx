@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import TicketInfoCard from "@/components/eporter/booking/TicketInfoCard";
 import PassengerListCard from "@/components/eporter/booking/PassengerListCard";
 import PortersList from "@/components/eporter/booking/PortersList";
@@ -13,6 +12,7 @@ import type { EporterBooking } from "@/types/models";
 import { useParams } from "next/navigation";
 import { useTicketDetail } from "@/lib/hooks/useTickets";
 import { useAuth } from "@/lib/auth/AuthContext";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 const KAIEPorterBookingPage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -163,7 +163,7 @@ const KAIEPorterBookingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
       {/* Navigation */}
-      <NavBarServices service="E-Porter" />
+      <TrainNavigation />
 
       {/* Main Content */}
       <div className="container mx-auto px-8 py-8">

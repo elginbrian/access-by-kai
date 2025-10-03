@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import NavBarServices from "@/components/navbar/NavBarServices";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 interface PaymentPageProps {
   params: { id: string };
@@ -32,7 +32,7 @@ const PaymentPage = ({ params }: PaymentPageProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <NavBarServices service="ShowLok" />
+      <TrainNavigation />
       
       <div className="container mx-auto px-8 py-16">
         <div className="mb-6">

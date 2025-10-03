@@ -3,11 +3,11 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Footer from "@/components/footer/Footer";
-import NavBarServices from "@/components/navbar/NavBarServices";
 import SearchBar from "@/components/logistics/SearchBar";
 import HeroSection from "@/components/logistics/HeroSection";
 import WhyChooseSection from "@/components/logistics/WhyChooseSection";
 import StepsSection from "@/components/logistics/StepsSection";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 const KAILogisticPage = () => {
   const router = useRouter();
@@ -23,7 +23,7 @@ const KAILogisticPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <NavBarServices service="Logistik" />
+      <TrainNavigation />
 
       {/* Search Bar */}
       <SearchBar onSearch={handleSearch} />
