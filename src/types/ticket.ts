@@ -1,4 +1,5 @@
 export interface TicketData {
+  tiketId?: number;
   id: string;
   ticketNumber: string;
   trainName: string;

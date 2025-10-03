@@ -21,11 +21,11 @@ export default function Home() {
         <div className="absolute inset-0 bg-black opacity-30 z-10" />
         <div className="relative z-20 h-full flex flex-col items-center justify-center text-center">
           <h1 className="text-[56px] font-bold text-white mb-0 leading-tight drop-shadow-lg">
-            Escape the City,
+            Lepaskan Penat Kota,
             <br />
-            <span className="text-[#a29bfe]">Find Your Journey</span>
+            <span className="text-[#a29bfe]">Temukan Perjalananmu</span>
           </h1>
-          <p className="text-[22px] text-white mt-6 font-normal drop-shadow-lg">Discover Indonesia's beauty through comfortable train travel</p>
+          <p className="text-[22px] text-white mt-6 font-normal drop-shadow-lg">Jelajahi keindahan Indonesia dengan perjalanan kereta yang nyaman</p>
         </div>
       </section>
 

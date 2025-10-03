@@ -5,6 +5,34 @@ import type { TicketData, TicketDetailData, TicketListParams, TicketDetailParams
 
 const supabase = createClient();
 
+function formatTime(value: string | undefined | null) {
+  if (!value) return "";
+  try {
+    const d = new Date(String(value));
+    return d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  } catch (e) {
+    return String(value);
+  }
+}
+
+function formatDate(value: string | undefined | null) {
+  if (!value) return "";
+  try {
+    const d = new Date(String(value));
+    return d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+  } catch (e) {
+    return String(value);
+  }
+}
+
+function formatDateTimeRange(start?: string | null, end?: string | null) {
+  if (!start && !end) return "";
+  const s = formatTime(start || undefined);
+  const e = formatTime(end || undefined);
+  if (s && e) return `${s} - ${e}`;
+  return s || e || "";
+}
+
 function mapUIStatusToDb(status: "active" | "cancelled" | "completed" | "expired") {
   switch (status) {
     case "active":
@@ -153,6 +181,8 @@ export function useUserTickets(userId: number, params?: TicketListParams) {
         const train = schedule?.master_kereta ?? null;
 
         return {
+          // numeric tiket_id from DB for cases where we want to route by numeric id
+          tiketId: Number(top.tiket_id ?? 0),
           // identify by kode_tiket (top-level)
           id: String(top.kode_tiket ?? ""),
           ticketNumber: String(top.kode_tiket ?? ""),
@@ -171,10 +201,10 @@ export function useUserTickets(userId: number, params?: TicketListParams) {
             name: "",
           },
 
-          // times: prefer segment times, otherwise use empty strings
-          departureTime: String(segment?.waktu_berangkat ?? ""),
-          arrivalTime: String(segment?.waktu_tiba ?? ""),
-          date: String(segment?.waktu_berangkat ?? ""),
+          // times: prefer segment times, otherwise use empty strings (formatted)
+          departureTime: formatTime(segment?.waktu_berangkat ?? ""),
+          arrivalTime: formatTime(segment?.waktu_tiba ?? ""),
+          date: formatDate(segment?.waktu_berangkat ?? ""),
           duration: "",
 
           // passenger/seat info: prefer nested but fallback to top-level ids
@@ -206,7 +236,7 @@ export function useUserTickets(userId: number, params?: TicketListParams) {
           boardingGate: top.gate_boarding ?? undefined,
           createdAt: undefined,
           updatedAt: undefined,
-        } as TicketData;
+        } as TicketData & { tiketId?: number };
       });
     },
     staleTime: 5 * 60 * 1000,
@@ -228,10 +258,8 @@ export function useTicketDetail(userId: number, params: TicketDetailParams) {
     queryFn: async (): Promise<TicketDetailData | null> => {
       if (!params.ticketId) return null;
 
-      const res: any = await supabase
-        .from("tiket")
-        .select(
-          `
+      let queryBuilder: any = supabase.from("tiket").select(
+        `
           tiket_id,
           kode_tiket,
           harga_tiket,
@@ -259,11 +287,6 @@ export function useTicketDetail(userId: number, params: TicketDetailParams) {
               biaya_admin,
               waktu_pembuatan,
               status_pemesanan
-            ),
-            rute!inner(
-              rute_id,
-              nama_rute,
-              jarak_km
             )
           ),
           penumpang!inner(
@@ -284,7 +307,6 @@ export function useTicketDetail(userId: number, params: TicketDetailParams) {
                 nomor_gerbong,
                 tipe_gerbong
               ),
-              tipe_gerbong,
               jadwal!inner(
                 jadwal_id,
                 kode_jadwal,
@@ -300,10 +322,18 @@ export function useTicketDetail(userId: number, params: TicketDetailParams) {
             )
           )
         `
-        )
-        .eq("kode_tiket", params.ticketId)
-        .eq("penumpang.user_id", userId)
-        .single();
+      );
+
+      const maybeNumber = Number(params.ticketId);
+      if (!Number.isNaN(maybeNumber) && String(maybeNumber) !== "") {
+        queryBuilder = queryBuilder.eq("tiket_id", maybeNumber as any);
+      } else {
+        queryBuilder = queryBuilder.eq("kode_tiket", params.ticketId);
+      }
+
+      queryBuilder = queryBuilder.eq("penumpang.user_id", userId).single();
+
+      const res: any = await queryBuilder;
 
       const data = (res as any).data as any | null;
       const error = (res as any).error;
@@ -315,10 +345,20 @@ export function useTicketDetail(userId: number, params: TicketDetailParams) {
       const booking = segment.pemesanan;
       const passenger = data.penumpang;
       const seatInfo = data.jadwal_kursi;
-      const railcar = seatInfo.jadwal_gerbong;
-      const schedule = railcar.jadwal;
-      const train = schedule.master_kereta;
-      const route = segment.rute;
+      const railcar = seatInfo.jadwal_gerbong as any;
+      const schedule = railcar?.jadwal as any;
+      const train = schedule?.master_kereta as any;
+      const route = segment?.rute ?? null;
+
+      let masterGerbongRow = (railcar?.master_gerbong as any) ?? null;
+      try {
+        if (!masterGerbongRow && (railcar?.master_gerbong_id || railcar?.master_gerbong_id === 0)) {
+          const mgRes: any = await supabase.from("master_gerbong").select("master_gerbong_id,nomor_gerbong,tipe_gerbong,fasilitas_gerbong").eq("master_gerbong_id", railcar.master_gerbong_id).single();
+          if (!mgRes.error && mgRes.data) {
+            masterGerbongRow = mgRes.data;
+          }
+        }
+      } catch (e) {}
 
       const baseTicket: TicketData = {
         id: data.kode_tiket,
@@ -342,9 +382,9 @@ export function useTicketDetail(userId: number, params: TicketDetailParams) {
           name: passenger.nama_lengkap,
         },
         seat: {
-          car: railcar.nomor_gerbong_aktual ?? railcar.master_gerbong?.nomor_gerbong ?? "",
+          car: railcar.nomor_gerbong_aktual ?? masterGerbongRow?.nomor_gerbong ?? "",
           number: seatInfo.kode_kursi,
-          class: railcar.master_gerbong?.tipe_gerbong || "",
+          class: masterGerbongRow?.tipe_gerbong ?? railcar.master_gerbong?.tipe_gerbong ?? "",
         },
         price: {
           ticketPrice: data.harga_tiket,
@@ -363,6 +403,7 @@ export function useTicketDetail(userId: number, params: TicketDetailParams) {
       };
 
       return {
+        tiketId: Number(data.tiket_id ?? 0),
         ...baseTicket,
         booking: {
           id: booking.pemesanan_id,
@@ -371,9 +412,9 @@ export function useTicketDetail(userId: number, params: TicketDetailParams) {
           paymentStatus: booking.status_pemesanan,
         },
         route: {
-          id: route.rute_id,
-          name: route.nama_rute,
-          distance: route.jarak_km,
+          id: route?.rute_id ?? 0,
+          name: route?.nama_rute ?? "",
+          distance: route?.jarak_km ?? 0,
         },
         schedule: {
           id: schedule.jadwal_id,
@@ -382,9 +423,9 @@ export function useTicketDetail(userId: number, params: TicketDetailParams) {
         },
         railcar: {
           id: railcar.jadwal_gerbong_id,
-          name: railcar.nomor_gerbong_aktual ?? railcar.master_gerbong?.nomor_gerbong ?? "",
-          type: railcar.master_gerbong?.tipe_gerbong || "standard",
-          facilities: Array.isArray(railcar.master_gerbong?.fasilitas_gerbong) ? railcar.master_gerbong.fasilitas_gerbong : [],
+          name: railcar.nomor_gerbong_aktual ?? masterGerbongRow?.nomor_gerbong ?? "",
+          type: (masterGerbongRow?.tipe_gerbong ?? railcar.master_gerbong?.tipe_gerbong) || "standard",
+          facilities: Array.isArray(masterGerbongRow?.fasilitas_gerbong) ? masterGerbongRow.fasilitas_gerbong : Array.isArray(railcar.master_gerbong?.fasilitas_gerbong) ? railcar.master_gerbong.fasilitas_gerbong : [],
         },
       } as TicketDetailData;
     },

@@ -136,7 +136,7 @@ const TrainReviewContent = () => {
           />
 
           <PassengerList passengers={passengers} />
-          <MealOrderList mealOrders={mealOrders} formatPrice={formatPrice} />
+          <MealOrderList mealOrders={mealOrders} formatPrice={formatPrice} onAddMeal={() => handleStepClick(2)} />
         </div>
 
         <div className="lg:col-span-4">

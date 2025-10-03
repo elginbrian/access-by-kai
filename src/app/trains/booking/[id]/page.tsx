@@ -34,6 +34,7 @@ function TrainBookingContent() {
   const { currentStep, handleStepClick, nextStep } = useBookingContext();
   const { bookingData, setJourneyData, setBookerData, setPassengersData, setTrainTicketPrice, updatePricing } = useCentralBooking();
   const { showSeatSelection, selectedSeats, isRouteExpanded, handleSeatSelect, handleCloseSeatSelection, handleOpenSeatSelection, handleToggleRoute, areAllSeatsSelected } = useSeatSelection();
+  const { bookingData: centralBooking } = useCentralBooking();
   const { bookingData: multiPassengerData, updateBookerData, updatePassengersData, getBookerData, getAllPassengersData } = useMultiPassengerBookingData();
 
   const [isRedirecting, setIsRedirecting] = React.useState(false);
@@ -80,6 +81,20 @@ function TrainBookingContent() {
     setJourneyData,
     setTrainTicketPrice,
   ]);
+
+  // Hydrate selected seats from central booking when returning to booking page
+  React.useEffect(() => {
+    try {
+      const seatsFromCentral = bookingData.passengers.map((p) => p.seat || "");
+      // if central has seats saved, apply them to local seat selection
+      const hasAnySeat = seatsFromCentral.some((s) => s && s !== "Belum dipilih");
+      if (hasAnySeat) {
+        handleSeatSelect(seatsFromCentral);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [bookingData.passengers, handleSeatSelect]);
 
   const bookerInfo = getBookerData();
   const allPassengersInfo = getAllPassengersData();

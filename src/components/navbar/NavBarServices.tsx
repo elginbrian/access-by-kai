@@ -27,16 +27,16 @@ const NavBarServices: React.FC<NavBarServicesProps> = ({ service }) => {
 
       <div className="flex gap-8">
         <button onClick={() => handleNav("/")} className="text-gray-700 hover:text-blue-600 font-medium">
-          Home
+          Beranda
         </button>
         <button onClick={() => handleNav("/trains")} className="text-gray-700 hover:text-blue-600 font-medium">
-          Booking
+          Tiket
         </button>
         <button onClick={() => handleNav("/promo")} className="text-gray-700 hover:text-blue-600 font-medium">
           Promo
         </button>
         <button onClick={() => handleNav("/contact")} className="text-gray-700 hover:text-blue-600 font-medium">
-          Contact
+          Kontak
         </button>
       </div>
 
@@ -63,10 +63,10 @@ const NavBarServices: React.FC<NavBarServicesProps> = ({ service }) => {
         ) : (
           <div className="flex items-center gap-2">
             <button onClick={() => handleNav("/auth/login")} className="text-gray-700 hover:text-blue-600 font-medium">
-              Login
+              Masuk
             </button>
             <button onClick={() => handleNav("/auth/register")} className="bg-blue-600 text-white px-3 py-1 rounded-md">
-              Register
+              Daftar
             </button>
           </div>
         )}

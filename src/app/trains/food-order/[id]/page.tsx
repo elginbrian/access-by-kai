@@ -39,7 +39,7 @@ const handleChatClick = () => {
 
 const TrainFoodOrderContent = () => {
   const { currentStep, handleStepClick, nextStep } = useBookingContext();
-  const { setFoodOrders } = useCentralBooking();
+  const { setFoodOrders, bookingData: centralBooking } = useCentralBooking();
   const [activeTab, setActiveTab] = useState<FoodTabType>("Makanan");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
@@ -121,6 +121,22 @@ const TrainFoodOrderContent = () => {
     }));
     setFoodOrders(foodOrderItems);
   }, [cart, setFoodOrders]);
+
+  React.useEffect(() => {
+    if (centralBooking && centralBooking.foodOrders && centralBooking.foodOrders.length > 0) {
+      const hydratedCart: CartItem[] = centralBooking.foodOrders.map((o) => ({
+        id: o.id,
+        name: o.name,
+        price: o.price,
+        quantity: o.quantity,
+        image: o.image,
+      }));
+      setCart(hydratedCart);
+      const q: { [key: string]: number } = {};
+      hydratedCart.forEach((c) => (q[c.id] = c.quantity));
+      setQuantities(q);
+    }
+  }, [centralBooking]);
 
   const bookingSteps = [
     {

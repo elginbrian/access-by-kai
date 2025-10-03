@@ -148,7 +148,7 @@ const SearchCard = () => {
       <div className="bg-white rounded-3xl shadow-2xl p-8 w-full">
         {/* Title */}
         <h1 className="text-3xl font-bold mb-8 text-center" style={{ color: colors.base.darker }}>
-          Book Your Train Journey
+          Pesan Perjalanan Keretamu
         </h1>
 
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -158,7 +158,7 @@ const SearchCard = () => {
             <div className="flex-1 min-w-[200px]">
               <label className="flex items-center text-sm font-semibold mb-2" style={{ color: colors.violet.normal }}>
                 <img src="/ic_train.svg" alt="Train Icon" style={{ color: colors.violet.normal }} />
-                <span className="ml-2">Dari (Departure)</span>
+                <span className="ml-2">Dari (Keberangkatan)</span>
               </label>
               <CustomSelect
                 options={stationOptions}
@@ -200,7 +200,7 @@ const SearchCard = () => {
             <div className="flex-1 min-w-[200px]">
               <label className="flex items-center text-sm font-semibold mb-2" style={{ color: colors.violet.normal }}>
                 <img src="/ic_train.svg" alt="Train Icon" style={{ color: colors.violet.normal }} />
-                <span className="ml-2">Ke (Arrival)</span>
+                <span className="ml-2">Ke (Tujuan)</span>
               </label>
               <CustomSelect
                 options={stationOptions}
@@ -310,7 +310,7 @@ const SearchCard = () => {
             ) : (
               <>
                 <SearchIcon />
-                <span>Search Trains</span>
+                <span>Cari Kereta</span>
               </>
             )}
           </button>

@@ -52,16 +52,16 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
           </div>
           <div className="flex space-x-8">
             <button onClick={() => handleNavClick("/")} className="text-purple-600 font-medium hover:opacity-80 transition-opacity">
-              Home
+              Beranda
             </button>
             <button onClick={() => handleNavClick("/trains")} className="text-black hover:text-purple-600 transition-colors">
-              Booking
+              Tiket
             </button>
             <button onClick={() => handleNavClick("/promo")} className="text-black hover:text-purple-600 transition-colors">
               Promo
             </button>
             <button onClick={() => handleNavClick("/contact")} className="text-black hover:text-purple-600 transition-colors">
-              Contact
+              Kontak
             </button>
           </div>
           <div className="flex items-center space-x-4">
@@ -70,10 +70,10 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
             ) : (
               <div className="flex items-center space-x-3">
                 <button onClick={() => handleNavClick("/auth/login")} className="text-purple-600 hover:text-purple-700 transition-colors font-medium text-sm px-4 py-2 rounded-full border border-purple-600 hover:bg-purple-50">
-                  Login
+                  Masuk
                 </button>
                 <button onClick={() => handleNavClick("/auth/register")} className="bg-purple-600 text-white hover:bg-purple-700 transition-colors font-medium text-sm px-4 py-2 rounded-full">
-                  Register
+                  Daftar
                 </button>
               </div>
             )}

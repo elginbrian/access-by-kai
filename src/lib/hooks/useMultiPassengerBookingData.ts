@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { useCentralBooking } from "@/lib/hooks/useCentralBooking";
 import { PassengerData } from "@/components/trains/booking/PassengerForm";
 
 export interface MultiPassengerFormData {
@@ -52,6 +53,35 @@ export function useMultiPassengerBookingData() {
       }));
     }
   }, [user]);
+
+  const { bookingData: centralBooking } = useCentralBooking();
+
+  useEffect(() => {
+    if (!centralBooking) return;
+
+    if (!bookingData.fullName && centralBooking.booker?.fullName) {
+      setBookingData((prev) => ({
+        ...prev,
+        fullName: centralBooking.booker.fullName || prev.fullName,
+        phoneNumber: centralBooking.booker.phone || prev.phoneNumber,
+        email: centralBooking.booker.email || prev.email,
+      }));
+    }
+
+    const localHasFilledPassengers = bookingData.passengers.some((p) => p.passengerName && p.passengerName.trim() !== "");
+    if (!localHasFilledPassengers && centralBooking.passengers && centralBooking.passengers.length > 0) {
+      const mapped = centralBooking.passengers.map((p) => ({
+        title: "Bapak",
+        passengerName: p.name || "",
+        idType: "KTP",
+        idNumber: p.idNumber || "",
+      }));
+      setBookingData((prev) => ({
+        ...prev,
+        passengers: mapped,
+      }));
+    }
+  }, [centralBooking]);
 
   const updateBookerData = (data: Partial<Pick<MultiPassengerFormData, "fullName" | "phoneNumber" | "email">>) => {
     setBookingData((prev) => ({

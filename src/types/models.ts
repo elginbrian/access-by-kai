@@ -140,6 +140,23 @@ export type TipeGerbongEnum = Database["public"]["Enums"]["tipe_gerbong_enum"];
 export type StatusPerpindahanKursiEnum = Database["public"]["Enums"]["status_perpindahan_kursi_enum"];
 export type TipeKoneksiEnum = Database["public"]["Enums"]["tipe_koneksi_enum"];
 
+// ===== E-PORTER TYPES =====
+
+export type EporterPorter = Database["public"]["Tables"]["e_porter_porter"]["Row"];
+export type NewEporterPorter = Database["public"]["Tables"]["e_porter_porter"]["Insert"];
+export type UpdateEporterPorter = Database["public"]["Tables"]["e_porter_porter"]["Update"];
+
+export type EporterBooking = Database["public"]["Tables"]["e_porter_booking"]["Row"];
+export type NewEporterBooking = Database["public"]["Tables"]["e_porter_booking"]["Insert"];
+export type UpdateEporterBooking = Database["public"]["Tables"]["e_porter_booking"]["Update"];
+
+export type EporterAssignment = Database["public"]["Tables"]["e_porter_assignment"]["Row"];
+export type NewEporterAssignment = Database["public"]["Tables"]["e_porter_assignment"]["Insert"];
+export type UpdateEporterAssignment = Database["public"]["Tables"]["e_porter_assignment"]["Update"];
+
+export type EporterBookingStatusEnum = Database["public"]["Enums"]["e_porter_booking_status_enum"];
+export type EporterAssignmentActionEnum = Database["public"]["Enums"]["e_porter_assignment_action_enum"];
+
 // ===== UTILITY TYPES =====
 
 // Combined types for relations

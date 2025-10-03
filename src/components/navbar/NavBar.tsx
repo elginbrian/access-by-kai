@@ -74,19 +74,19 @@ const NavBar = () => {
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center space-x-6">
               <button onClick={() => handleNavClick("/")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
-                Home
+                Beranda
               </button>
               <button onClick={() => handleNavClick("/trains")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
-                Tickets
+                Tiket
               </button>
               <button onClick={() => handleNavClick("/routes")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
-                Routes
+                Rute
               </button>
               <button onClick={() => handleNavClick("/about")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
-                About
+                Tentang
               </button>
               <button onClick={() => handleNavClick("/contact")} className="text-white hover:text-white/70 transition-colors font-medium text-sm">
-                Contact
+                Kontak
               </button>
             </div>
 
@@ -150,10 +150,10 @@ const NavBar = () => {
                 <>
                   {/* Login/Register buttons when not logged in */}
                   <button onClick={() => handleNavClick("/auth/login")} className="text-white hover:text-white/70 transition-colors font-medium text-sm px-4 py-2 rounded-full border border-white/30 hover:border-white/50">
-                    Login
+                    Masuk
                   </button>
                   <button onClick={() => handleNavClick("/auth/register")} className="bg-white text-gray-900 hover:bg-white/90 transition-colors font-medium text-sm px-4 py-2 rounded-full">
-                    Register
+                    Daftar
                   </button>
                 </>
               )}
@@ -177,19 +177,19 @@ const NavBar = () => {
           >
             <div className="px-2 pt-2 pb-3 space-y-1">
               <button onClick={() => handleNavClick("/")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
-                Home
+                Beranda
               </button>
               <button onClick={() => handleNavClick("/trains")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
-                Tickets
+                Tiket
               </button>
               <button onClick={() => handleNavClick("/routes")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
-                Routes
+                Rute
               </button>
               <button onClick={() => handleNavClick("/about")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
-                About
+                Tentang
               </button>
               <button onClick={() => handleNavClick("/contact")} className="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-white/10">
-                Contact
+                Kontak
               </button>
 
               {/* Mobile Auth Section */}
@@ -217,10 +217,10 @@ const NavBar = () => {
                 ) : (
                   <div className="px-3 py-2 space-y-2">
                     <button onClick={() => handleNavClick("/auth/login")} className="block w-full text-center px-4 py-2 text-white border border-white/30 rounded-full hover:border-white/50 transition-colors">
-                      Login
+                      Masuk
                     </button>
                     <button onClick={() => handleNavClick("/auth/register")} className="block w-full text-center px-4 py-2 bg-white text-gray-900 rounded-full hover:bg-white/90 transition-colors">
-                      Register
+                      Daftar
                     </button>
                   </div>
                 )}
