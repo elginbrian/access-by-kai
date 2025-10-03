@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase";
 import { CreatePaymentRequestSchema } from "@/lib/midtrans/types";
 import type { CreatePaymentRequest, MidtransSnapTokenRequest, MidtransItemDetails } from "@/lib/midtrans/types";
 
-const supabase = createClient();
+const supabase = createClient() as any;
 
 export async function POST(request: NextRequest) {
   try {

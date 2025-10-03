@@ -4,21 +4,21 @@ import { createLegacyServerClient } from "@/lib/supabase";
 export async function POST(request: NextRequest) {
   try {
     const supabase = createLegacyServerClient();
-    
+
     // Extract auth token
-    const cookieString = request.headers.get('cookie') || '';
+    const cookieString = request.headers.get("cookie") || "";
     let authToken = null;
-    
+
     const authCookieMatch = cookieString.match(/([^;\s]+)-auth-token=([^;]+)/);
     if (authCookieMatch) {
       const cookieValue = authCookieMatch[2];
-      if (cookieValue.startsWith('base64-')) {
+      if (cookieValue.startsWith("base64-")) {
         try {
           const decodedData = atob(cookieValue.substring(7));
           const tokenData = JSON.parse(decodedData);
           authToken = tokenData.access_token;
         } catch (e) {
-          console.warn('Failed to decode auth token:', e);
+          console.warn("Failed to decode auth token:", e);
         }
       } else {
         authToken = cookieValue;
@@ -26,8 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!authToken) {
-      authToken = request.cookies.get("sb-access-token")?.value || 
-                  request.cookies.get("supabase-auth-token")?.value;
+      authToken = request.cookies.get("sb-access-token")?.value || request.cookies.get("supabase-auth-token")?.value;
     }
 
     const { data, error } = await supabase.auth.getUser(authToken || undefined);
@@ -47,26 +46,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { 
-      user_id, 
-      judul, 
-      pesan, 
-      tipe_notifikasi, 
-      priority_level = 'NORMAL',
-      reference_type,
-      reference_id,
-      action_url
-    } = body;
+    const { user_id, judul, pesan, tipe_notifikasi, priority_level = "NORMAL", reference_type, reference_id, action_url } = body;
 
     // Validate required fields
     if (!user_id || !judul || !pesan || !tipe_notifikasi) {
-      return NextResponse.json({ 
-        error: "Missing required fields: user_id, judul, pesan, tipe_notifikasi" 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Missing required fields: user_id, judul, pesan, tipe_notifikasi",
+        },
+        { status: 400 }
+      );
     }
 
     // Create notification
-    const { data: newNotification, error: insertError } = await supabase
+    const { data: newNotification, error: insertError } = await (supabase as any)
       .from("notifications")
       .insert({
         user_id,
@@ -78,7 +71,7 @@ export async function POST(request: NextRequest) {
         reference_id,
         action_url,
         is_read: false,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -88,16 +81,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to create notification" }, { status: 500 });
     }
 
-    return NextResponse.json({
-      success: true,
-      data: newNotification
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        data: newNotification,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Create notification error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

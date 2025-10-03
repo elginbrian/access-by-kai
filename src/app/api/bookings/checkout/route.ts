@@ -5,7 +5,7 @@ import { evaluateFraud } from "@/lib/antiFraud/simpleRules";
 import { midtransService } from "@/lib/midtrans";
 import * as jadwalKursiSvc from "@/lib/mcp/services/jadwal_kursi";
 
-const supabase = createClient();
+const supabase = createClient() as any;
 
 async function verifyCaptcha(token?: string | null, remoteIp?: string | null): Promise<boolean> {
   if (!token) return false;
@@ -531,21 +531,18 @@ export async function POST(request: NextRequest) {
     // update pembayaran with partial info
     await supabase.from("pembayaran").update({ id_transaksi_eksternal: orderId }).eq("pembayaran_id", payment.pembayaran_id);
 
-    // Create booking notification
     try {
-      await supabase
-        .from("notifications")
-        .insert({
-          user_id: userId,
-          tipe_notifikasi: "TRAIN_BOOKING",
-          judul: "Pemesanan Berhasil Dibuat",
-          pesan: `Pemesanan tiket ${bookingData.journey.trainName} (${bookingData.journey.trainCode}) telah berhasil dibuat. Silakan lanjutkan pembayaran.`,
-          priority_level: "NORMAL",
-          reference_type: "TRAIN_BOOKING",
-          reference_id: pemesananId.toString(),
-          is_read: false,
-          created_at: new Date().toISOString()
-        });
+      await (supabase as any).from("notifications").insert({
+        user_id: userId,
+        tipe_notifikasi: "TRAIN_BOOKING",
+        judul: "Pemesanan Berhasil Dibuat",
+        pesan: `Pemesanan tiket ${bookingData.journey.trainName} (${bookingData.journey.trainCode}) telah berhasil dibuat. Silakan lanjutkan pembayaran.`,
+        priority_level: "NORMAL",
+        reference_type: "TRAIN_BOOKING",
+        reference_id: pemesananId.toString(),
+        is_read: false,
+        created_at: new Date().toISOString(),
+      });
     } catch (notificationError) {
       console.warn("Failed to create booking notification:", notificationError);
       // Don't fail the booking if notification creation fails

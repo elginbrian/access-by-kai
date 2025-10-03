@@ -4,22 +4,22 @@ import type { Review, ReviewFilters, PaginatedReviews } from "@/types/notificati
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createLegacyServerClient();
-    
+    const supabase = createLegacyServerClient() as any;
+
     // Extract auth token
-    const cookieString = request.headers.get('cookie') || '';
+    const cookieString = request.headers.get("cookie") || "";
     let authToken = null;
-    
+
     const authCookieMatch = cookieString.match(/([^;\s]+)-auth-token=([^;]+)/);
     if (authCookieMatch) {
       const cookieValue = authCookieMatch[2];
-      if (cookieValue.startsWith('base64-')) {
+      if (cookieValue.startsWith("base64-")) {
         try {
           const decodedData = atob(cookieValue.substring(7));
           const tokenData = JSON.parse(decodedData);
           authToken = tokenData.access_token;
         } catch (e) {
-          console.warn('Failed to decode auth token:', e);
+          console.warn("Failed to decode auth token:", e);
         }
       } else {
         authToken = cookieValue;
@@ -27,8 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!authToken) {
-      authToken = request.cookies.get("sb-access-token")?.value || 
-                  request.cookies.get("supabase-auth-token")?.value;
+      authToken = request.cookies.get("sb-access-token")?.value || request.cookies.get("supabase-auth-token")?.value;
     }
 
     const { data, error } = await supabase.auth.getUser(authToken || undefined);
@@ -38,17 +37,18 @@ export async function GET(request: NextRequest) {
 
     // Parse query parameters
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const jenis_layanan = searchParams.get('jenis_layanan');
-    const penilaian = searchParams.get('penilaian');
-    const platform = searchParams.get('platform');
-    const pengguna_id = searchParams.get('pengguna_id'); // For user's own reviews
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const jenis_layanan = searchParams.get("jenis_layanan");
+    const penilaian = searchParams.get("penilaian");
+    const platform = searchParams.get("platform");
+    const pengguna_id = searchParams.get("pengguna_id"); // For user's own reviews
 
     // Build query
     let query = supabase
       .from("ulasan")
-      .select(`
+      .select(
+        `
         ulasan_id,
         pengguna_id,
         jenis_layanan,
@@ -58,7 +58,9 @@ export async function GET(request: NextRequest) {
         dibuat_pada,
         diperbarui_pada,
         pengguna:pengguna_id(nama_lengkap, foto_profil_url)
-      `, { count: 'exact' })
+      `,
+        { count: "exact" }
+      )
       .order("dibuat_pada", { ascending: false });
 
     // Apply filters
@@ -93,50 +95,45 @@ export async function GET(request: NextRequest) {
       .eq("jenis_layanan", jenis_layanan || "")
       .is("jenis_layanan", jenis_layanan ? null : "not.null");
 
-    const averageRating = avgData && avgData.length > 0 
-      ? avgData.reduce((sum, review) => sum + review.penilaian, 0) / avgData.length 
-      : 0;
+    const averageRating = avgData && avgData.length > 0 ? (avgData as Array<{ penilaian: number }>).reduce((sum: number, review: { penilaian: number }) => sum + (review.penilaian || 0), 0) / avgData.length : 0;
 
     const totalPages = Math.ceil((count || 0) / limit);
 
     const response: PaginatedReviews = {
-      data: reviews || [],
+      // cast reviews to any to satisfy the declared Review type (DB may return nullable fields)
+      data: (reviews || []) as any as Review[],
       total: count || 0,
       page,
       limit,
       totalPages,
-      averageRating: Math.round(averageRating * 10) / 10
+      averageRating: Math.round(averageRating * 10) / 10,
     };
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error("Review fetch error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createLegacyServerClient();
-    
+    const supabase = createLegacyServerClient() as any;
+
     // Extract auth token
-    const cookieString = request.headers.get('cookie') || '';
+    const cookieString = request.headers.get("cookie") || "";
     let authToken = null;
-    
+
     const authCookieMatch = cookieString.match(/([^;\s]+)-auth-token=([^;]+)/);
     if (authCookieMatch) {
       const cookieValue = authCookieMatch[2];
-      if (cookieValue.startsWith('base64-')) {
+      if (cookieValue.startsWith("base64-")) {
         try {
           const decodedData = atob(cookieValue.substring(7));
           const tokenData = JSON.parse(decodedData);
           authToken = tokenData.access_token;
         } catch (e) {
-          console.warn('Failed to decode auth token:', e);
+          console.warn("Failed to decode auth token:", e);
         }
       } else {
         authToken = cookieValue;
@@ -144,8 +141,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!authToken) {
-      authToken = request.cookies.get("sb-access-token")?.value || 
-                  request.cookies.get("supabase-auth-token")?.value;
+      authToken = request.cookies.get("sb-access-token")?.value || request.cookies.get("supabase-auth-token")?.value;
     }
 
     const { data, error } = await supabase.auth.getUser(authToken || undefined);
@@ -165,25 +161,26 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { 
-      jenis_layanan, 
-      penilaian, 
-      komentar, 
-      platform = 'UMUM'
-    } = body;
+    const { jenis_layanan, penilaian, komentar, platform = "UMUM" } = body;
 
     // Validate required fields
     if (!jenis_layanan || !penilaian || !komentar) {
-      return NextResponse.json({ 
-        error: "Missing required fields: jenis_layanan, penilaian, komentar" 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Missing required fields: jenis_layanan, penilaian, komentar",
+        },
+        { status: 400 }
+      );
     }
 
     // Validate rating range
     if (penilaian < 1 || penilaian > 5) {
-      return NextResponse.json({ 
-        error: "Penilaian must be between 1 and 5" 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Penilaian must be between 1 and 5",
+        },
+        { status: 400 }
+      );
     }
 
     // Create review
@@ -196,7 +193,7 @@ export async function POST(request: NextRequest) {
         komentar,
         platform,
         dibuat_pada: new Date().toISOString(),
-        diperbarui_pada: new Date().toISOString()
+        diperbarui_pada: new Date().toISOString(),
       })
       .select()
       .single();
@@ -208,33 +205,30 @@ export async function POST(request: NextRequest) {
 
     // Create notification for successful review submission
     try {
-      await supabase
-        .from("notifications")
-        .insert({
-          user_id: currentUser.user_id,
-          tipe_notifikasi: 'SYSTEM_UPDATE',
-          judul: 'Ulasan Berhasil Dikirim',
-          pesan: `Terima kasih! Ulasan Anda untuk layanan ${jenis_layanan} telah berhasil dikirim dan akan membantu kami meningkatkan kualitas layanan.`,
-          priority_level: 'LOW',
-          reference_type: 'REVIEW',
-          reference_id: newReview.ulasan_id,
-          is_read: false,
-          created_at: new Date().toISOString()
-        });
+      await (supabase as any).from("notifications").insert({
+        user_id: currentUser.user_id,
+        tipe_notifikasi: "SYSTEM_UPDATE",
+        judul: "Ulasan Berhasil Dikirim",
+        pesan: `Terima kasih! Ulasan Anda untuk layanan ${jenis_layanan} telah berhasil dikirim dan akan membantu kami meningkatkan kualitas layanan.`,
+        priority_level: "LOW",
+        reference_type: "REVIEW",
+        reference_id: newReview.ulasan_id,
+        is_read: false,
+        created_at: new Date().toISOString(),
+      });
     } catch (notificationError) {
       console.warn("Failed to create review notification:", notificationError);
     }
 
-    return NextResponse.json({
-      success: true,
-      data: newReview
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        data: newReview,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Create review error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase";
 import { PaymentCallbackSchema } from "@/lib/midtrans/types";
 import { midtransService } from "@/lib/midtrans";
 
-const supabase = createClient();
+const supabase = createClient() as any;
 
 export async function POST(request: NextRequest) {
   try {

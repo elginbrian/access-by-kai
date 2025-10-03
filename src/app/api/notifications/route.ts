@@ -1,25 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createLegacyServerClient } from "@/lib/supabase";
-import type { Notification, NotificationFilter } from "@/types/notification";
+import type { Notification, NotificationFilters } from "@/types/notification";
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = createLegacyServerClient();
-    
+
     // Extract auth token
-    const cookieString = request.headers.get('cookie') || '';
+    const cookieString = request.headers.get("cookie") || "";
     let authToken = null;
-    
+
     const authCookieMatch = cookieString.match(/([^;\s]+)-auth-token=([^;]+)/);
     if (authCookieMatch) {
       const cookieValue = authCookieMatch[2];
-      if (cookieValue.startsWith('base64-')) {
+      if (cookieValue.startsWith("base64-")) {
         try {
           const decodedData = atob(cookieValue.substring(7));
           const tokenData = JSON.parse(decodedData);
           authToken = tokenData.access_token;
         } catch (e) {
-          console.warn('Failed to decode auth token:', e);
+          console.warn("Failed to decode auth token:", e);
         }
       } else {
         authToken = cookieValue;
@@ -27,8 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!authToken) {
-      authToken = request.cookies.get("sb-access-token")?.value || 
-                  request.cookies.get("supabase-auth-token")?.value;
+      authToken = request.cookies.get("sb-access-token")?.value || request.cookies.get("supabase-auth-token")?.value;
     }
 
     const { data, error } = await supabase.auth.getUser(authToken || undefined);
@@ -49,24 +48,20 @@ export async function GET(request: NextRequest) {
 
     // Parse query parameters
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const isRead = searchParams.get('isRead');
-    const priority = searchParams.get('priority');
-    const type = searchParams.get('type');
-    const dateFrom = searchParams.get('dateFrom');
-    const dateTo = searchParams.get('dateTo');
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const isRead = searchParams.get("isRead");
+    const priority = searchParams.get("priority");
+    const type = searchParams.get("type");
+    const dateFrom = searchParams.get("dateFrom");
+    const dateTo = searchParams.get("dateTo");
 
     // Build query
-    let query = supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", currentUser.user_id)
-      .order("created_at", { ascending: false });
+    let query = (supabase as any).from("notifications").select("*").eq("user_id", currentUser.user_id).order("created_at", { ascending: false });
 
     // Apply filters
     if (isRead !== null) {
-      query = query.eq("is_read", isRead === 'true');
+      query = query.eq("is_read", isRead === "true");
     }
     if (priority) {
       query = query.eq("priority_level", priority);
@@ -93,14 +88,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Get total count for pagination
-    let countQuery = supabase
-      .from("notifications")
-      .select("*", { count: 'exact', head: true })
-      .eq("user_id", currentUser.user_id);
+    let countQuery = (supabase as any).from("notifications").select("*", { count: "exact", head: true }).eq("user_id", currentUser.user_id);
 
     // Apply same filters for count
     if (isRead !== null) {
-      countQuery = countQuery.eq("is_read", isRead === 'true');
+      countQuery = countQuery.eq("is_read", isRead === "true");
     }
     if (priority) {
       countQuery = countQuery.eq("priority_level", priority);
@@ -124,15 +116,11 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit)
-      }
+        totalPages: Math.ceil((count || 0) / limit),
+      },
     });
-
   } catch (error) {
     console.error("Get notifications error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

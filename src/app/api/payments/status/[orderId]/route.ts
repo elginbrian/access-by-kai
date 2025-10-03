@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { midtransService } from "@/lib/midtrans";
 import { createClient } from "@/lib/supabase";
 
-const supabase = createClient();
+const supabase = createClient() as any;
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ orderId: string }> }) {
   try {

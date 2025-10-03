@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { midtransService } from "@/lib/midtrans";
 import { createClient } from "@/lib/supabase";
 
-const supabase = createClient();
+const supabase = createClient() as any;
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ orderId: string }> }) {
   try {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       const { data: tickets } = await supabase.from("tiket").select("jadwal_kursi_id").eq("pemesanan_id", payment.pemesanan_id);
 
       if (tickets && tickets.length > 0) {
-        const seatIds = tickets.map((t) => t.jadwal_kursi_id).filter(Boolean);
+        const seatIds = tickets.map((t: { jadwal_kursi_id: any }) => t.jadwal_kursi_id).filter(Boolean);
 
         if (seatIds.length > 0) {
           await supabase.from("jadwal_kursi").update({ status_inventaris: "TERSEDIA" }).in("jadwal_kursi_id", seatIds);
