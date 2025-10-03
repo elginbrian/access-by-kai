@@ -127,7 +127,10 @@ const PayCardProfilePage: React.FC = () => {
                     {/* Sidebar */}
                     <div className="lg:col-span-3">
                         <div className="sticky top-8">
-                            <ProfileSidebar />
+                            <ProfileSidebar 
+                                kaiPayBalance={kaiPayBalance} 
+                                railPointBalance={railPointBalance} 
+                            />
                         </div>
                     </div>
 
