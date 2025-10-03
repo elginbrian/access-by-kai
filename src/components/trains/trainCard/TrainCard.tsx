@@ -8,10 +8,11 @@ interface TrainBadge {
   type: "executive" | "economy";
 }
 
-interface TrainData {
+export interface TrainCardData {
   name: string;
   code: string;
   price: number;
+  kelas_tersedia?: string[];
   badges: string[];
   arrival: string;
   departure?: string;
@@ -25,8 +26,8 @@ interface TrainData {
 }
 
 interface TrainCardProps {
-  train: TrainData;
-  onBookNow?: (train: TrainData) => void;
+  train: TrainCardData;
+  onBookNow?: (train: TrainCardData) => void;
 }
 
 const TrainCard: React.FC<TrainCardProps> = ({ train, onBookNow }) => {
