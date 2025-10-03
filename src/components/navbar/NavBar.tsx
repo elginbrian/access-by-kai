@@ -112,7 +112,7 @@ const NavBar = () => {
                           onClick={() => {
                             setIsMenuOpen(false);
                             const uid = user?.profile?.user_id ?? user?.id;
-                            if (uid) router.push(`/profile/${uid}`);
+                            if (uid) router.push(`/${uid}`);
                           }}
                           className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                         >
@@ -121,7 +121,8 @@ const NavBar = () => {
                         <button
                           onClick={() => {
                             setIsMenuOpen(false);
-                            router.push("/mytickets");
+                            const uid = user?.profile?.user_id ?? user?.id;
+                            if (uid) router.push(`/${uid}/mytickets`);
                           }}
                           className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                         >
@@ -205,7 +206,7 @@ const NavBar = () => {
                         const uid = user?.profile?.user_id ?? user?.id;
                         if (uid) {
                           setIsMenuOpen(false);
-                          router.push(`/profile/${uid}`);
+                          router.push(`/${uid}`);
                         }
                       }}
                       className="flex items-center space-x-2"

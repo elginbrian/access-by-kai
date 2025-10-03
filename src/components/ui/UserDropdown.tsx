@@ -61,7 +61,7 @@ const UserDropdown: React.FC<Props> = ({ displayName = "User", displayAvatar = "
 
               <Menu.Item>
                 {({ active }) => (
-                  <button onClick={() => go(`/profile/${userId}/notification`)} className={`${active ? "bg-gray-100" : ""} w-full text-left px-4 py-2 flex items-center gap-3 text-sm`}>
+                  <button onClick={() => go(`/${userId}/notification`)} className={`${active ? "bg-gray-100" : ""} w-full text-left px-4 py-2 flex items-center gap-3 text-sm`}>
                     <Icon name="bell" className="w-4 h-4 text-gray-600" />
                     Notifikasi
                   </button>
@@ -70,7 +70,7 @@ const UserDropdown: React.FC<Props> = ({ displayName = "User", displayAvatar = "
 
               <Menu.Item>
                 {({ active }) => (
-                  <button onClick={() => go("/mytickets")} className={`${active ? "bg-gray-100" : ""} w-full text-left px-4 py-2 flex items-center gap-3 text-sm`}>
+                  <button onClick={() => go(`/${userId}/mytickets`)} className={`${active ? "bg-gray-100" : ""} w-full text-left px-4 py-2 flex items-center gap-3 text-sm`}>
                     <Icon name="box" className="w-4 h-4 text-gray-600" />
                     Tiket Saya
                   </button>

@@ -5,8 +5,13 @@ import ProfileSidebar from '@/components/profile/ProfileSidebar';
 import PassengerCard, { PassengerData } from '@/components/profile/PassengerCard';
 import PassengerInfoBox from '@/components/profile/PassengerInfoBox';
 import { colors } from '@/app/design-system/colors';
+import type { Pengguna } from '@/types/models';
 
-const ManagePassengersPage: React.FC = () => {
+interface Props {
+  profile: Pengguna;
+}
+
+const ManagePassengersPageClient: React.FC<Props> = ({ profile }) => {
     const [passengers, setPassengers] = useState<PassengerData[]>([
         {
             id: '1',
@@ -66,9 +71,10 @@ const ManagePassengersPage: React.FC = () => {
         <div className="min-h-screen flex" style={{ backgroundColor: colors.base.lightHover }}>
             {/* Sidebar - hidden on mobile */}
             <div className="hidden lg:block">
-                <ProfileSidebar 
-                    kaiPayBalance={125000} 
-                    railPointBalance={2450} 
+                <ProfileSidebar
+                    profile={profile}
+                    kaiPayBalance={125000}
+                    railPointBalance={2450}
                 />
             </div>
 
@@ -163,4 +169,4 @@ const ManagePassengersPage: React.FC = () => {
     );
 };
 
-export default ManagePassengersPage;
+export default ManagePassengersPageClient;

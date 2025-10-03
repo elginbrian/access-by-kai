@@ -40,7 +40,7 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
   const displayName = userName || user?.profile?.nama_lengkap || "";
   const displayAvatar = userAvatar || user?.profile?.foto_profil_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest";
   const userIsLoggedIn = isAuthenticated || !!userName;
-  const profilePath = uid ? `/profile/${uid}` : "/profile";
+  const profilePath = uid ? `/${uid}` : "/profile";
 
   const handleAuthClick = async () => {
     if (userIsLoggedIn) {

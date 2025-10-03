@@ -21,7 +21,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
   return (
     <div className={`relative ${className}`}>
       <Link
-        href={userId ? `/profile/${userId}/notification` : '/notification'}
+        href={userId ? `/${userId}/notification` : '/notification'}
         className="relative inline-flex items-center p-2 text-gray-600 hover:text-gray-900 transition-colors"
         onMouseEnter={() => showPreview && setIsOpen(true)}
         onMouseLeave={() => showPreview && setIsOpen(false)}
@@ -78,7 +78,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
                 Anda memiliki {unreadCount} notifikasi yang belum dibaca
               </p>
               <Link
-                href={userId ? `/profile/${userId}/notification` : '/notification'}
+                href={userId ? `/${userId}/notification` : '/notification'}
                 className="inline-block bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition-colors"
                 onClick={() => setIsOpen(false)}
               >

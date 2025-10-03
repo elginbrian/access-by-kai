@@ -1,11 +1,16 @@
-'use client';
+"use client";
 
 import React from "react";
 import ProfileSidebar from "@/components/profile/ProfileSidebar";
 import ChangePasswordForm from "@/components/profile/ChangePasswordForm";
 import { colors } from "@/app/design-system/colors";
+import type { Pengguna } from "@/types/models";
 
-const ChangePasswordPage = () => {
+interface Props {
+  profile: Pengguna;
+}
+
+const ChangePasswordPageClient: React.FC<Props> = ({ profile }) => {
     const handleCancel = () => {
         // Handle cancel action - could navigate back to profile
         console.log('Cancel clicked');
@@ -19,9 +24,10 @@ const ChangePasswordPage = () => {
 
     return (
         <div className="min-h-screen flex" style={{ backgroundColor: colors.base.lightHover }}>
-            <ProfileSidebar 
-                kaiPayBalance={125000} 
-                railPointBalance={2450} 
+            <ProfileSidebar
+                profile={profile}
+                kaiPayBalance={125000}
+                railPointBalance={2450}
             />
 
             {/* Main content with left margin */}
@@ -35,6 +41,6 @@ const ChangePasswordPage = () => {
             </div>
         </div>
     );
-}
+};
 
-export default ChangePasswordPage;
+export default ChangePasswordPageClient;

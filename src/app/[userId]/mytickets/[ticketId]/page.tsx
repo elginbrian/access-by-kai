@@ -14,9 +14,9 @@ const MyTicketDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const ticketId = params?.id as string;
-  const rawUserId = user?.profile?.user_id;
-  const parsedUserId = rawUserId == null ? NaN : typeof rawUserId === "string" ? parseInt(rawUserId, 10) : (rawUserId as number);
+  const ticketId = params?.ticketId as string;
+  const userIdParam = params?.userId as string;
+  const parsedUserId = userIdParam == null ? NaN : typeof userIdParam === "string" ? parseInt(userIdParam, 10) : (userIdParam as number);
 
   const { data: ticketDetail, isLoading, error } = useTicketDetail(parsedUserId, { ticketId });
   const { cancelTicket } = useTicketActions(parsedUserId);
@@ -38,7 +38,7 @@ const MyTicketDetailPage: React.FC = () => {
       try {
         await cancelTicket.mutateAsync(ticketDetail.id);
         toast.success("Tiket berhasil dibatalkan");
-        router.push("/mytickets");
+        router.push(`/${parsedUserId}/mytickets`);
       } catch (error) {
         toast.error("Gagal membatalkan tiket");
       }
@@ -55,7 +55,7 @@ const MyTicketDetailPage: React.FC = () => {
 
       // Redirect to tickets list after successful transfer
       setTimeout(() => {
-        router.push("/mytickets");
+        router.push(`/${parsedUserId}/mytickets`);
       }, 2000);
     } catch (error) {
       // Error is already handled by the hook with toast
@@ -107,7 +107,7 @@ const MyTicketDetailPage: React.FC = () => {
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Tiket tidak ditemukan</h3>
             <p className="text-gray-600 mb-4">Tiket yang Anda cari tidak ditemukan atau tidak dapat diakses.</p>
-            <button onClick={() => router.push("/mytickets")} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            <button onClick={() => router.push(`/${parsedUserId}/mytickets`)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               Kembali ke Tiket Saya
             </button>
           </div>
