@@ -13,11 +13,11 @@ interface TrainNavigationProps {
   onNavClick?: (section: string) => void;
 }
 
-const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest", onNavClick }) => {
+const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" }) => {
   const router = useRouter();
   const pathname = usePathname();
   const [isTransparent, setIsTransparent] = useState(pathname === "/");
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const isHome = pathname === "/";
@@ -40,7 +40,7 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
   const displayName = userName || user?.profile?.nama_lengkap || "";
   const displayAvatar = userAvatar || user?.profile?.foto_profil_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest";
   const userIsLoggedIn = isAuthenticated || !!userName;
-  const profilePath = uid ? `/profile/${uid}` : "/profile";
+  const profilePath = uid ? `/${uid}` : "/profile";
 
   const handleAuthClick = async () => {
     if (userIsLoggedIn) {
@@ -98,7 +98,15 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
           </div>
           <div className="flex items-center space-x-4">
             {userIsLoggedIn ? (
-              <UserDropdown displayName={displayName} displayAvatar={displayAvatar} onLogout={handleAuthClick} onNavigate={(p) => router.push(p)} profilePath={profilePath} lightMode={isTransparent} />
+              <UserDropdown 
+                displayName={displayName} 
+                displayAvatar={displayAvatar} 
+                onLogout={handleAuthClick} 
+                onNavigate={(p) => router.push(p)} 
+                profilePath={profilePath} 
+                lightMode={isTransparent}
+                userId={uid}
+              />
             ) : (
               <div className="flex items-center space-x-3">
                 <button

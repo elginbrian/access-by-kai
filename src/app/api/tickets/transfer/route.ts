@@ -208,6 +208,56 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 6. Create notification for the ticket recipient
+    try {
+      await supabase
+        .from("notifications")
+        .insert({
+          user_id: targetUser.user_id,
+          tipe_notifikasi: "TICKET_TRANSFER",
+          judul: "Tiket Diterima",
+          pesan: `Anda telah menerima tiket dari ${currentUserFromDb?.nama_lengkap || 'pengguna lain'}. Silakan cek tiket Anda di halaman "Tiket Saya".`,
+          priority_level: "NORMAL",
+          reference_type: "TICKET",
+          reference_id: ticketId,
+          is_read: false,
+          created_at: new Date().toISOString()
+        });
+
+      // Create notification for the sender
+      await supabase
+        .from("notifications")
+        .insert({
+          user_id: currentUserProfile.user_id,
+          tipe_notifikasi: "TICKET_TRANSFER",
+          judul: "Transfer Tiket Berhasil",
+          pesan: `Tiket Anda telah berhasil ditransfer ke ${targetUser.nama_lengkap}.`,
+          priority_level: "LOW",
+          reference_type: "TICKET",
+          reference_id: ticketId,
+          is_read: false,
+          created_at: new Date().toISOString()
+        });
+
+      // Create review request notification for the recipient after some time
+      await supabase
+        .from("notifications")
+        .insert({
+          user_id: targetUser.user_id,
+          tipe_notifikasi: "REVIEW_REQUEST",
+          judul: "Bagikan Pengalaman Anda",
+          pesan: "Bagaimana pengalaman Anda dengan layanan transfer tiket kami? Berikan ulasan untuk membantu kami meningkatkan kualitas layanan.",
+          priority_level: "LOW",
+          reference_type: "REVIEW",
+          action_url: "/reviews/create?service=BOOKING_TIKET",
+          is_read: false,
+          created_at: new Date().toISOString()
+        });
+    } catch (notificationError) {
+      console.warn("Failed to create notifications:", notificationError);
+      // Don't fail the transfer if notification creation fails
+    }
+
     // Success response
     return NextResponse.json({
       success: true,

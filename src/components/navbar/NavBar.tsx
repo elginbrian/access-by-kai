@@ -11,7 +11,7 @@ const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const handleAuthClick = async () => {
     if (isAuthenticated) {
@@ -112,7 +112,7 @@ const NavBar = () => {
                           onClick={() => {
                             setIsMenuOpen(false);
                             const uid = user?.profile?.user_id ?? user?.id;
-                            if (uid) router.push(`/profile/${uid}`);
+                            if (uid) router.push(`/${uid}`);
                           }}
                           className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                         >
@@ -121,11 +121,21 @@ const NavBar = () => {
                         <button
                           onClick={() => {
                             setIsMenuOpen(false);
-                            router.push("/mytickets");
+                            const uid = user?.profile?.user_id ?? user?.id;
+                            if (uid) router.push(`/${uid}/mytickets`);
                           }}
                           className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                         >
                           Tiket Saya
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            router.push("/reviews");
+                          }}
+                          className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          Ulasan Layanan
                         </button>
                         <div className="border-t" />
                         <button
@@ -180,6 +190,9 @@ const NavBar = () => {
               <button onClick={() => handleNavClick("/logistic")} className={`block w-full text-left px-3 py-2 rounded-md ${isActive("/logistic") ? "text-purple-300 font-semibold" : "text-white hover:bg-white/10"}`}>
                 Logistik
               </button>
+              <button onClick={() => handleNavClick("/reviews")} className={`block w-full text-left px-3 py-2 rounded-md ${isActive("/reviews") ? "text-purple-300 font-semibold" : "text-white hover:bg-white/10"}`}>
+                Ulasan Layanan
+              </button>
 
               <div className="border-t border-white/10 pt-2 mt-2">
                 {isAuthenticated ? (
@@ -193,7 +206,7 @@ const NavBar = () => {
                         const uid = user?.profile?.user_id ?? user?.id;
                         if (uid) {
                           setIsMenuOpen(false);
-                          router.push(`/profile/${uid}`);
+                          router.push(`/${uid}`);
                         }
                       }}
                       className="flex items-center space-x-2"

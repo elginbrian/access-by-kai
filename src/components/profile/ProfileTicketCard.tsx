@@ -20,9 +20,10 @@ interface Ticket {
 interface ProfileTicketCardProps {
   ticket: Ticket;
   index: number;
+  userId: string;
 }
 
-const ProfileTicketCard: React.FC<ProfileTicketCardProps> = ({ ticket, index }) => {
+const ProfileTicketCard: React.FC<ProfileTicketCardProps> = ({ ticket, index, userId }) => {
   const router = useRouter();
 
   const formatDate = (d: string) => {
@@ -122,9 +123,16 @@ const ProfileTicketCard: React.FC<ProfileTicketCardProps> = ({ ticket, index }) 
             )}
 
             <button
-              onClick={() => router.push(`/mytickets/${(ticket as any).tiketId ?? ticket.id}`)}
+              onClick={() => {
+                if (userId && userId !== 'NaN' && userId !== 'undefined') {
+                  router.push(`/${userId}/mytickets/${(ticket as any).tiketId ?? ticket.id}`);
+                } else {
+                  console.error('Invalid userId for navigation:', userId);
+                }
+              }}
               aria-label={`Detail tiket ${ticket.id}`}
               className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold border border-[#d1d5db] transition-all duration-200 transform hover:scale-105"
+              disabled={!userId || userId === 'NaN' || userId === 'undefined'}
             >
               <span className="text-[#4b5563]"> Detail </span>
             </button>

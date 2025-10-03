@@ -15,8 +15,6 @@ interface Props {
 const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, railPointBalance = 2450 }) => {
   const pathname = usePathname();
   const userId = profile?.user_id;
-  
-  const name = profile?.nama_lengkap || "John Doe";
   const email = profile?.email || "john.doe@email.com";
   const avatarInitials = (profile?.nama_lengkap || "JD")
     .split(" ")
@@ -31,22 +29,22 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
   const navigationItems = [
     {
       label: "Riwayat Tiket",
-      path: `/profile/${userId}`,
+      path: userId ? `/${userId}` : '#',
       icon: null,
     },
     {
       label: "KAI Pay & RaiPoint", 
-      path: `/profile/${userId}/paycard`,
+      path: userId ? `/${userId}/paycard` : '#',
       icon: null,
     },
     {
       label: "Ganti Kata Sandi",
-      path: `/profile/${userId}/change-password`,
+      path: userId ? `/${userId}/change-password` : '#',
       icon: null,
     },
     {
       label: "Daftar Penumpang",
-      path: `/profile/${userId}/manage/passengers`,
+      path: userId ? `/${userId}/manage/passengers` : '#',
       icon: null,
     },
     {
@@ -58,12 +56,11 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
 
   const handleLogout = () => {
     // Handle logout logic here
-    console.log("Logout clicked");
     // You might want to call your logout function here
   };
 
   const isActivePath = (path: string) => {
-    if (path === `/profile/${userId}`) {
+    if (path === `/${userId}`) {
       return pathname === path;
     }
     return pathname.startsWith(path);
@@ -86,50 +83,93 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
       </div>
 
       <div className="space-y-4 mb-8">
-        <Link 
-          href={`/profile/${userId}/paycard`}
-          className="block"
-        >
-          <div
-            className="text-white rounded-xl p-5 shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
-            style={{
-              background: `linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)`,
-              boxShadow: "0 8px 24px rgba(74, 144, 226, 0.25)",
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <img src="/ic_ewallet_white.svg" alt="Kai Pay" className="w-4 h-4" />
-              <div className="text-sm">Kai Pay</div>
-            </div>
-            <div className="text-2xl font-bold mt-2">Rp. {formatCurrency(kaiPayBalance)}</div>
-          </div>
-        </Link>
+        {userId ? (
+          <>
+            <Link 
+              href={`/${userId}/paycard`}
+              className="block"
+            >
+              <div
+                className="text-white rounded-xl p-5 shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
+                style={{
+                  background: `linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)`,
+                  boxShadow: "0 8px 24px rgba(74, 144, 226, 0.25)",
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <img src="/ic_ewallet_white.svg" alt="Kai Pay" className="w-4 h-4" />
+                  <div className="text-sm">Kai Pay</div>
+                </div>
+                <div className="text-2xl font-bold mt-2">Rp. {formatCurrency(kaiPayBalance)}</div>
+              </div>
+            </Link>
 
-        <Link 
-          href={`/profile/${userId}/paycard`}
-          className="block"
-        >
-          <div
-            className="text-white rounded-xl p-5 shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
-            style={{
-              background: `linear-gradient(135deg, #f97316 0%, #ea580c 100%)`,
-              boxShadow: "0 8px 24px rgba(252, 187, 108, 0.25)",
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <img src="/ic_star_white.svg" alt="RaiPoint" className="w-4 h-4" />
-              <div className="text-sm">RaiPoint</div>
+            <Link 
+              href={`/${userId}/paycard`}
+              className="block"
+            >
+              <div
+                className="text-white rounded-xl p-5 shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
+                style={{
+                  background: `linear-gradient(135deg, #f97316 0%, #ea580c 100%)`,
+                  boxShadow: "0 8px 24px rgba(252, 187, 108, 0.25)",
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <img src="/ic_star_white.svg" alt="RaiPoint" className="w-4 h-4" />
+                  <div className="text-sm">RaiPoint</div>
+                </div>
+                <div className="text-2xl font-bold mt-2">{formatCurrency(railPointBalance)}</div>
+              </div>
+            </Link>
+          </>
+        ) : (
+          <>
+            <div
+              className="text-white rounded-xl p-5 shadow-lg opacity-50 cursor-not-allowed"
+              style={{
+                background: `linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)`,
+                boxShadow: "0 8px 24px rgba(74, 144, 226, 0.25)",
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <img src="/ic_ewallet_white.svg" alt="Kai Pay" className="w-4 h-4" />
+                <div className="text-sm">Kai Pay</div>
+              </div>
+              <div className="text-2xl font-bold mt-2">Rp. {formatCurrency(kaiPayBalance)}</div>
             </div>
-            <div className="text-2xl font-bold mt-2">{formatCurrency(railPointBalance)}</div>
-          </div>
-        </Link>
+
+            <div
+              className="text-white rounded-xl p-5 shadow-lg opacity-50 cursor-not-allowed"
+              style={{
+                background: `linear-gradient(135deg, #f97316 0%, #ea580c 100%)`,
+                boxShadow: "0 8px 24px rgba(252, 187, 108, 0.25)",
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <img src="/ic_star_white.svg" alt="RaiPoint" className="w-4 h-4" />
+                <div className="text-sm">RaiPoint</div>
+              </div>
+              <div className="text-2xl font-bold mt-2">{formatCurrency(railPointBalance)}</div>
+            </div>
+          </>
+        )}
       </div>
 
       <nav className="space-y-2">
         {navigationItems.map((item) => {
           const isActive = isActivePath(item.path);
+          const isDisabled = item.path === '#';
           
-          return (
+          return isDisabled ? (
+            <div
+              key={item.path}
+              className="block w-full text-left px-4 py-3 rounded-xl font-medium opacity-50 cursor-not-allowed border border-gray-100"
+              style={{ color: colors.base.darkActive }}
+            >
+              {item.label}
+            </div>
+          ) : (
             <Link
               key={item.path}
               href={item.path}

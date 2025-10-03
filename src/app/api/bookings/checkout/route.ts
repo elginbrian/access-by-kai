@@ -531,6 +531,26 @@ export async function POST(request: NextRequest) {
     // update pembayaran with partial info
     await supabase.from("pembayaran").update({ id_transaksi_eksternal: orderId }).eq("pembayaran_id", payment.pembayaran_id);
 
+    // Create booking notification
+    try {
+      await supabase
+        .from("notifications")
+        .insert({
+          user_id: userId,
+          tipe_notifikasi: "TRAIN_BOOKING",
+          judul: "Pemesanan Berhasil Dibuat",
+          pesan: `Pemesanan tiket ${bookingData.journey.trainName} (${bookingData.journey.trainCode}) telah berhasil dibuat. Silakan lanjutkan pembayaran.`,
+          priority_level: "NORMAL",
+          reference_type: "TRAIN_BOOKING",
+          reference_id: pemesananId.toString(),
+          is_read: false,
+          created_at: new Date().toISOString()
+        });
+    } catch (notificationError) {
+      console.warn("Failed to create booking notification:", notificationError);
+      // Don't fail the booking if notification creation fails
+    }
+
     return NextResponse.json({
       success: true,
       pemesananId,

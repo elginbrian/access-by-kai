@@ -28,3 +28,4 @@ export * from "./program_loyalitas";
 export * from "./jadwal_gerbong";
 export * from "./jadwal_kursi";
 export * from "./menu_ketersediaan";
+export * from "./ulasan";

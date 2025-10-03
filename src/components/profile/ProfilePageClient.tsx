@@ -17,7 +17,35 @@ interface Props {
 
 const ProfilePageClient: React.FC<Props> = ({ profile }) => {
   const { user } = useAuth();
-  const numericUserId = profile?.user_id ?? (user?.profile?.user_id as number | undefined);
+
+  // If no profile is found, show error
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.base.lightHover }}>
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Icon name="alert" className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2" style={{ color: colors.base.darker }}>
+            Profil tidak ditemukan
+          </h3>
+          <p style={{ color: colors.base.darkActive }} className="mb-4">
+            Profil yang Anda cari tidak ditemukan atau tidak dapat diakses.
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Kembali
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Use the passed profile, or fall back to current user's profile
+  const currentProfile = profile || user?.profile;
+  const numericUserId = currentProfile?.user_id ?? (user?.profile?.user_id as number | undefined);
 
   const parsedUserId = numericUserId == null ? NaN : typeof numericUserId === "string" ? parseInt(numericUserId as any, 10) : (numericUserId as number);
 
@@ -83,7 +111,7 @@ const ProfilePageClient: React.FC<Props> = ({ profile }) => {
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: colors.base.lightHover }}>
       <ProfileSidebar 
-        profile={profile ?? undefined} 
+        profile={currentProfile} 
         kaiPayBalance={125000} 
         railPointBalance={2450} 
       />
@@ -109,7 +137,12 @@ const ProfilePageClient: React.FC<Props> = ({ profile }) => {
               )}
 
               {paginatedTickets.map((ticket, index) => (
-                <ProfileTicketCard key={ticket.id} ticket={ticket} index={index} />
+                <ProfileTicketCard 
+                  key={ticket.id} 
+                  ticket={ticket} 
+                  index={index} 
+                  userId={isNaN(parsedUserId) ? '' : String(parsedUserId)} 
+                />
               ))}
             </div>
 
