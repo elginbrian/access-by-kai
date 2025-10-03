@@ -122,7 +122,7 @@ const ProfileTicketCard: React.FC<ProfileTicketCardProps> = ({ ticket, index }) 
             )}
 
             <button
-              onClick={() => router.push(`/mytickets/${ticket.id}`)}
+              onClick={() => router.push(`/mytickets/${(ticket as any).tiketId ?? ticket.id}`)}
               aria-label={`Detail tiket ${ticket.id}`}
               className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold border border-[#d1d5db] transition-all duration-200 transform hover:scale-105"
             >

@@ -62,7 +62,7 @@ const ProfilePageClient: React.FC<Props> = ({ profile }) => {
       const toLabel = t.arrivalStation?.code ?? t.arrivalStation?.name ?? "-";
 
       return {
-        id: t.id || t.ticketNumber,
+        id: t.tiketId ? String(t.tiketId) : t.id || t.ticketNumber,
         status: statusLabel,
         title: t.trainName || "-",
         class: t.seat?.class || "-",

@@ -218,12 +218,22 @@ const MyTicketDetailPage: React.FC = () => {
                   </div>
 
                   <div className="text-center">
-                    <div className="w-24 h-24 bg-gray-100 mx-auto mb-2 rounded-lg flex items-center justify-center">
-                      <div className="w-20 h-20 bg-black/10 rounded grid grid-cols-4 gap-0.5 p-1">
-                        {Array.from({ length: 16 }).map((_, i) => (
-                          <div key={i} className={`rounded-sm ${getCellFilled(i) ? "bg-black" : "bg-transparent"}`}></div>
-                        ))}
-                      </div>
+                    <div className="w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
+                      {(() => {
+                        const payload = {
+                          tiketId: ticketDetail.tiketId ?? null,
+                          kode_tiket: ticketDetail.ticketNumber ?? ticketDetail.id ?? null,
+                          bookingId: ticketDetail.booking?.id ?? null,
+                          passenger: ticketDetail.passenger?.name ?? null,
+                          trainName: ticketDetail.trainName ?? null,
+                          date: ticketDetail.date ?? null,
+                          seat: ticketDetail.seat?.car ?? null,
+                          seatNumber: ticketDetail.seat?.number ?? null,
+                        } as const;
+                        const data = encodeURIComponent(JSON.stringify(payload));
+                        const src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${data}`;
+                        return <img src={src} alt={`QR Code tiket ${ticketDetail.ticketNumber ?? ticketDetail.id}`} className="w-full h-full object-cover" />;
+                      })()}
                     </div>
                     <div className="text-xs text-gray-500">Scan untuk validasi</div>
                   </div>

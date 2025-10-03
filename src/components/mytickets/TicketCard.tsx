@@ -157,14 +157,21 @@ const TicketCard: React.FC<Props> = ({ ticket, onDetail }) => {
                 </div>
               </div>
 
-              {/* QR Code Placeholder */}
+              {/* QR Code for ticket validation */}
               <div className="text-center">
-                <div className="w-24 h-24 bg-gray-100 mx-auto mb-2 rounded-lg flex items-center justify-center">
-                  <div className="w-20 h-20 bg-black/10 rounded grid grid-cols-4 gap-0.5 p-1">
-                    {Array.from({ length: 16 }).map((_, i) => (
-                      <div key={i} className={`rounded-sm ${getCellFilled(i) ? "bg-black" : "bg-transparent"}`}></div>
-                    ))}
-                  </div>
+                <div className="w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
+                  {(() => {
+                    const payload = {
+                      kode_tiket: ticket.ticketNumber ?? ticket.id ?? null,
+                      passenger: ticket.passenger ?? null,
+                      trainName: ticket.trainName ?? null,
+                      date: ticket.date ?? null,
+                      seat: ticket.seat ?? null,
+                    } as const;
+                    const data = encodeURIComponent(JSON.stringify(payload));
+                    const src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${data}`;
+                    return <img src={src} alt={`QR Code tiket ${ticket.ticketNumber ?? ticket.id}`} className="w-full h-full object-cover" />;
+                  })()}
                 </div>
                 <div className="text-xs text-gray-500">Scan untuk validasi</div>
               </div>

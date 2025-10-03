@@ -191,7 +191,7 @@ const MyTicketsPage: React.FC = () => {
                   class: ticket.seat?.class ?? "-",
                   totalPrice: ticket.price?.total ? `Rp ${ticket.price.total.toLocaleString("id-ID")}` : "-",
                 }}
-                onDetail={() => router.push(`/mytickets/${ticket.ticketNumber ?? ticket.id}`)}
+                onDetail={() => router.push(`/mytickets/${ticket.tiketId ?? ticket.ticketNumber ?? ticket.id}`)}
               />
             ))
           )}
