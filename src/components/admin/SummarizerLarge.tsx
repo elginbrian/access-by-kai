@@ -28,9 +28,11 @@ type Metrics = {
 type Props = {
   className?: string;
   metrics?: Metrics | null;
+  overrideStructured?: any | null;
+  skipFetch?: boolean;
 };
 
-export default function SummarizerLarge({ className = "", metrics = null }: Props) {
+export default function SummarizerLarge({ className = "", metrics = null, overrideStructured = null, skipFetch = false }: Props) {
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [structured, setStructured] = useState<any | null>(null);
@@ -38,6 +40,7 @@ export default function SummarizerLarge({ className = "", metrics = null }: Prop
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (skipFetch) return;
     let mounted = true;
     async function fetchSummary() {
       setLoading(true);
@@ -81,6 +84,20 @@ export default function SummarizerLarge({ className = "", metrics = null }: Prop
     };
   }, [metrics && JSON.stringify(metrics)]);
 
+  useEffect(() => {
+    if (overrideStructured) {
+      setStructured(overrideStructured);
+      setSummary(null);
+      setLines(null);
+      setError(null);
+      setLoading(false);
+    }
+  }, [overrideStructured]);
+
+  useEffect(() => {
+    const override = (arguments && arguments.length && (arguments as any)[0]) || null;
+  }, []);
+
   return (
     <div className={`bg-white rounded-lg p-6 shadow-lg ${className}`}>
       <h3 className="text-2xl font-bold text-gray-900 mb-2">Ringkasan & Rekomendasi AI</h3>
@@ -93,17 +110,17 @@ export default function SummarizerLarge({ className = "", metrics = null }: Prop
         <div>
           {structured ? (
             <div>
-              <div className="mt-3 space-y-2">
+              <div className="space-y-3 text-gray-700">
                 {(structured.summary_lines ?? []).map((s: string, idx: number) => (
-                  <div key={idx} className="text-gray-700">
+                  <p key={idx} className="text-sm leading-relaxed">
                     {formatInlineBold(s)}
-                  </div>
+                  </p>
                 ))}
               </div>
 
               <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                 {(structured.recommendations ?? []).map((r: string, idx: number) => (
-                  <div key={idx} className="p-3 border rounded-md bg-gray-50">
+                  <div key={idx} className="p-4 border rounded-md bg-gray-50">
                     <div className="text-sm text-gray-800">{formatInlineBold(r)}</div>
                   </div>
                 ))}
@@ -120,15 +137,13 @@ export default function SummarizerLarge({ className = "", metrics = null }: Prop
             </div>
           ) : summary ? (
             <div>
-              <div className="prose prose-sm text-gray-800 mb-4">
+              <div className="space-y-3 text-gray-700 mb-4">
                 {lines && lines.length > 0 ? (
-                  <ul className="list-disc pl-5 space-y-2">
-                    {lines.map((ln, i) => (
-                      <li key={i} className="text-lg font-medium">
-                        {formatInlineBold(ln)}
-                      </li>
-                    ))}
-                  </ul>
+                  lines.map((ln, i) => (
+                    <p key={i} className="text-sm leading-relaxed">
+                      {formatInlineBold(ln)}
+                    </p>
+                  ))
                 ) : (
                   <div className="text-base">{String(summary)}</div>
                 )}

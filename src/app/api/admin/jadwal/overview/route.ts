@@ -38,7 +38,6 @@ export async function GET(req: NextRequest) {
       soldPer[String(jId)] = (soldPer[String(jId)] || 0) + 1;
     }
 
-    // fetch jadwal_gerbong for capacity
     const jadwalIds = jadwals.map((j: any) => j.jadwal_id);
     let capacityMap: Record<string, number> = {};
     if (jadwalIds.length) {
@@ -55,26 +54,45 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // fetch names for master_kereta and rute
     const mkIds = [...new Set(jadwals.map((j: any) => j.master_kereta_id))];
-    const mkRes: any = mkIds.length ? await supabase.from("master_kereta").select("master_kereta_id,nama_kereta").in("master_kereta_id", mkIds) : { data: [] };
-    const mkMap = (mkRes.data ?? []).reduce((m: any, k: any) => ((m[k.master_kereta_id] = k.nama_kereta), m), {} as any);
+    const mkRes: any = mkIds.length ? await supabase.from("master_kereta").select("master_kereta_id,nama_kereta,jenis_layanan,kapasitas_total,jumlah_gerbong,fasilitas_umum").in("master_kereta_id", mkIds) : { data: [] };
+    const mkMap = (mkRes.data ?? []).reduce((m: any, k: any) => {
+      m[k.master_kereta_id] = k.nama_kereta;
+      return m;
+    }, {} as any);
+    const mkDetailsMap = (mkRes.data ?? []).reduce((m: any, k: any) => {
+      m[k.master_kereta_id] = k;
+      return m;
+    }, {} as any);
     const rIds = [...new Set(jadwals.map((j: any) => j.rute_id))];
     const rRes: any = rIds.length ? await supabase.from("rute").select("rute_id,nama_rute").in("rute_id", rIds) : { data: [] };
     const rMap = (rRes.data ?? []).reduce((m: any, r: any) => ((m[r.rute_id] = r.nama_rute), m), {} as any);
 
     const items = (jadwals ?? []).map((j: any) => {
       const sold = soldPer[String(j.jadwal_id)] || 0;
-      const cap = Math.max(1, capacityMap[String(j.jadwal_id)] || 100);
+
+      const capFromMap = capacityMap[String(j.jadwal_id)];
+      const capFallback = mkDetailsMap[j.master_kereta_id]?.kapasitas_total;
+      const cap = Math.max(1, Number(capFromMap || capFallback || 100));
       const occ = Math.min(100, Math.round((sold / cap) * 10000) / 100);
+      const mk = mkDetailsMap[j.master_kereta_id] ?? {};
       return {
         id: String(j.jadwal_id),
+        kodeJadwal: j.kode_jadwal ?? null,
+        nomorKa: j.nomor_ka,
         namaKereta: mkMap[j.master_kereta_id] ?? j.nomor_ka,
+        masterKeretaId: j.master_kereta_id,
+        kelas: mk.jenis_layanan ?? null,
+        kapasitas: cap,
+        seatsSold: sold,
+        okupansiPercent: occ,
+        ruteId: j.rute_id,
         rute: rMap[j.rute_id] ?? String(j.rute_id),
         jamBerangkat: j.waktu_berangkat_origin,
         jamTiba: j.waktu_tiba_destination,
-        penumpangHariIni: sold > 0 ? `${sold} Penumpang` : "-",
-        okupansiPercent: occ,
+        tanggal: j.tanggal_keberangkatan,
+        statusJadwal: j.status_jadwal,
+        hargaBase: j.harga_base,
       };
     });
 
