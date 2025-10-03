@@ -82,6 +82,25 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  try {
+    if (pathname.startsWith("/admin")) {
+      const supabase = createClient();
+      const res = await supabase
+        .from("pengguna")
+        .select("role")
+        .eq("email", user.email || "")
+        .maybeSingle();
+      const role = (res as any)?.data?.role || null;
+      // if (role !== "admin") {
+      //   return NextResponse.redirect(new URL("/unauthorized", request.url));
+      // }
+    }
+  } catch (err) {
+    // if (pathname.startsWith("/admin")) {
+    //   return NextResponse.redirect(new URL("/unauthorized", request.url));
+    // }
+  }
+
   for (const route of TRAINS_ID_REQUIRED_ROUTES) {
     if (pathname === route) {
       return NextResponse.redirect(new URL("/trains", request.url));

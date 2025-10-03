@@ -4,11 +4,10 @@ import React from "react";
 import TableKelola, { Column } from "@/components/admin/table/TableKelola";
 import PopularTrainCard from "@/components/admin/card/PopularTrainCard";
 import ChartMultiLine from "@/components/admin/chart/ChartMultiLine";
-import AiRecomendationCard from "@/components/admin/card/AiRecomendationCard";
+import SummarizerLarge from "@/components/admin/SummarizerLarge";
 import LiveLocation from "@/components/admin/realtime-track/LiveLocation";
+import LoadingSkeleton from "@/components/ui/LoadingSkeleton";
 import { useEffect, useState } from "react";
-
-const aiPlaceholder = [{ text: "AI recommendations are disabled for now.", tone: "info" }];
 
 const columns: Column<any>[] = [
   { key: "route", label: "Rute", render: (r) => <div className="font-semibold text-gray-800">{r.route}</div> },
@@ -131,19 +130,18 @@ export default function AdminDashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="col-span-2 grid grid-cols-1 gap-4">
-            <AiRecomendationCard
-              title="AI Co-Pilot Insights"
-              subtitle="Rekomendasi proaktif untuk optimasi operasional"
-              badge="Real-time Analysis"
-              accentColor="#10b981"
-              items={aiItems ?? [{ text: "Memuat rekomendasi...", tone: "info" }]}
-              cta={{ label: "Terapkan Rekomendasi", variant: "primary" }}
-            />
+            <SummarizerLarge metrics={summary ?? null} />
 
             <div className="grid grid-cols-4 gap-4">
               <div className="bg-white rounded-lg p-4 shadow-sm text-center">
-                <div className="text-2xl font-bold text-gray-800">{loading ? "..." : summary?.ticketsSold ?? "—"}</div>
-                <div className="text-sm text-gray-500">Tiket Terjual Hari Ini</div>
+                {loading ? (
+                  <LoadingSkeleton variant="card" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-gray-800">{summary?.ticketsSold ?? "—"}</div>
+                    <div className="text-sm text-gray-500">Tiket Terjual Hari Ini</div>
+                  </>
+                )}
                 <div className="flex items-center justify-center mt-2">
                   <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
@@ -151,8 +149,14 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
               <div className="bg-white rounded-lg p-4 shadow-sm text-center">
-                <div className="text-2xl font-bold text-gray-800">{loading ? "..." : `${summary?.activeSchedules ?? "—"}`}</div>
-                <div className="text-sm text-gray-500">Kereta Aktif Beroperasi</div>
+                {loading ? (
+                  <LoadingSkeleton variant="card" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-gray-800">{`${summary?.activeSchedules ?? "—"}`}</div>
+                    <div className="text-sm text-gray-500">Kereta Aktif Beroperasi</div>
+                  </>
+                )}
                 <div className="flex items-center justify-center mt-2">
                   <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -160,8 +164,14 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
               <div className="bg-white rounded-lg p-4 shadow-sm text-center">
-                <div className="text-2xl font-bold text-gray-800">{loading ? "..." : `${summary?.otpPercent ?? "—"}%`}</div>
-                <div className="text-sm text-gray-500">Ketepatan Waktu (OTP)</div>
+                {loading ? (
+                  <LoadingSkeleton variant="card" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-gray-800">{`${summary?.otpPercent ?? "—"}%`}</div>
+                    <div className="text-sm text-gray-500">Ketepatan Waktu (OTP)</div>
+                  </>
+                )}
                 <div className="flex items-center justify-center mt-2">
                   <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
@@ -169,8 +179,14 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
               <div className="bg-white rounded-lg p-4 shadow-sm text-center">
-                <div className="text-2xl font-bold text-gray-800">{loading ? "..." : `Rp ${(summary?.revenue ?? 0).toLocaleString("id-ID")}`}</div>
-                <div className="text-sm text-gray-500">Pendapatan Hari Ini</div>
+                {loading ? (
+                  <LoadingSkeleton variant="card" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-gray-800">{`Rp ${(summary?.revenue ?? 0).toLocaleString("id-ID")}`}</div>
+                    <div className="text-sm text-gray-500">Pendapatan Hari Ini</div>
+                  </>
+                )}
                 <div className="flex items-center justify-center mt-2">
                   <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
@@ -210,11 +226,14 @@ export default function AdminDashboardPage() {
                     <ChartMultiLine width={760} height={220} xLabels={revenueChart.xLabels} series={revenueChart.series} title="Pendapatan Harian (Rp)" />
                   </div>
                 ) : (
-                  <div className="mt-6 text-sm text-gray-500">Memuat pendapatan...</div>
+                  <div className="mt-6">
+                    <LoadingSkeleton variant="chart" />
+                    <div className="mt-2 text-sm text-gray-500">Memuat pendapatan...</div>
+                  </div>
                 )}
               </div>
             ) : (
-              <div className="h-[260px] flex items-center justify-center text-gray-500">Loading chart...</div>
+              <LoadingSkeleton variant="chart" />
             )}
           </div>
 
@@ -244,9 +263,12 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <div className="mt-4 space-y-3">
-              {Array.isArray(serviceQueue) && serviceQueue.length === 0 && <div className="text-sm text-gray-500">Tidak ada permintaan layanan baru.</div>}
-              {Array.isArray(serviceQueue) &&
-                serviceQueue.map((service: any) => (
+              {queueLoading ? (
+                <LoadingSkeleton variant="list" />
+              ) : Array.isArray(serviceQueue) && serviceQueue.length === 0 ? (
+                <div className="text-sm text-gray-500">Tidak ada permintaan layanan baru.</div>
+              ) : (
+                serviceQueue?.map((service: any) => (
                   <div key={service.id} className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -261,7 +283,8 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
                   </div>
-                ))}
+                ))
+              )}
             </div>
           </div>
         </div>

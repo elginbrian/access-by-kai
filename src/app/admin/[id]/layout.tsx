@@ -1,5 +1,6 @@
 import React from "react";
 import NavBarAdmin from "@/components/navbar/NavBarAdmin";
+import AdminClientWrapper from "@/components/admin/AdminClientWrapper";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,7 +9,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <NavBarAdmin />
       </div>
 
-      <main className="flex-1 h-screen overflow-y-auto">{children}</main>
+      <main className="flex-1 h-screen overflow-y-auto">
+        <AdminClientWrapper>{children}</AdminClientWrapper>
+      </main>
     </div>
   );
 }
