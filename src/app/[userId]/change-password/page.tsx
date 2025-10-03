@@ -15,14 +15,17 @@ const ChangePasswordPage = async ({ params }: Props) => {
 
   const supabase = await createServerClient();
 
+  // Await params in Next.js 15
+  const { userId } = await params;
+
   // If userId is not provided or is invalid, redirect to home
-  if (!params.userId || params.userId === 'undefined' || params.userId === 'null') {
+  if (!userId || userId === 'undefined' || userId === 'null') {
     console.log('Invalid userId in change-password, redirecting to home');
     redirect('/');
   }
 
-  console.log('Fetching profile for change-password userId:', params.userId);
-  const { data: profile, error } = await supabase.from("pengguna").select("*").eq("user_id", Number(params.userId)).maybeSingle();
+  console.log('Fetching profile for change-password userId:', userId);
+  const { data: profile, error } = await supabase.from("pengguna").select("*").eq("user_id", Number(userId)).maybeSingle();
 
   const fetchedProfile: Pengguna | null = error || !profile ? null : (profile as Pengguna);
   console.log('Fetched profile for change-password:', fetchedProfile, 'error:', error);
