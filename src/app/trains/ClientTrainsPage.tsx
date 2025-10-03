@@ -30,7 +30,6 @@ const ClientTrainsPage: React.FC<Props> = ({ rawSearchParams }) => {
   const router = useRouter();
   const searchParams = new URLSearchParams();
 
-  // normalize incoming search params
   Object.entries(rawSearchParams).forEach(([k, v]) => {
     if (Array.isArray(v)) {
       v.forEach((val) => searchParams.append(k, String(val)));
@@ -195,7 +194,6 @@ const ClientTrainsPage: React.FC<Props> = ({ rawSearchParams }) => {
 
   return (
     <div>
-      {/* This component contains the trains listing UI. For brevity we render a minimal placeholder. */}
       <h1 className="text-2xl font-bold">Train search results</h1>
     </div>
   );
