@@ -7,7 +7,16 @@ export async function POST(req: Request) {
   const admin: any = createAdminClient();
   try {
     const body = await req.json();
-    const parsed = TransferRequestSchema.parse(body);
+
+    const coerced = {
+      ...body,
+      from_user_id: body?.from_user_id != null ? Number(body.from_user_id) : body?.from_user_id,
+      to_user_id: body?.to_user_id != null ? Number(body.to_user_id) : body?.to_user_id,
+      tiket_id: body?.tiket_id != null ? Number(body.tiket_id) : body?.tiket_id,
+      waiting_period_seconds: body?.waiting_period_seconds != null ? Number(body.waiting_period_seconds) : body?.waiting_period_seconds,
+    };
+
+    const parsed = TransferRequestSchema.parse(coerced);
 
     const allowed = await checkTransferAllowed({ fromUserId: parsed.from_user_id, toUserId: parsed.to_user_id, tiketCount: 1 });
     if (!allowed.allowed) {
