@@ -129,10 +129,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Akses data penumpang untuk mendapatkan user_id saat ini
+    // 3. Akses data penumpang untuk mendapatkan info dan verifikasi ownership
     const { data: penumpangData, error: penumpangError } = await supabase
       .from("penumpang")
-      .select("user_id, nama_lengkap")
+      .select("user_id, nama_lengkap, tipe_identitas, nomor_identitas, tanggal_lahir, jenis_kelamin, kewarganegaraan, is_difabel, kebutuhan_khusus")
       .eq("penumpang_id", ticketData.penumpang_id)
       .single();
 
@@ -169,11 +169,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Override user_id di tabel penumpang dengan user_id target
-    const { error: transferError } = await supabase
+    // 4. Buat penumpang baru untuk user target (agar tidak mengubah tiket lain)
+    const { data: newPenumpang, error: createPenumpangError } = await supabase
       .from("penumpang")
-      .update({ user_id: targetUser.user_id })
-      .eq("penumpang_id", penumpangId);
+      .insert({
+        user_id: targetUser.user_id,
+        nama_lengkap: targetUser.nama_lengkap,
+        tipe_identitas: penumpangData.tipe_identitas,
+        nomor_identitas: targetUser.nomor_identitas || targetUser.nik || penumpangData.nomor_identitas,
+        tanggal_lahir: penumpangData.tanggal_lahir,
+        jenis_kelamin: penumpangData.jenis_kelamin,
+        kewarganegaraan: penumpangData.kewarganegaraan,
+        is_difabel: penumpangData.is_difabel,
+        kebutuhan_khusus: penumpangData.kebutuhan_khusus,
+      })
+      .select("penumpang_id")
+      .single();
+
+    if (createPenumpangError || !newPenumpang) {
+      console.error("Create penumpang error:", createPenumpangError);
+      return NextResponse.json(
+        { error: "Gagal membuat data penumpang baru" },
+        { status: 500 }
+      );
+    }
+
+    // 5. Update tiket untuk mengarah ke penumpang baru (hanya tiket yang ditransfer)
+    const { error: transferError } = await supabase
+      .from("tiket")
+      .update({ penumpang_id: newPenumpang.penumpang_id })
+      .eq("tiket_id", ticketId);
 
     if (transferError) {
       console.error("Transfer error:", transferError);
