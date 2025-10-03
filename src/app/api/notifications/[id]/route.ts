@@ -1,27 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createLegacyServerClient } from "@/lib/supabase";
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, context: any) {
+  const params = await context.params;
   try {
     const supabase = createLegacyServerClient();
-    
-    // Extract auth token
-    const cookieString = request.headers.get('cookie') || '';
+
+    const cookieString = request.headers.get("cookie") || "";
     let authToken = null;
-    
+
     const authCookieMatch = cookieString.match(/([^;\s]+)-auth-token=([^;]+)/);
     if (authCookieMatch) {
       const cookieValue = authCookieMatch[2];
-      if (cookieValue.startsWith('base64-')) {
+      if (cookieValue.startsWith("base64-")) {
         try {
           const decodedData = atob(cookieValue.substring(7));
           const tokenData = JSON.parse(decodedData);
           authToken = tokenData.access_token;
         } catch (e) {
-          console.warn('Failed to decode auth token:', e);
+          console.warn("Failed to decode auth token:", e);
         }
       } else {
         authToken = cookieValue;
@@ -29,8 +26,7 @@ export async function PATCH(
     }
 
     if (!authToken) {
-      authToken = request.cookies.get("sb-access-token")?.value || 
-                  request.cookies.get("supabase-auth-token")?.value;
+      authToken = request.cookies.get("sb-access-token")?.value || request.cookies.get("supabase-auth-token")?.value;
     }
 
     const { data, error } = await supabase.auth.getUser(authToken || undefined);
@@ -38,7 +34,6 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get current user profile
     const { data: currentUser, error: userError } = await supabase
       .from("pengguna")
       .select("user_id")
@@ -53,15 +48,14 @@ export async function PATCH(
     const body = await request.json();
     const { is_read } = body;
 
-    // Update notification
-    const { data: updatedNotification, error: updateError } = await supabase
+    const { data: updatedNotification, error: updateError } = await (supabase as any)
       .from("notifications")
-      .update({ 
+      .update({
         is_read,
-        read_at: is_read ? new Date().toISOString() : null
+        read_at: is_read ? new Date().toISOString() : null,
       })
       .eq("notification_id", notificationId)
-      .eq("user_id", currentUser.user_id) // Ensure user owns the notification
+      .eq("user_id", currentUser.user_id)
       .select()
       .single();
 
@@ -76,39 +70,33 @@ export async function PATCH(
 
     return NextResponse.json({
       success: true,
-      data: updatedNotification
+      data: updatedNotification,
     });
-
   } catch (error) {
     console.error("Update notification error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: any) {
+  const params = await context.params;
   try {
     const supabase = createLegacyServerClient();
-    
+
     // Extract auth token (same logic as above)
-    const cookieString = request.headers.get('cookie') || '';
+    const cookieString = request.headers.get("cookie") || "";
     let authToken = null;
-    
+
     const authCookieMatch = cookieString.match(/([^;\s]+)-auth-token=([^;]+)/);
     if (authCookieMatch) {
       const cookieValue = authCookieMatch[2];
-      if (cookieValue.startsWith('base64-')) {
+      if (cookieValue.startsWith("base64-")) {
         try {
           const decodedData = atob(cookieValue.substring(7));
           const tokenData = JSON.parse(decodedData);
           authToken = tokenData.access_token;
         } catch (e) {
-          console.warn('Failed to decode auth token:', e);
+          console.warn("Failed to decode auth token:", e);
         }
       } else {
         authToken = cookieValue;
@@ -116,8 +104,7 @@ export async function DELETE(
     }
 
     if (!authToken) {
-      authToken = request.cookies.get("sb-access-token")?.value || 
-                  request.cookies.get("supabase-auth-token")?.value;
+      authToken = request.cookies.get("sb-access-token")?.value || request.cookies.get("supabase-auth-token")?.value;
     }
 
     const { data, error } = await supabase.auth.getUser(authToken || undefined);
@@ -125,7 +112,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get current user profile
     const { data: currentUser, error: userError } = await supabase
       .from("pengguna")
       .select("user_id")
@@ -138,12 +124,7 @@ export async function DELETE(
 
     const notificationId = params.id;
 
-    // Delete notification
-    const { error: deleteError } = await supabase
-      .from("notifications")
-      .delete()
-      .eq("notification_id", notificationId)
-      .eq("user_id", currentUser.user_id); // Ensure user owns the notification
+    const { error: deleteError } = await (supabase as any).from("notifications").delete().eq("notification_id", notificationId).eq("user_id", currentUser.user_id); // Ensure user owns the notification
 
     if (deleteError) {
       console.error("Error deleting notification:", deleteError);
@@ -152,14 +133,10 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Notification deleted successfully"
+      message: "Notification deleted successfully",
     });
-
   } catch (error) {
     console.error("Delete notification error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
