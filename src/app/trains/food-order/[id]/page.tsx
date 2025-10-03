@@ -118,8 +118,12 @@ const TrainFoodOrderContent = () => {
       forPassenger: "Main Passenger",
       image: item.image,
     }));
-    setFoodOrders(foodOrderItems);
-  }, [cart, setFoodOrders]);
+
+    // Prevent infinite loop by only updating if different
+    if (JSON.stringify(foodOrderItems) !== JSON.stringify(centralBooking.foodOrders)) {
+      setFoodOrders(foodOrderItems);
+    }
+  }, [cart, setFoodOrders, centralBooking.foodOrders]);
 
   React.useEffect(() => {
     if (centralBooking && centralBooking.foodOrders && centralBooking.foodOrders.length > 0) {

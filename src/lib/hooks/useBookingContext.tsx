@@ -46,7 +46,10 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   };
 
   const navigateToStep = (step: number) => {
-    if (!trainId) return;
+    if (!trainId) {
+      console.error("Train ID is missing, cannot navigate");
+      return;
+    }
 
     switch (step) {
       case 1:

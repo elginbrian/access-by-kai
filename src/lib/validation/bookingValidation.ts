@@ -40,7 +40,7 @@ export function validateBookingCompletion(bookingData: BookingData): BookingVali
         missingFields.push(`passengers[${index}].idNumber`);
       }
 
-      if (!passenger.seat.trim()) {
+      if (!passenger.seat.trim() || passenger.seat === "Belum dipilih") {
         errors.push(`Kursi untuk penumpang ${index + 1} harus dipilih`);
         missingFields.push(`passengers[${index}].seat`);
       }

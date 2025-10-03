@@ -16,7 +16,7 @@ interface TrainNavigationProps {
 const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest", onNavClick }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [isTransparent, setIsTransparent] = useState(true);
+  const [isTransparent, setIsTransparent] = useState(pathname === "/");
   const { user, isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
