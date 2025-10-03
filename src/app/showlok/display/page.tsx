@@ -1,78 +1,143 @@
 "use client";
 
-import React from "react";
-import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
-import SearchSummary from "@/components/trains/trainSummary/SearchSummary";
-import PromoBanner from "@/components/trains/promotions/PromoBanner";
-import PassengerSelectionCard from "@/components/hotels/show-hotel/PassengerSelectionCard";
-import HotelCard from "@/components/hotels/show-hotel/HotelCard";
-import { colors } from "@/app/design-system";
-
-interface Passenger {
-  id: string;
-  name: string;
-  type: "Adult" | "Child" | "Toddler" | string;
-  isSelected: boolean;
-}
+import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import NavBarServices from "@/components/navbar/NavBarServices";
+import SimpleStationSelector from "@/components/showlok/SimpleStationSelector";
+import FacilityCard from "@/components/showlok/FacilityCard";
+import { useStationFacilities } from "@/lib/hooks/useFacilities";
+import { useUserTickets } from "@/lib/hooks/useTickets";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { getStationIdByCode, getStationIdsByName } from "@/lib/utils/stationHelpers";
 
 const ShowlokDisplayPage: React.FC = () => {
-  const [isChatOpen, setIsChatOpen] = React.useState(false);
-  const [priceValue, setPriceValue] = React.useState(800000);
-  const [passengers, setPassengers] = React.useState<Passenger[]>([
-    { id: "1", name: "John Doe", type: "Adult", isSelected: false },
-    { id: "2", name: "Jane Doe", type: "Toddler", isSelected: false },
-    { id: "3", name: "Emma Doe", type: "Child", isSelected: false },
-  ]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const ticketId = searchParams.get("ticket");
 
-  const handleChatClick = () => setIsChatOpen(true);
-  const handleCloseChatSidebar = () => setIsChatOpen(false);
+  const { user } = useAuth();
+  const penggunaId = user?.profile?.user_id ?? null;
 
-  const handlePassengerToggle = (id: string) => {
-    setPassengers((prev) => prev.map((p) => (p.id === id ? { ...p, isSelected: !p.isSelected } : p)));
+  const { data: tickets = [] } = useUserTickets(Number(penggunaId), { limit: 10 });
+  const selectedTicket = tickets.find((t) => t.id === ticketId);
+
+  const [selectedStation, setSelectedStation] = useState<"departure" | "arrival">("departure");
+
+  // Get station ID based on selection
+  const { data: stationId } = useQuery({
+    queryKey: ["stationId", selectedTicket, selectedStation],
+    queryFn: async (): Promise<number | null> => {
+      if (!selectedTicket) return null;
+
+      const stationInfo = selectedStation === "departure" ? selectedTicket.departureStation : selectedTicket.arrivalStation;
+
+      // Try to get by code first, then by name
+      let id = await getStationIdByCode(stationInfo.code);
+      if (!id) {
+        id = await getStationIdsByName(stationInfo.name);
+      }
+      return id;
+    },
+    enabled: !!selectedTicket,
+  });
+
+  const { data: facilities = [], isLoading, error } = useStationFacilities(stationId || 0);
+
+  const handleBack = () => {
+    router.push("/showlok");
   };
 
+  const handleFacilitySelect = (facilityId: number) => {
+    router.push(`/showlok/booking/${facilityId}?ticket=${ticketId}`);
+  };
+
+  if (!selectedTicket) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+        <NavBarServices service="ShowLok" />
+        <div className="container mx-auto px-8 py-16">
+          <div className="text-center py-16">
+            <p className="text-red-600">Tiket tidak ditemukan</p>
+            <button onClick={handleBack} className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-xl">
+              Kembali ke ShowLok
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen relative" style={{ backgroundColor: colors.violet.light }}>
-      <div className="sticky top-0 z-30 bg-white">
-        <TrainNavigation onNavClick={() => {}} />
-        <SearchSummary departure="Bekasi" arrival="Bandung" date="15 Dec 2024" passengers="2 Adults" onEditSchedule={() => {}} onSwitchStations={() => {}} />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+      <NavBarServices service="ShowLok" />
 
-      <div className="max-w-7xl mx-auto px-6 pt-6">
-        <PromoBanner title="Special Weekend Discount!" description="Get up to 30% off on Executive class tickets" buttonText="View Offers" onViewOffers={() => {}} />
-
-        <div className="flex items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold text-black">Tersedia</h2>
-            <span className="text-sm text-gray-500 rounded-lg bg-gray-100 px-3 py-1.5">Semua</span>
-            <span className="text-sm text-gray-500 rounded-lg bg-gray-100 px-3 py-1.5">Luxury Lounge</span>
-            <span className="bg-gradient-to-r from-[#6b46c1] to-[#3b82f6] text-white px-4 py-1.5 rounded-full text-sm font-medium">Shower and Locker</span>
-          </div>
-          <div className="text-sm text-gray-600 flex items-center">
-            Filter:
-            <select className="ml-2 border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>Departure Time</option>
-            </select>
-          </div>
+      <div className="container mx-auto px-8 py-16">
+        <div className="mb-6">
+          <button onClick={handleBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors">
+            <span>←</span> Kembali ke daftar tiket
+          </button>
         </div>
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left filters column */}
-          <aside className="w-full lg:w-80 lg:flex-shrink-0 space-y-4">
-            <PassengerSelectionCard passengers={passengers} onPassengerToggle={handlePassengerToggle} maxPorters={3} />
-          </aside>
 
-          {/* Results list */}
-          <main className="flex-1 space-y-6">
-            <div className="space-y-4">
-              <HotelCard title="Shower and Locker Yogyakarta" subtitle="300m from Yogyakarta Station" price="Rp 80,000" rating="8.8" tags={["Tersedia", "CAMPURAN"]} />
-              <HotelCard title="Shower and Locker Yogyakarta" subtitle="300m from Yogyakarta Station" price="Rp 80,000" rating="8.8" tags={["Tersedia", "CAMPURAN"]} />
-              <HotelCard title="Shower and Locker Yogyakarta" subtitle="300m from Yogyakarta Station" price="Rp 80,000" rating="8.8" tags={["Tersedia", "CAMPURAN"]} />
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Fasilitas ShowLok</h1>
+          <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
+            <h3 className="font-semibold text-gray-900 mb-2">Tiket yang dipilih:</h3>
+            <div className="text-sm text-gray-600">
+              <p>
+                <strong>{selectedTicket.trainName || selectedTicket.ticketNumber}</strong>
+              </p>
+              <p>
+                {selectedTicket.departureStation?.name} → {selectedTicket.arrivalStation?.name}
+              </p>
+              <p>{selectedTicket.date ? new Date(selectedTicket.date).toLocaleDateString("id-ID") : ""}</p>
             </div>
-          </main>
+          </div>
+        </div>
+
+        <SimpleStationSelector
+          departureStation={{
+            name: selectedTicket.departureStation?.name || "",
+            code: selectedTicket.departureStation?.code || "",
+          }}
+          arrivalStation={{
+            name: selectedTicket.arrivalStation?.name || "",
+            code: selectedTicket.arrivalStation?.code || "",
+          }}
+          selectedStation={selectedStation}
+          onStationSelect={setSelectedStation}
+        />
+
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Fasilitas di {selectedStation === "departure" ? selectedTicket.departureStation?.name : selectedTicket.arrivalStation?.name}</h2>
+
+          {!stationId ? (
+            <div className="text-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Mencari stasiun...</p>
+            </div>
+          ) : isLoading ? (
+            <div className="text-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Memuat fasilitas...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <p className="text-red-600">Gagal memuat fasilitas</p>
+            </div>
+          ) : facilities.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-gray-600">Belum ada fasilitas ShowLok di stasiun ini</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {facilities.map((facility) => (
+                <FacilityCard key={facility.facility_id} facility={facility} onSelect={() => handleFacilitySelect(facility.facility_id)} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Chat is provided globally via ChatShellClient; local floating button and sidebar removed */}
     </div>
   );
 };

@@ -1,127 +1,103 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import NavBarServices from "@/components/navbar/NavBarServices";
-import HotelHeroSection from "@/components/hotels/booking/HotelHeroSection";
-import RatingReviews from "@/components/hotels/booking/RatingReviews";
-import LocationSection from "@/components/hotels/booking/LocationSection";
-import ServiceDescription from "@/components/hotels/booking/ServiceDescription";
-import FacilitiesCard from "@/components/hotels/booking/FacilitiesCard";
-import PaymentOptionsCard, { type PaymentOption } from "@/components/hotels/booking/PaymentOptionsCard";
-import BookingButton from "@/components/hotels/booking/BookingButton";
+import { useFacilityDetail } from "@/lib/hooks/useFacilities";
 
-const ShowlokBookingPage: React.FC = () => {
-  const [selectedPayment, setSelectedPayment] = useState<string>("cash");
-  const [isLoading, setIsLoading] = useState(false);
+interface BookingPageProps {
+  params: { id: string };
+}
 
-  // Hotel data - in real app, this would come from API
-  const hotelData = {
-    title: "Luxury Lounge",
-    description: "Kenyamanan ekstra sebelum perjalanan Anda",
-    price: "Mulai Rp 50.000 / pax",
-    rating: 8.7,
-    features: ["Nyaman & Bersih", "Staf Ramah", "Lokasi Strategis", "Fasilitas Lengkap"],
-    location: {
-      name: "Stasiun Gambir, Jakarta Pusat",
-      address: "Jl. Gambir, Gambir, Kecamatan Gambir, Kota Jakarta Pusat, DKI Jakarta"
-    },
-    serviceDescription: `Luxury Lounge memberikan kenyamanan ekstra sebelum perjalanan Anda. Dilengkapi
-dengan sofa empuk, AC, meja kerja, perpustakaan mini, free snack & drinks, dan ruang kerja
-ekslusif. Nikmati suasana tenang dan nyaman sambil menunggu keberangkatan kereta
-Anda.`
+const BookingPage = ({ params }: BookingPageProps) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const ticketId = searchParams.get("ticket");
+  const facilityId = parseInt(params.id);
+
+  const {
+    data: facility,
+    isLoading,
+    error
+  } = useFacilityDetail(facilityId);
+
+  const handleBack = () => {
+    router.push(`/showlok/display${ticketId ? `?ticket=${ticketId}` : ""}`);
   };
 
-  const paymentOptions: PaymentOption[] = [
-    {
-      id: "cash",
-      label: "Bayar Sekarang",
-      description: "Diskon khusus tersedia",
-      descriptionColor: "text-green-500"
-    },
-    {
-      id: "later",
-      label: "Bayar Nanti",
-      description: "Reservasi booking direstul",
-      descriptionColor: "text-gray-500"
-    },
-    {
-      id: "offline",
-      label: "Bayar Dekat Tanggal",
-      description: "Ketersediaan terbatas",
-      descriptionColor: "text-yellow-600",
-      warningIcon: "/ic_warning_yellow.svg"
-    }
-  ];
-
-  const handleBookNow = () => {
-    setIsLoading(true);
-    // Simulate booking process
-    setTimeout(() => {
-      setIsLoading(false);
-      alert("Booking berhasil!");
-    }, 2000);
+  const handleProceedToPayment = () => {
+    // In a real implementation, this would create a booking record first
+    // For now, we'll proceed directly to payment
+    router.push(`/showlok/payment/${facilityId}?ticket=${ticketId}`);
   };
 
-  const handleConfirmBooking = () => {
-    setIsLoading(true);
-    // Simulate confirmation process
-    setTimeout(() => {
-      setIsLoading(false);
-      alert(`Pesanan dikonfirmasi dengan metode pembayaran: ${selectedPayment}`);
-    }, 2000);
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+        <NavBarServices service="ShowLok" />
+        <div className="container mx-auto px-8 py-16">
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Memuat detail fasilitas...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !facility) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+        <NavBarServices service="ShowLok" />
+        <div className="container mx-auto px-8 py-16">
+          <div className="text-center py-16">
+            <p className="text-red-600">Fasilitas tidak ditemukan</p>
+            <button
+              onClick={handleBack}
+              className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-xl"
+            >
+              Kembali
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <NavBarServices service="Hotel" />
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+      <NavBarServices service="ShowLok" />
+      
+      <div className="container mx-auto px-8 py-16">
+        <div className="mb-6">
+          <button 
+            onClick={handleBack}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            <span>←</span> Kembali ke daftar fasilitas
+          </button>
+        </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Hero Section */}
-        <HotelHeroSection
-          title={hotelData.title}
-          description={hotelData.description}
-          price={hotelData.price}
-          onBookNow={handleBookNow}
-        />
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">
+          Booking {facility.nama_fasilitas}
+        </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Rating & Reviews */}
-            <RatingReviews
-              rating={hotelData.rating}
-              features={hotelData.features}
-            />
-
-            {/* Location */}
-            <LocationSection
-              location={hotelData.location}
-            />
-
-            {/* Service Description */}
-            <ServiceDescription
-              description={hotelData.serviceDescription}
-            />
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Facilities */}
-            <FacilitiesCard />
-
-            {/* Payment Options */}
-            <PaymentOptionsCard
-              options={paymentOptions}
-              selectedPayment={selectedPayment}
-              onPaymentChange={setSelectedPayment}
-            />
-
-            {/* Booking Button */}
-            <BookingButton
-              onClick={handleConfirmBooking}
-              loading={isLoading}
-            />
+        <div className="bg-white rounded-3xl shadow-xl p-8">
+          <div className="text-center py-16">
+            <p className="text-gray-600 mb-6">
+              Halaman booking sedang dalam pengembangan...
+            </p>
+            <div className="mt-4 text-sm text-gray-500 mb-8">
+              <p>Facility ID: {facilityId}</p>
+              <p>Ticket ID: {ticketId}</p>
+              <p>Station: {facility.station?.nama_stasiun}</p>
+            </div>
+            <button
+              onClick={handleProceedToPayment}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors"
+            >
+              Lanjut ke Pembayaran
+            </button>
           </div>
         </div>
       </div>
@@ -129,4 +105,4 @@ Anda.`
   );
 };
 
-export default ShowlokBookingPage;
+export default BookingPage;
