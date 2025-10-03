@@ -11,7 +11,7 @@ const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const handleAuthClick = async () => {
     if (isAuthenticated) {

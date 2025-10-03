@@ -13,11 +13,11 @@ interface TrainNavigationProps {
   onNavClick?: (section: string) => void;
 }
 
-const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest", onNavClick }) => {
+const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" }) => {
   const router = useRouter();
   const pathname = usePathname();
   const [isTransparent, setIsTransparent] = useState(pathname === "/");
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const isHome = pathname === "/";
