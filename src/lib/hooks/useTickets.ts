@@ -201,10 +201,12 @@ export function useUserTickets(userId: number, params?: TicketListParams) {
             name: "",
           },
 
-          // times: prefer segment times, otherwise use empty strings (formatted)
-          departureTime: formatTime(segment?.waktu_berangkat ?? ""),
-          arrivalTime: formatTime(segment?.waktu_tiba ?? ""),
-          date: formatDate(segment?.waktu_berangkat ?? ""),
+          departureTime: formatTime(segment?.waktu_berangkat ?? schedule?.waktu_berangkat_origin ?? ""),
+          arrivalTime: formatTime(segment?.waktu_tiba ?? schedule?.waktu_tiba_destination ?? ""),
+          date: formatDate(segment?.waktu_berangkat ?? schedule?.tanggal_keberangkatan ?? ""),
+          dateIso: segment?.waktu_berangkat ?? schedule?.tanggal_keberangkatan ?? null,
+          departureIso: segment?.waktu_berangkat ?? schedule?.waktu_berangkat_origin ?? null,
+          arrivalIso: segment?.waktu_tiba ?? schedule?.waktu_tiba_destination ?? null,
           duration: "",
 
           // passenger/seat info: prefer nested but fallback to top-level ids
@@ -444,7 +446,7 @@ export function useTicketActions(userId: number) {
       if (!isValidUserId) {
         throw new Error("useTicketActions requires a numeric userId parameter (pengguna.user_id)");
       }
-      
+
       const { error } = await supabase.from("tiket").update({ status_tiket: "DIBATALKAN" }).eq("kode_tiket", ticketId);
 
       if (error) throw error;
@@ -460,7 +462,7 @@ export function useTicketActions(userId: number) {
       if (!isValidUserId) {
         throw new Error("useTicketActions requires a numeric userId parameter (pengguna.user_id)");
       }
-      
+
       const { error } = await supabase.from("tiket").update(updates).eq("kode_tiket", ticketId);
 
       if (error) throw error;

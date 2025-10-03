@@ -16,6 +16,13 @@ export interface TicketData {
   arrivalTime: string;
   date: string;
   duration: string;
+
+  dateIso?: string | null;
+  departureIso?: string | null;
+  arrivalIso?: string | null;
+
+  timeRange?: string;
+  travelClass?: string;
   passenger: {
     id: number;
     name: string;

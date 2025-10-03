@@ -9,6 +9,7 @@ import PickupDetails from "@/components/eporter/PickupDetails";
 import PorterBookingForm from "@/components/eporter/PorterBookingForm";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useUserTickets } from "@/lib/hooks/useTickets";
+import { isIsoDateString } from "@/lib/utils/format";
 import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 const KAIEPorterPage = () => {
@@ -140,17 +141,18 @@ const KAIEPorterPage = () => {
                     trainName: t.trainName || t.ticketNumber || "-",
                     trainCode: t.trainNumber ? `KA ${t.trainNumber}` : "",
                     trainClass: t.seat?.class || "",
-                    departureTime: t.departureTime ? new Date(t.departureTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "",
+                    departureTime: t.departureIso ? new Date(t.departureIso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : t.departureTime || "",
                     departureStation: t.departureStation?.name || t.departureStation?.code || "-",
-                    arrivalTime: t.arrivalTime ? new Date(t.arrivalTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "",
+                    arrivalTime: t.arrivalIso ? new Date(t.arrivalIso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : t.arrivalTime || "",
                     arrivalStation: t.arrivalStation?.name || t.arrivalStation?.code || "-",
                     duration: t.duration || "",
                     travelClass: t.seat?.class || "",
-                    date: t.date ? new Date(t.date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "",
+
+                    date: t.dateIso ? new Date(t.dateIso).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : t.date || "",
                     timeRange:
-                      t.departureTime && t.arrivalTime
-                        ? `${new Date(t.departureTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} - ${new Date(t.arrivalTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
-                        : "",
+                      t.departureIso && t.arrivalIso
+                        ? `${new Date(t.departureIso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} - ${new Date(t.arrivalIso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
+                        : t.timeRange || "",
                   }))}
                   onTicketSelect={handleTicketSelect}
                   buttonText="Pilih tiket ini"
