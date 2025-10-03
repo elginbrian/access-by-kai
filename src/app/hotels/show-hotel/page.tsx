@@ -17,7 +17,7 @@ interface Passenger {
   isSelected: boolean;
 }
 
-const HotelsShowHotelPage: React.FC = () => {
+const ShowlokDisplayPage: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = React.useState(false);
   const [priceValue, setPriceValue] = React.useState(800000);
   const [passengers, setPassengers] = React.useState<Passenger[]>([
@@ -118,4 +118,4 @@ const HotelsShowHotelPage: React.FC = () => {
   );
 };
 
-export default HotelsShowHotelPage;
+export default ShowlokDisplayPage;

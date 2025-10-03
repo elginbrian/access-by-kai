@@ -10,7 +10,7 @@ import FacilitiesCard from "@/components/hotels/booking/FacilitiesCard";
 import PaymentOptionsCard, { type PaymentOption } from "@/components/hotels/booking/PaymentOptionsCard";
 import BookingButton from "@/components/hotels/booking/BookingButton";
 
-const HotelBookingPage: React.FC = () => {
+const ShowlokBookingPage: React.FC = () => {
   const [selectedPayment, setSelectedPayment] = useState<string>("cash");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -129,4 +129,4 @@ Anda.`
   );
 };
 
-export default HotelBookingPage;
+export default ShowlokBookingPage;
