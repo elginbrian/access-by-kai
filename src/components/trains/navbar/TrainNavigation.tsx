@@ -37,10 +37,19 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
   }, [pathname]);
 
   const uid = user?.profile?.user_id ?? user?.id;
-  const displayName = userName || user?.profile?.nama_lengkap || "";
-  const displayAvatar = userAvatar || user?.profile?.foto_profil_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest";
+
+  const rawName = userName || user?.profile?.nama_lengkap || user?.email || "Pengguna";
+
+  const uidStr = uid ? String(uid) : undefined;
+
+  const maxLen = 20;
+  const shortName = rawName.length > maxLen ? `${rawName.slice(0, maxLen - 1)}…` : rawName;
+
+  const seed = encodeURIComponent(rawName || "Guest");
+  const defaultSeededAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+  const displayAvatar = userAvatar || user?.profile?.foto_profil_url || defaultSeededAvatar;
   const userIsLoggedIn = isAuthenticated || !!userName;
-  const profilePath = uid ? `/${uid}` : "/profile";
+  const profilePath = uidStr ? `/${uidStr}` : "/profile";
 
   const handleAuthClick = async () => {
     if (userIsLoggedIn) {
@@ -98,14 +107,15 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
           </div>
           <div className="flex items-center space-x-4">
             {userIsLoggedIn ? (
-              <UserDropdown 
-                displayName={displayName} 
-                displayAvatar={displayAvatar} 
-                onLogout={handleAuthClick} 
-                onNavigate={(p) => router.push(p)} 
-                profilePath={profilePath} 
+              <UserDropdown
+                displayName={rawName}
+                displayShortName={shortName}
+                displayAvatar={displayAvatar}
+                onLogout={handleAuthClick}
+                onNavigate={(p) => router.push(p)}
+                profilePath={profilePath}
                 lightMode={isTransparent}
-                userId={uid}
+                userId={uidStr}
               />
             ) : (
               <div className="flex items-center space-x-3">

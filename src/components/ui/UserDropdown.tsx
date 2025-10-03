@@ -7,6 +7,7 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 
 interface Props {
   displayName?: string;
+  displayShortName?: string;
   displayAvatar?: string;
   onLogout?: () => Promise<void> | void;
   onNavigate?: (path: string) => void;
@@ -15,13 +16,13 @@ interface Props {
   userId?: string;
 }
 
-const UserDropdown: React.FC<Props> = ({ displayName = "User", displayAvatar = "/favicon.ico", onLogout, onNavigate, profilePath, lightMode = false, userId }) => {
+const UserDropdown: React.FC<Props> = ({ displayName = "User", displayShortName, displayAvatar = "/favicon.ico", onLogout, onNavigate, profilePath, lightMode = false, userId }) => {
   const go = (path: string) => {
     onNavigate?.(path);
   };
 
   return (
-    <div className="flex items-center space-x-3">
+    <div className="flex items-center space-x-3 min-w-0">
       {/* Notification Bell */}
       <button onClick={() => go(`/${userId}/notification`)} className={`${lightMode ? "text-white" : "text-gray-600"} w-full text-left py-2 flex items-center text-sm`}>
         <Icon name="bell" className="w-6 h-6" />
@@ -31,9 +32,19 @@ const UserDropdown: React.FC<Props> = ({ displayName = "User", displayAvatar = "
       <div className="relative">
         <Menu as="div" className="relative inline-block text-left">
           <div>
-            <Menu.Button className="flex items-center space-x-2 hover:opacity-90 transition-opacity focus:outline-none">
-              <img src={displayAvatar} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
-              <span className={`text-sm ${lightMode ? "text-white" : "text-black"}`}>{displayName}</span>
+            <Menu.Button className="flex items-center space-x-2 hover:opacity-90 transition-opacity focus:outline-none min-w-0" title={displayName}>
+              <img
+                src={displayAvatar}
+                alt="Profile"
+                className="w-8 h-8 rounded-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  const seed = encodeURIComponent(displayName || "Guest");
+                  target.onerror = null;
+                  target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+                }}
+              />
+              <span className={`text-sm ${lightMode ? "text-white" : "text-black"} truncate max-w-[10rem] sm:max-w-[12rem]`}>{displayShortName ?? displayName}</span>
             </Menu.Button>
           </div>
 
