@@ -132,7 +132,6 @@ const SearchCard = () => {
     setValue("arrivalStationId", currentDeparture);
   };
 
-  const SwapIcon = () => <Icon name="swap" className="w-5 h-5" />;
   const SearchIcon = () => <Icon name="search" className="w-5 h-5" />;
 
   return (
@@ -184,10 +183,11 @@ const SearchCard = () => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* Form Row - Exactly like original */}
-          <div className="flex flex-row gap-4 items-end mb-6">
+          <div className="flex flex-wrap gap-4 items-end mb-6">
             {/* Departure */}
             <div className="flex-1 min-w-[200px]">
               <label className="flex items-center text-sm font-semibold mb-2" style={{ color: colors.violet.normal }}>
+                <img src="/ic_train_purple_dark.svg" alt="Train" className="mr-2" />
                 <span className="">Dari (Keberangkatan)</span>
               </label>
               <div className="relative">
@@ -213,26 +213,26 @@ const SearchCard = () => {
                 className="p-3 rounded-full transition-colors focus:outline-none"
                 style={{
                   backgroundColor: colors.violet.light,
-                  color: colors.violet.normal,
+                  color: colors.violet.lightHover,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.violet.normal;
+                  e.currentTarget.style.backgroundColor = colors.violet.lightHover;
                   e.currentTarget.style.color = colors.base.light;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = colors.violet.light;
-                  e.currentTarget.style.color = colors.violet.normal;
+                  e.currentTarget.style.color = colors.violet.lightHover;
                 }}
                 aria-label="Swap locations"
               >
-                <SwapIcon />
+                <img src="/ic_switch.svg" alt="Swap Icon" />
               </button>
             </div>
 
             {/* Arrival */}
             <div className="flex-1 min-w-[200px]">
               <label className="flex items-center text-sm font-semibold mb-2" style={{ color: colors.violet.normal }}>
-                <img src="/ic_train.svg" alt="Train Icon" style={{ color: colors.violet.normal }} />
+                <img src="/ic_train_purple_dark.svg" alt="Train" className="mr-2" />
                 <span className="">Ke (Tujuan)</span>
               </label>
               <div className="relative">
@@ -251,73 +251,83 @@ const SearchCard = () => {
             </div>
 
             {/* Departure Date */}
-            <div className="flex-1 min-w-[200px]">
-              <label className="flex items-center text-sm font-semibold mb-2" style={{ color: colors.violet.normal }}>
-                <img src="/ic_calendar.svg" alt="Calendar Icon" />
-                <span className="ml-2">Tanggal Berangkat</span>
-              </label>
-              <input
-                type="date"
-                {...register("departureDate")}
-                min={today}
-                className="w-full px-4 py-3 bg-white rounded-xl font-medium cursor-pointer transition-colors focus:outline-none"
-                style={{
-                  border: "2px solid #000000",
-                  color: colors.base.darker,
-                  WebkitAppearance: "none",
-                  MozAppearance: "textfield",
-                  boxSizing: "border-box",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.border = `2px solid ${colors.violet.normal}`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.border = "2px solid #000000";
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.border = `2px solid ${colors.violet.normal}`;
-                  e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.violet.light}`;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.border = "2px solid #000000";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              />
+            <div className="w-full lg:flex-1 min-w-[200px] flex justify-center lg:justify-start">
+              <div className="flex flex-col w-full space-y-2">
+                <label className="flex items-center text-sm font-semibold mb-2" style={{ color: colors.violet.normal }}>
+                  <img src="/ic_calendar.svg" alt="Calendar Icon" />
+                  <span className="ml-2">Tanggal Berangkat</span>
+                </label>
+                <div className="w-full max-w-xs border-1 rounded-xl border-gray-500">
+                  <div className="flex flex-col w-full space-y-2">
+                    <input
+                      type="date"
+                      {...register("departureDate")}
+                      min={today}
+                      className="w-full px-4 py-3 bg-white rounded-xl font-medium cursor-pointer transition-colors focus:outline-none"
+                      style={{
+                        border: "2px solid #000000",
+                        color: colors.base.darker,
+                        WebkitAppearance: "none",
+                        MozAppearance: "textfield",
+                        boxSizing: "border-box",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.border = `2px solid ${colors.violet.normal}`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.border = "2px solid #000000";
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.border = `2px solid ${colors.violet.normal}`;
+                        e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.violet.light}`;
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.border = "2px solid #000000";
+                        e.currentTarget.style.boxShadow = "none";
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Return Date */}
-            <div className="flex-1 min-w-[200px]">
-              <label className="flex items-center text-sm font-semibold mb-2" style={{ color: colors.violet.normal }}>
-                <img src="/ic_calendar.svg" alt="Calendar Icon" />
-                <span className="ml-2">Tanggal Pulang</span>
-              </label>
-              <input
-                type="date"
-                {...register("returnDate")}
-                min={watchedValues.departureDate || today}
-                className="w-full px-4 py-3 bg-white rounded-xl font-medium cursor-pointer transition-colors focus:outline-none"
-                style={{
-                  border: "2px solid #000000",
-                  color: colors.base.darker,
-                  WebkitAppearance: "none",
-                  MozAppearance: "textfield",
-                  boxSizing: "border-box",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.border = `2px solid ${colors.violet.normal}`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.border = "2px solid #000000";
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.border = `2px solid ${colors.violet.normal}`;
-                  e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.violet.light}`;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.border = "2px solid #000000";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              />
+            <div className="w-full lg:flex-1 min-w-[200px] flex justify-center lg:justify-start">
+              <div className="flex flex-col w-full space-y-2">
+                <label className="flex items-center text-sm font-semibold" style={{ color: colors.violet.normal }}>
+                  <img src="/ic_calendar.svg" alt="Calendar Icon" />
+                  <span className="ml-2">Tanggal Pulang</span>
+                </label>
+                <div className="w-full max-w-xs border-1 rounded-xl border-gray-500">
+                  <input
+                    type="date"
+                    {...register("returnDate")}
+                    min={watchedValues.departureDate || today}
+                    className="w-full px-4 py-3 bg-white rounded-xl font-medium cursor-pointer transition-colors focus:outline-none"
+                    style={{
+                      border: "2px solid #000000",
+                      color: colors.base.darker,
+                      WebkitAppearance: "none",
+                      MozAppearance: "textfield",
+                      boxSizing: "border-box",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.border = `2px solid ${colors.violet.normal}`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.border = "2px solid #000000";
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.border = `2px solid ${colors.violet.normal}`;
+                      e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.violet.light}`;
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.border = "2px solid #000000";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

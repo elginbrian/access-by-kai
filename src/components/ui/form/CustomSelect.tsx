@@ -132,7 +132,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, p
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       <div
-        className="w-full px-4 py-3 bg-white border-2 rounded-xl font-medium cursor-pointer transition-all duration-200 flex items-center justify-between focus:outline-none"
+        className="w-full px-4 py-3 bg-white border-1 border-gray-100 rounded-xl font-medium cursor-pointer transition-all duration-200 flex items-center justify-between focus:outline-none"
         style={{
           borderColor: getBorderColor(),
           color: selectedOption ? colors.base.darker : colors.base.darkHover,

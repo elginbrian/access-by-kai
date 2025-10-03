@@ -9,6 +9,9 @@ import DiscountsSection from "@/components/onboarding/discounts/DiscountsSection
 import FAQSection from "@/components/onboarding/faq/FAQSection";
 import HelpSection from "@/components/onboarding/help/HelpSection";
 import { colors } from "./design-system";
+import KAIPay from "@/components/KAIPay";
+import ServSection from "@/components/onboarding/services/ServSection";
+import TrainBookingSection from "@/components/trains/TrainBookingSection";
 
 export default function Home() {
   return (
@@ -33,7 +36,10 @@ export default function Home() {
       </div>
 
       <div className="pt-[84px]">
+        <KAIPay />
+        <ServSection />
         <ServicesSection />
+        <TrainBookingSection />
         <PromotionsSection />
         <div className="relative">
           <div className="relative z-10">
