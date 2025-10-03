@@ -13,12 +13,10 @@ interface Props {
 const ChangePasswordPageClient: React.FC<Props> = ({ profile }) => {
     const handleCancel = () => {
         // Handle cancel action - could navigate back to profile
-        console.log('Cancel clicked');
     };
 
     const handleSubmit = (data: { oldPassword: string; newPassword: string; confirmPassword: string }) => {
         // Handle form submission
-        console.log('Password change data:', data);
         // Here you would typically call an API to update the password
     };
 

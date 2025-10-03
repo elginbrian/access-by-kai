@@ -51,13 +51,11 @@ const ManagePassengersPageClient: React.FC<Props> = ({ profile }) => {
     const handleAddPassenger = () => {
         if (passengers.length < 8) {
             // This would typically open a form modal or navigate to add passenger page
-            console.log('Add new passenger');
         }
     };
 
     const handleEditPassenger = (passenger: PassengerData) => {
         // This would typically open edit form modal or navigate to edit page
-        console.log('Edit passenger:', passenger);
     };
 
     const handleDeletePassenger = (passengerId: string) => {

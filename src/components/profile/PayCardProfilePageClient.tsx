@@ -18,11 +18,10 @@ const PayCardProfilePageClient: React.FC<Props> = ({ profile }) => {
 
     const handleTopUp = (amount: number) => {
         setKaiPayBalance((prev) => prev + amount);
-        console.log(`Top up KAI Pay with amount: Rp ${amount.toLocaleString("id-ID")}`);
     };
 
     const handleCouponRedeem = (couponTitle: string) => {
-        console.log(`Redeeming coupon: ${couponTitle}`);
+        // Handle coupon redemption logic here
     };
 
     const coupons = [
@@ -144,7 +143,7 @@ const PayCardProfilePageClient: React.FC<Props> = ({ profile }) => {
                     <div className="lg:col-span-9">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <WalletCard type="kaipay" balance={kaiPayBalance} icon="/ic_ewallet_white.svg" iconAlt="KAI Pay" onClick={() => setIsTopUpModalOpen(true)} />
-                            <WalletCard type="railpoint" balance={railPointBalance} icon="/ic_star_white.svg" iconAlt="RaiPoint" onClick={() => console.log("RaiPoint details clicked")} />
+                            <WalletCard type="railpoint" balance={railPointBalance} icon="/ic_star_white.svg" iconAlt="RaiPoint" onClick={() => {}} />
                         </div>
                         <div className="bg-white rounded-2xl shadow-sm border p-8">
                             <div className="space-y-8">

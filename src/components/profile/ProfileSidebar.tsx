@@ -15,8 +15,6 @@ interface Props {
 const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, railPointBalance = 2450 }) => {
   const pathname = usePathname();
   const userId = profile?.user_id;
-  
-  const name = profile?.nama_lengkap || "John Doe";
   const email = profile?.email || "john.doe@email.com";
   const avatarInitials = (profile?.nama_lengkap || "JD")
     .split(" ")
@@ -58,7 +56,6 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
 
   const handleLogout = () => {
     // Handle logout logic here
-    console.log("Logout clicked");
     // You might want to call your logout function here
   };
 
