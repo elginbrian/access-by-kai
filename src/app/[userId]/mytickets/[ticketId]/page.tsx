@@ -7,6 +7,8 @@ import NavBarServices from "@/components/navbar/NavBarServices";
 import { useTicketDetail, useTicketActions } from "@/lib/hooks/useTickets";
 import { useAuth } from "@/lib/auth/AuthContext";
 import TransferFlowModal from "@/components/mytickets/TransferFlowModal";
+import CancelTicketModal from "@/components/mytickets/CancelTicketModal";
+import { useSeatChange } from "@/lib/hooks/useSeatChange";
 import toast from "react-hot-toast";
 
 const MyTicketDetailPage: React.FC = () => {
@@ -19,8 +21,10 @@ const MyTicketDetailPage: React.FC = () => {
 
   const { data: ticketDetail, isLoading, error } = useTicketDetail(parsedUserId, { ticketId });
   const { cancelTicket } = useTicketActions(parsedUserId);
+  const { startSeatChange } = useSeatChange();
 
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   const getCellFilled = (index: number): boolean => {
     const seed = ticketId?.split("").reduce((s, ch) => s + ch.charCodeAt(0), 0) + index;
@@ -30,17 +34,8 @@ const MyTicketDetailPage: React.FC = () => {
   const handleCancelTicket = async () => {
     if (!ticketDetail) return;
 
-    const confirmCancel = window.confirm(`Apakah Anda yakin ingin membatalkan tiket ${ticketDetail.ticketNumber}? Tindakan ini tidak dapat dibatalkan.`);
-
-    if (confirmCancel) {
-      try {
-        await cancelTicket.mutateAsync(ticketDetail.id);
-        toast.success("Tiket berhasil dibatalkan");
-        router.push(`/${parsedUserId}/mytickets`);
-      } catch (error) {
-        toast.error("Gagal membatalkan tiket");
-      }
-    }
+    // Open the cancel modal instead of simple confirm
+    setIsCancelModalOpen(true);
   };
 
   const handleAction = (action: string) => {
@@ -55,10 +50,46 @@ const MyTicketDetailPage: React.FC = () => {
         toast("Fitur reschedule akan segera tersedia", { icon: "ℹ️" });
         break;
       case "change-seat":
-        toast("Fitur ganti kursi akan segera tersedia", { icon: "ℹ️" });
+        handleChangeSeat();
         break;
       default:
         break;
+    }
+  };
+
+  const handleChangeSeat = async () => {
+    if (!ticketDetail) {
+      toast.error("Data tiket tidak ditemukan");
+      return;
+    }
+
+    if (ticketDetail.status !== "active") {
+      toast.error("Hanya tiket aktif yang dapat diganti kursinya");
+      return;
+    }
+
+    try {
+      // Calculate change fee (15% of original ticket price)
+      const changeFee = Math.round(ticketDetail.price.ticketPrice * 0.15);
+      const adminFee = 5000;
+      const totalFee = changeFee + adminFee;
+
+      const confirmMessage = `Ganti kursi dari ${ticketDetail.seat.number} ke kursi baru?
+
+Biaya ganti kursi: Rp ${changeFee.toLocaleString("id-ID")}
+Biaya admin: Rp ${adminFee.toLocaleString("id-ID")}
+Total biaya: Rp ${totalFee.toLocaleString("id-ID")}
+
+Lanjutkan ke pemilihan kursi?`;
+
+      const confirmed = window.confirm(confirmMessage);
+
+      if (confirmed) {
+        startSeatChange(ticketDetail, parsedUserId);
+      }
+    } catch (error) {
+      console.error("Error starting seat change:", error);
+      toast.error("Gagal memulai proses ganti kursi");
     }
   };
 
@@ -269,7 +300,9 @@ const MyTicketDetailPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button className="w-full bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center gap-3 hover:from-blue-700 hover:to-purple-700 transition">
+              <button
+                onClick={() => window.print()}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center gap-3 hover:from-blue-700 hover:to-purple-700 transition">
                 <img src="/ic_print.svg" alt="Print" />
                 Cetak E-Boarding Pass
               </button>
@@ -293,6 +326,19 @@ const MyTicketDetailPage: React.FC = () => {
         ticketNumber={String(ticketDetail?.ticketNumber ?? ticketDetail?.id ?? "")}
         currentUserId={parsedUserId}
       />
+
+      {/* Cancel Ticket Modal */}
+      {ticketDetail && (
+        <CancelTicketModal
+          isOpen={isCancelModalOpen}
+          onClose={() => setIsCancelModalOpen(false)}
+          ticketDetail={ticketDetail}
+          onSuccess={() => {
+            toast.success("Tiket berhasil dibatalkan");
+            router.push(`/${parsedUserId}/mytickets`);
+          }}
+        />
+      )}
 
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
