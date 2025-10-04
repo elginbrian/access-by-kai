@@ -6,6 +6,7 @@ import PassengerCard, { PassengerData } from '@/components/profile/PassengerCard
 import PassengerInfoBox from '@/components/profile/PassengerInfoBox';
 import { colors } from '@/app/design-system/colors';
 import type { Pengguna } from '@/types/models';
+import TrainNavigation from '@/components/trains/navbar/TrainNavigation';
 
 interface Props {
   profile: Pengguna;
@@ -77,7 +78,8 @@ const ManagePassengersPageClient: React.FC<Props> = ({ profile }) => {
             </div>
 
             {/* Main content */}
-            <div className="flex-1 lg:ml-80 bg-[#f9fafb]">
+            <div className="flex-1 ml-80 bg-[#f9fafb]">
+                <TrainNavigation />
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ">
                     <div className="bg-white rounded-2xl p-6 shadow-sm">
                         {/* Header Section */}

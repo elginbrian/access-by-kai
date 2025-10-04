@@ -92,15 +92,12 @@ const TrainNavigation: React.FC<TrainNavigationProps> = ({ userName = "", userAv
             <button onClick={() => handleNavClick("/")} className={`${isTransparent ? "text-white" : isActive("/") ? "text-purple-600 underline underline-offset-4 font-semibold" : "text-black font-medium"} hover:opacity-80 transition-all`}>
               Beranda
             </button>
-
             <button onClick={() => handleNavClick("/trains")} className={`${isTransparent ? "text-white" : isActive("/trains") ? "text-purple-600 font-semibold" : "text-black font-medium"} hover:text-purple-600 transition-colors`}>
               Antarkota
             </button>
-
             <button onClick={() => handleNavClick("/e-porter")} className={`${isTransparent ? "text-white" : isActive("/e-porter") ? "text-purple-600 font-semibold" : "text-black font-medium"} hover:text-purple-600 transition-colors`}>
               E-Porter
             </button>
-
             <button onClick={() => handleNavClick("/logistic")} className={`${isTransparent ? "text-white" : isActive("/logistic") ? "text-purple-600 font-semibold" : "text-black font-medium"} hover:text-purple-600 transition-colors`}>
               Logistik
             </button>

@@ -10,6 +10,7 @@ import ProfilePagination from "@/components/profile/ProfilePagination";
 import { useUserTickets } from "@/lib/hooks/useTickets";
 import { useAuth } from "@/lib/auth/AuthContext";
 import type { Pengguna } from "@/types/models";
+import TrainNavigation from "../trains/navbar/TrainNavigation";
 
 interface Props {
   profile?: Pengguna | null;
@@ -110,45 +111,53 @@ const ProfilePageClient: React.FC<Props> = ({ profile }) => {
 
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: colors.base.lightHover }}>
-      <ProfileSidebar 
-        profile={currentProfile} 
-        kaiPayBalance={125000} 
-        railPointBalance={2450} 
+      <ProfileSidebar
+      profile={currentProfile}
+      kaiPayBalance={125000}
+      railPointBalance={2450}
       />
 
-      <div className="flex-1 ml-80 bg-[#f9fafb]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <section>
-            <ProfileFilters selectedStatus={statusFilter} onStatusChange={setStatusFilter} searchQuery={query} onSearchChange={(e) => setQuery(e.target.value)} dateRange={dateRange} onDateRangeChange={setDateRange} />
+      <div className="flex-1 ml-80 bg-[#f9fafb] flex flex-col">
+      <TrainNavigation />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+        <section>
+        <ProfileFilters
+          selectedStatus={statusFilter}
+          onStatusChange={setStatusFilter}
+          searchQuery={query}
+          onSearchChange={(e) => setQuery(e.target.value)}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+        />
 
-            <div className="space-y-6">
-              {ticketsLoading && <div className="text-center py-12">Memuat tiket...</div>}
+        <div className="space-y-6">
+          {ticketsLoading && <div className="text-center py-12">Memuat tiket...</div>}
 
-              {!ticketsLoading && paginatedTickets.length === 0 && (
-                <div className="bg-white rounded-2xl shadow-sm p-8 text-center border border-gray-100">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Icon name="file" className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2" style={{ color: colors.base.darker }}>
-                    Tidak ada tiket ditemukan
-                  </h3>
-                  <p style={{ color: colors.base.darkActive }}>Coba ubah filter pencarian Anda</p>
-                </div>
-              )}
-
-              {paginatedTickets.map((ticket, index) => (
-                <ProfileTicketCard 
-                  key={ticket.id} 
-                  ticket={ticket} 
-                  index={index} 
-                  userId={isNaN(parsedUserId) ? '' : String(parsedUserId)} 
-                />
-              ))}
+          {!ticketsLoading && paginatedTickets.length === 0 && (
+          <div className="bg-white rounded-2xl shadow-sm p-8 text-center border border-gray-100">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Icon name="file" className="w-8 h-8 text-gray-400" />
             </div>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: colors.base.darker }}>
+            Tidak ada tiket ditemukan
+            </h3>
+            <p style={{ color: colors.base.darkActive }}>Coba ubah filter pencarian Anda</p>
+          </div>
+          )}
 
-            <ProfilePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-          </section>
+          {paginatedTickets.map((ticket, index) => (
+          <ProfileTicketCard
+            key={ticket.id}
+            ticket={ticket}
+            index={index}
+            userId={isNaN(parsedUserId) ? '' : String(parsedUserId)}
+          />
+          ))}
         </div>
+
+        <ProfilePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        </section>
+      </div>
       </div>
     </div>
   );
