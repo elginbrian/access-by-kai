@@ -20,6 +20,15 @@ export function useLogin() {
       if (data.user) {
         toast.success("Login berhasil!");
         queryClient.invalidateQueries({ queryKey: ["auth"] });
+        // Sync session token to server so middleware can read it via httpOnly cookie
+        if (data.session?.access_token) {
+          fetch("/api/auth/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ access_token: data.session.access_token }),
+          }).catch(() => {});
+        }
+
         router.push("/");
       }
     },
@@ -177,6 +186,15 @@ export function useOAuthCallback() {
       if (data.user) {
         toast.success("Login berhasil!");
         queryClient.invalidateQueries({ queryKey: ["auth"] });
+
+        // Sync session token to server so middleware can read it via httpOnly cookie
+        if (data.session?.access_token) {
+          fetch("/api/auth/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ access_token: data.session.access_token }),
+          }).catch(() => {});
+        }
 
         if (data.user.profile?.nomor_telepon) {
           router.push("/");
