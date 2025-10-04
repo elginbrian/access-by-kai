@@ -20,7 +20,7 @@ export function useLogin() {
       if (data.user) {
         toast.success("Login berhasil!");
         queryClient.invalidateQueries({ queryKey: ["auth"] });
-        // Sync session token to server so middleware can read it via httpOnly cookie
+
         if (data.session?.access_token) {
           fetch("/api/auth/sync", {
             method: "POST",
