@@ -20,13 +20,27 @@ const TrainResultsList: React.FC<TrainResultsListProps> = ({ trains, onBookNow }
           });
         }
 
+        // compute sales/urgency and badges before creating the mapped train
+        // the logic is 1 days has more than 20 tickets sold
+        const salesCount = (train as any).seats_sold_today ?? (train as any).seats_sold ?? 0;
+        const isUrgent = (train.kursi_tersedia !== undefined && train.kursi_tersedia <= 5) || salesCount >= 10;
+        const urgentLabel = salesCount >= 10 ? `Paling cepat habis · ${salesCount} pembeli/hari` : "Paling cepat habis";
+
+        const badgesArr = [
+          ...(isUrgent ? [urgentLabel] : []),
+          ...((train.kelas_tersedia || []).filter((kelas: any) => kelas && kelas !== "")),
+          train.kursi_tersedia > 0 ? "Tersedia" : "Penuh",
+          train.jenis_layanan || "Standard",
+          `${train.kursi_tersedia} kursi`,
+        ].slice(0, 4);
+
         const mappedTrain: TrainCardData = {
           name: train.nama_kereta || "Kereta Api",
           code: train.nomor_ka || train.kode_jadwal || "N/A",
           price: Math.round(train.harga_mulai || 0),
 
           kelas_tersedia: train.kelas_tersedia || [],
-          badges: [...(train.kelas_tersedia || []).filter((kelas: any) => kelas && kelas !== ""), train.kursi_tersedia > 0 ? "Tersedia" : "Penuh", train.jenis_layanan || "Standard", `${train.kursi_tersedia} kursi`].slice(0, 4),
+          badges: badgesArr,
           arrival: `${train.stasiun_tujuan?.nama || "Tujuan"} (${train.stasiun_tujuan?.kode || "---"})`,
           departure: `${train.stasiun_asal?.nama || "Asal"} (${train.stasiun_asal?.kode || "---"})`,
           departureStation: train.stasiun_asal?.nama || "Stasiun Asal",

@@ -32,7 +32,12 @@ interface TrainCardProps {
 
 const TrainCard: React.FC<TrainCardProps> = ({ train, onBookNow }) => {
   const getBadgeStyles = (badge: string) => {
-    switch (badge.toLowerCase()) {
+    const lower = badge.toLowerCase();
+    if (lower.startsWith("paling cepat habis")) {
+      return "bg-orange-100 text-orange-700";
+    }
+
+    switch (lower) {
       case "eksekutif":
         return "bg-purple-100 text-purple-700";
       case "ekonomi":
