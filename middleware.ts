@@ -61,14 +61,56 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  const token = request.cookies.get("sb-access-token")?.value || request.cookies.get("supabase-auth-token")?.value;
+  function tryParseCookieValue(val: string | undefined) {
+    if (!val) return undefined;
+
+    if (val.match(/^[A-Za-z0-9-_.]+\.[A-Za-z0-9-_.]+\.[A-Za-z0-9-_.]+$/)) return val;
+
+    try {
+      const decoded = decodeURIComponent(val);
+      const parsed = JSON.parse(decoded);
+
+      if (Array.isArray(parsed)) {
+        for (const p of parsed) {
+          if (p && typeof p === "object" && p.access_token) return p.access_token;
+        }
+      }
+
+      if (parsed && typeof parsed === "object") {
+        if (parsed.access_token) return parsed.access_token;
+        if (parsed.token) return parsed.token;
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+
+    return undefined;
+  }
+
+  const cookieNamesToTry = ["sb-access-token", "supabase-auth-token", "sb:token", "sb"];
+  let token: string | undefined;
+  for (const name of cookieNamesToTry) {
+    const c = request.cookies.get(name)?.value;
+    const parsed = tryParseCookieValue(c);
+    if (parsed) {
+      token = parsed;
+      break;
+    }
+  }
 
   const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
   if (isAuthRoute) {
-    const { user } = await checkAuthentication(token);
-    if (user) {
-      return NextResponse.redirect(new URL("/", request.url));
+    if (token) {
+      try {
+        const { user } = await checkAuthentication(token);
+        if (user) return NextResponse.redirect(new URL("/", request.url));
+
+        return NextResponse.next();
+      } catch (e) {
+        return NextResponse.next();
+      }
     }
+
     return NextResponse.next();
   }
 
@@ -78,9 +120,16 @@ export async function middleware(request: NextRequest) {
   //   return NextResponse.next();
   // }
 
-  const { user, error } = await checkAuthentication(token);
+  let user: any = null;
+  let error: any = null;
 
-  if (!user || error) {
+  if (token) {
+    const auth = await checkAuthentication(token);
+    user = auth.user;
+    error = auth.error;
+  }
+
+  if (!user && !token) {
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("redirect", pathname + request.nextUrl.search);
     return NextResponse.redirect(loginUrl);
