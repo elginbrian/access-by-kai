@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import ProfileSidebar from "@/components/profile/ProfileSidebar";
 import WalletCard from "@/components/profile/payment/WalletCard";
 import CouponCard from "@/components/profile/payment/CouponCard";
-import { colors } from "@/app/design-system";
+import { colors } from "@/app/design-system/colors";
 import type { Pengguna } from "@/types/models";
+import TrainNavigation from "@/components/trains/navbar/TrainNavigation";
 
 interface Props {
   profile: Pengguna;
@@ -125,27 +126,22 @@ const PayCardProfilePageClient: React.FC<Props> = ({ profile }) => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="container mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    {/* Sidebar */}
-                    <div className="lg:col-span-3">
-                        <div className="sticky top-8">
-                            <ProfileSidebar
-                                profile={profile}
-                                kaiPayBalance={kaiPayBalance}
-                                railPointBalance={railPointBalance}
-                            />
-                        </div>
-                    </div>
+        <div className="min-h-screen flex" style={{ backgroundColor: colors.base.lightHover }}>
+            <ProfileSidebar
+                profile={profile}
+                kaiPayBalance={kaiPayBalance}
+                railPointBalance={railPointBalance}
+            />
 
-                    {/* Main Content */}
-                    <div className="lg:col-span-9">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <WalletCard type="kaipay" balance={kaiPayBalance} icon="/ic_ewallet_white.svg" iconAlt="KAI Pay" onClick={() => setIsTopUpModalOpen(true)} />
-                            <WalletCard type="railpoint" balance={railPointBalance} icon="/ic_star_white.svg" iconAlt="RaiPoint" onClick={() => {}} />
-                        </div>
-                        <div className="bg-white rounded-2xl shadow-sm border p-8">
+            {/* Main content with left margin */}
+            <div className="flex-1 ml-80 bg-[#f9fafb]">
+                <TrainNavigation />
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <WalletCard type="kaipay" balance={kaiPayBalance} icon="/ic_ewallet_white.svg" iconAlt="KAI Pay" onClick={() => setIsTopUpModalOpen(true)} />
+                                <WalletCard type="railpoint" balance={railPointBalance} icon="/ic_star_white.svg" iconAlt="RaiPoint" onClick={() => {}} />
+                            </div>
+                            <div className="bg-white rounded-2xl shadow-sm border p-8">
                             <div className="space-y-8">
                                 <div>
                                     <h3 className="text-lg font-semibold text-gray-900 mb-1">Kupon Tersedia</h3>
@@ -205,7 +201,6 @@ const PayCardProfilePageClient: React.FC<Props> = ({ profile }) => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>

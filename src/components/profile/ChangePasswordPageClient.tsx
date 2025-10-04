@@ -5,6 +5,7 @@ import ProfileSidebar from "@/components/profile/ProfileSidebar";
 import ChangePasswordForm from "@/components/profile/ChangePasswordForm";
 import { colors } from "@/app/design-system/colors";
 import type { Pengguna } from "@/types/models";
+import TrainNavigation from "../trains/navbar/TrainNavigation";
 
 interface Props {
   profile: Pengguna;
@@ -30,6 +31,7 @@ const ChangePasswordPageClient: React.FC<Props> = ({ profile }) => {
 
             {/* Main content with left margin */}
             <div className="flex-1 ml-80 bg-[#f9fafb]">
+                <TrainNavigation />
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <ChangePasswordForm
                         onCancel={handleCancel}
