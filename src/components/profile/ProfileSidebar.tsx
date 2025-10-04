@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { colors } from "@/app/design-system/colors";
 import type { Pengguna } from "@/types/models";
+import { useLogout } from "@/lib/auth/authHooks";
 
 interface Props {
   profile?: Pengguna | null;
@@ -56,9 +57,11 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
     },
   ];
 
+  const logoutMutation = useLogout();
+
   const handleLogout = () => {
-    // Handle logout logic here
-    // You might want to call your logout function here
+    if (logoutMutation.status === "pending") return;
+    logoutMutation.mutate();
   };
 
   const isActivePath = (path: string) => {
@@ -180,8 +183,13 @@ const ProfileSidebar: React.FC<Props> = ({ profile, kaiPayBalance = 125000, rail
           );
         })}
 
-        <button onClick={handleLogout} className="w-full text-left px-4 py-3 rounded-xl hover:bg-red-50 transition-all duration-200 transform hover:scale-[1.01] border border-gray-100" style={{ color: colors.red.normal }}>
-          Keluar
+        <button
+          onClick={handleLogout}
+          disabled={logoutMutation.status === "pending"}
+          className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 transform hover:scale-[1.01] border border-gray-100 ${logoutMutation.status === 'pending' ? 'opacity-60 cursor-wait' : 'hover:bg-red-50'}`}
+          style={{ color: colors.red.normal }}
+        >
+          {logoutMutation.status === 'pending' ? 'Keluar...' : 'Keluar'}
         </button>
       </nav>
     </aside>
