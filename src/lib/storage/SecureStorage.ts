@@ -119,7 +119,7 @@ export class BookingSecureStorage {
       return null;
     }
 
-    const maxAge = 24 * 60 * 60 * 1000;
+    const maxAge = 6 * 60 * 1000;
     if (data.timestamp && Date.now() - data.timestamp > maxAge) {
       this.clearBookingData();
       return null;
@@ -147,7 +147,17 @@ export class BookingSecureStorage {
   }
 
   static getSeatData(): any | null {
-    return SecureStorage.getItem<any>(this.SEAT_SELECTION_KEY);
+    const data = SecureStorage.getItem<any>(this.SEAT_SELECTION_KEY);
+    if (!data) return null;
+
+    // expire seat selection data after 6 minutes as well
+    const maxAge = 6 * 60 * 1000;
+    if (data.timestamp && Date.now() - data.timestamp > maxAge) {
+      SecureStorage.removeItem(this.SEAT_SELECTION_KEY);
+      return null;
+    }
+
+    return data;
   }
 
   static clearBookingData(): void {

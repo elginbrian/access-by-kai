@@ -25,6 +25,9 @@ export function useSeatSelection() {
     setSelectedSeats((prev) => {
       const same = prev.length === seats.length && prev.every((s, i) => s === seats[i]);
       if (same) return prev;
+      try {
+        BookingSecureStorage.setSeatData({ seats, timestamp: Date.now() });
+      } catch (e) {}
       return seats;
     });
   }, []);
@@ -33,6 +36,9 @@ export function useSeatSelection() {
     setSelectedSeats((prev) => {
       const newSeats = [...prev];
       newSeats[passengerIndex] = seatNumber;
+      try {
+        BookingSecureStorage.setSeatData({ seats: newSeats, timestamp: Date.now() });
+      } catch (e) {}
       return newSeats;
     });
   }, []);
@@ -41,6 +47,9 @@ export function useSeatSelection() {
     setSelectedSeats((prev) => {
       const newSeats = [...prev];
       newSeats.splice(passengerIndex, 1);
+      try {
+        BookingSecureStorage.setSeatData({ seats: newSeats, timestamp: Date.now() });
+      } catch (e) {}
       return newSeats;
     });
   }, []);
@@ -57,7 +66,6 @@ export function useSeatSelection() {
     setIsRouteExpanded((prev) => !prev);
   }, []);
 
-  // Utility to get seat for specific passenger
   const getSeatForPassenger = useCallback(
     (passengerIndex: number): string | undefined => {
       return selectedSeats[passengerIndex];
@@ -65,7 +73,6 @@ export function useSeatSelection() {
     [selectedSeats]
   );
 
-  // Utility to check if all passengers have seats
   const areAllSeatsSelected = useCallback(
     (passengerCount: number): boolean => {
       return selectedSeats.length >= passengerCount && selectedSeats.slice(0, passengerCount).every((seat) => seat && seat !== "");
