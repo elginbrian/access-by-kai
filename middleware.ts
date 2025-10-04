@@ -46,6 +46,11 @@ async function checkAuthentication(token: string | undefined) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  const assetExtRegex = /\.(png|jpg|jpeg|gif|svg|css|js|map|ico|webp|avif|json|txt|xml)$/i;
+  if (pathname === "/favicon.ico" || pathname.startsWith("/_next") || assetExtRegex.test(pathname)) {
+    return NextResponse.next();
+  }
+
   const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
   if (!rateLimit(ip)) {
     return new NextResponse("Too Many Requests", {
