@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 interface UseBookingTimerProps {
@@ -14,6 +14,7 @@ export function useBookingTimer({ totalMinutes = 6, redirectPath = "/trains", on
   const [timeLeft, setTimeLeft] = useState(totalMinutes * 60);
   const [isActive, setIsActive] = useState(false);
   const [isTimeUp, setIsTimeUp] = useState(false);
+  const timeLeftRef = useRef<number>(timeLeft);
 
   const startTimer = useCallback(() => {
     const startTime = Date.now();
@@ -81,23 +82,27 @@ export function useBookingTimer({ totalMinutes = 6, redirectPath = "/trains", on
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
-    if (isActive && timeLeft > 0) {
+    if (isActive) {
       interval = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            setIsActive(false);
-            setIsTimeUp(true);
-            return 0;
-          }
-          return prevTime - 1;
-        });
+        // safely decrement using ref to avoid recreating effect when timeLeft changes
+        const current = timeLeftRef.current;
+        if (current <= 1) {
+          setIsActive(false);
+          setIsTimeUp(true);
+          setTimeLeft(0);
+          timeLeftRef.current = 0;
+        } else {
+          const next = current - 1;
+          setTimeLeft(next);
+          timeLeftRef.current = next;
+        }
       }, 1000);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, timeLeft]);
+  }, [isActive]);
 
   useEffect(() => {
     if (isTimeUp) {

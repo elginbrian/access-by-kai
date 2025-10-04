@@ -42,6 +42,7 @@ function TrainBookingContent() {
 
   const { data: trainDetails, isLoading: trainLoading, error: trainError } = useTrainBookingDetails(jadwalId);
   const { data: routeStations, isLoading: routeLoading } = useTrainRouteStations(jadwalId);
+  const syncingSelectedSeatsRef = React.useRef(false);
 
   React.useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -89,6 +90,8 @@ function TrainBookingContent() {
       if (hasAnySeat) {
         const same = seatsFromCentral.length === selectedSeats.length && seatsFromCentral.every((s, i) => s === selectedSeats[i]);
         if (!same) {
+          // mark that we're syncing from central to avoid immediate write-back loops
+          syncingSelectedSeatsRef.current = true;
           handleSeatSelect(seatsFromCentral);
         }
       }
@@ -127,7 +130,12 @@ function TrainBookingContent() {
         seat: selectedSeats[index] || "Belum dipilih",
         seatType: "Window",
       }));
-      setPassengersData(passengersForCentral);
+      // If we just synced selectedSeats from central, skip one write-back to avoid loops
+      if (syncingSelectedSeatsRef.current) {
+        syncingSelectedSeatsRef.current = false;
+      } else {
+        setPassengersData(passengersForCentral);
+      }
     }
   }, [allPassengersInfo, selectedSeats, setPassengersData]);
 

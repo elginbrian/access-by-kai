@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import TrainInfoHeader from "@/components/trains/seat-selection/TrainInfoHeader";
 import SeatStatusLegend from "@/components/trains/seat-selection/SeatStatusLegend";
@@ -24,7 +24,6 @@ interface SeatSelectionProps {
 
 const SeatSelection: React.FC<SeatSelectionProps> = ({ onClose, onSeatSelect, selectedSeats, passengers: passengersProp, jadwalId }) => {
   const [currentCar, setCurrentCar] = useState(1);
-  const [passengers, setPassengers] = useState<Passenger[]>([]);
 
   const { bookingData } = useCentralBooking();
   const { data: gerbongList, isLoading: gerbongLoading, error: gerbongError } = useJadwalGerbongByJadwal(jadwalId || 0);
@@ -56,23 +55,16 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({ onClose, onSeatSelect, se
     }
   }, [gerbongList]);
 
-  useEffect(() => {
-    if (passengersProp && passengersProp.length > 0) {
-      const convertedPassengers: Passenger[] = passengersProp.map((passenger, index) => ({
-        id: passenger.id,
-        name: passenger.name,
-        seat: selectedSeats[index] || passenger.seat || "",
-        isAdult: passenger.isAdult,
-        type: passenger.type,
-      }));
-
-      const hasChanged = convertedPassengers.some((passenger, index) => !passengers[index] || passengers[index].id !== passenger.id || passengers[index].name !== passenger.name || passengers[index].seat !== passenger.seat);
-
-      if (hasChanged) {
-        setPassengers(convertedPassengers);
-      }
-    }
-  }, [passengersProp, selectedSeats, passengers]);
+  const passengers: Passenger[] = useMemo(() => {
+    if (!passengersProp || passengersProp.length === 0) return [];
+    return passengersProp.map((passenger, index) => ({
+      id: passenger.id,
+      name: passenger.name,
+      seat: selectedSeats[index] || passenger.seat || "",
+      isAdult: passenger.isAdult,
+      type: passenger.type,
+    }));
+  }, [passengersProp, selectedSeats]);
 
   const generateSeats = useCallback((): Seat[] => {
     if (!kursiList || kursiLoading) {
@@ -173,12 +165,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({ onClose, onSeatSelect, se
 
         console.log("Assigned seats:", assignedSeats);
 
-        const passengersWithSeats = passengers.map((passenger, index) => ({
-          ...passenger,
-          seat: assignedSeats[index] || "",
-        }));
-
-        setPassengers(passengersWithSeats);
+        // update selection upstream; passengers are derived from props so don't mutate local state
         onSeatSelect(assignedSeats);
         toast.success(`${assignedSeats.length} kursi berhasil dipilih secara otomatis!`);
       } else {

@@ -1,12 +1,32 @@
 import { useState, useCallback } from "react";
+import { BookingSecureStorage } from "@/lib/storage/SecureStorage";
 
 export function useSeatSelection() {
   const [showSeatSelection, setShowSeatSelection] = useState(false);
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [selectedSeats, setSelectedSeats] = useState<string[]>(() => {
+    try {
+      if (typeof window === "undefined") return [];
+
+      const seatData = BookingSecureStorage.getSeatData();
+      if (seatData && Array.isArray(seatData.seats) && seatData.seats.length > 0) {
+        return seatData.seats;
+      }
+
+      const booking = BookingSecureStorage.getBookingData();
+      if (booking && Array.isArray(booking.passengers) && booking.passengers.length > 0) {
+        return booking.passengers.map((p: any) => p.seat || "");
+      }
+    } catch (e) {}
+    return [];
+  });
   const [isRouteExpanded, setIsRouteExpanded] = useState(false);
 
   const handleSeatSelect = useCallback((seats: string[]) => {
-    setSelectedSeats(seats);
+    setSelectedSeats((prev) => {
+      const same = prev.length === seats.length && prev.every((s, i) => s === seats[i]);
+      if (same) return prev;
+      return seats;
+    });
   }, []);
 
   const handleSingleSeatSelect = useCallback((seatNumber: string, passengerIndex: number) => {

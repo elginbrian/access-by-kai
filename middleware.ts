@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase";
 
-const PROTECTED_ROUTES = ["/trains/booking", "/trains/food-order", "/trains/review", "/trains/payment"];
+const PROTECTED_ROUTES = ["/trains/food-order", "/trains/review", "/trains/payment"];
 const AUTH_ROUTES = ["/auth/login", "/auth/register"];
 const TRAINS_ID_REQUIRED_ROUTES = ["/trains/booking", "/trains/food-order", "/trains/review", "/trains/payment"];
 
