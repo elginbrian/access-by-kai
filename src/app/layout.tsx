@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/lib/providers/Providers";
 import ChatShellClient from "@/components/global/ChatShellClient";
+import ClearBookingOnRouteChange from "@/components/global/ClearBookingOnRouteChange";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({
     <html lang="id">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
+          <ClearBookingOnRouteChange />
           <div style={{ paddingRight: "var(--ai-sidebar-width, 0px)", transition: "padding-right 0.3s" }}>{children}</div>
           <ChatShellClient />
         </Providers>

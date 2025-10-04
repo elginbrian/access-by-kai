@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase";
 
-const PROTECTED_ROUTES = ["/trains/food-order", "/trains/review", "/trains/payment"];
 const AUTH_ROUTES = ["/auth/login", "/auth/register"];
 const TRAINS_ID_REQUIRED_ROUTES = ["/trains/booking", "/trains/food-order", "/trains/review", "/trains/payment"];
 
@@ -68,11 +67,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
+  // const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
 
-  if (!isProtectedRoute) {
-    return NextResponse.next();
-  }
+  // if (!isProtectedRoute) {
+  //   return NextResponse.next();
+  // }
 
   const { user, error } = await checkAuthentication(token);
 
